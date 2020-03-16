@@ -1,0 +1,148 @@
+{
+  "name": "mxscript",
+  "displayName": "MxScript",
+  "description": "Script Manager for ibm Maximo / Control Desk",
+  "version": "0.5.0",
+  "engines": {
+    "vscode": "^1.41.0"
+  },
+  "publisher": "Rana",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ahmednrana/mxscript.git"
+  },
+  "icon": "images/icon.png",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.sync",
+    "onCommand:extension.update",
+    "onCommand:extension.compare",
+    "onCommand:extension.downloadall"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.sync",
+        "title": "Upload Script to Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "extension.update",
+        "title": "Update Script from Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "extension.compare",
+        "title": "Compare Script with Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "extension.downloadall",
+        "title": "Download All Scripts from Server",
+        "category": "Maximo Scripts"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Maximo configuration",
+      "properties": {
+        "mxscript.serverSettings.hostname": {
+          "type": "string",
+          "default": null,
+          "description": "Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)"
+        },
+        "mxscript.serverSettings.port": {
+          "type": "number",
+          "default": 9080,
+          "description": "Maximo port. Default is 9080"
+        },
+        "mxscript.authentication.username": {
+          "type": "string",
+          "default": "maxadmin",
+          "description": "Username for Maximo Authentication"
+        },
+        "mxscript.authentication.password": {
+          "type": "string",
+          "default": "maxadmin",
+          "description": "Password for Maximo Authentication"
+        },
+        "mxscript.authentication.authenticationType": {
+          "type": "string",
+          "enum": [
+            "internal",
+            "ldap"
+          ],
+          "enumDescriptions": [
+            "Maximo's internal authentication",
+            "LDAP based authentication using applciation server"
+          ],
+          "default": "internal",
+          "description": "Type of Authentication"
+        },
+        "mxscript.serverSettings.objectStructure": {
+          "type": "string",
+          "default": "MXAPIAUTOSCRIPT",
+          "description": "Object Structure to be used scripts uploading / downloading"
+        },
+        "mxscript.serverSettings.httpProtocol": {
+          "type": "string",
+          "enum": [
+            "http",
+            "https"
+          ],
+          "enumDescriptions": [
+            "Http",
+            "Https Secure Protocol"
+          ],
+          "default": "http",
+          "description": "Http protocol (http or https)"
+        },
+        "mxscript.scriptSettings.createPythonFileForJythonScripts": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Create Jython script in Maximo even if the file in editor is .py"
+        },
+        "mxscript.scriptSettings.logLevel": {
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR",
+            "FATAL"
+          ],
+          "enumDescriptions": [
+            "Logs messages that are useful in debugging",
+            "Logs informational messages",
+            "Logs messages indicating harmful situations in functionality",
+            "Logs message indicating errors in application functionality",
+            "Logs very severe errors messages"
+          ],
+          "type": "string",
+          "description": "The log level tp set with scripts when creating / updating them. Leave empty to leave them as it is"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.1",
+    "vscode": "^1.1.28",
+    "tslint": "^5.12.1",
+    "@types/node": "^10.12.21",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "@types/node-fetch": "^2.5.5",
+    "node-fetch": "^2.6.0",
+    "xml2js": "^0.4.23"
+  }
+}
