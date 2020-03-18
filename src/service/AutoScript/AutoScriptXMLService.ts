@@ -92,6 +92,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
             downloadAllResponse = downloadAllResponse as Response;
             if (!downloadAllResponse.ok && downloadAllResponse.status !== 200 && downloadAllResponse.status !== 201) {
                 this.vscode.window.showErrorMessage("Error in fetching data " + downloadAllResponse.status + " " + downloadAllResponse.statusText);
+                return;
             }
             let autoScriptData: string = await downloadAllResponse.text();
             if (!autoScriptData.includes('creationDate')) {
@@ -166,6 +167,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
         updateResponse = updateResponse as Response;
         if (!updateResponse.ok && updateResponse.status !== 200 && updateResponse.status !== 201) {
             this.vscode.window.showErrorMessage("Error in fetching data " + updateResponse.status + " " + updateResponse.statusText);
+            return;
         }
         let autoScriptData: string = await updateResponse.text();
         if (!autoScriptData.includes('creationDate')) {
@@ -209,7 +211,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
     }
 
     // Sync opened script
-    public async syncScript() {
+    public async uploadScript() {
         var url = new URL(this.configService.getXMLUrl());
         let headers: Headers = this.getAuthHeaders();
 
@@ -224,7 +226,8 @@ export class AutoScriptXMLService implements IAutoScriptService {
             });
         syncResponse = syncResponse as Response;
         if (!syncResponse.ok && syncResponse.status !== 200 && syncResponse.status !== 201) {
-            this.vscode.window.showErrorMessage("Error in fetching data " + syncResponse.status + " " + syncResponse.statusText);
+            this.vscode.window.showErrorMessage("Error in uploading script " + syncResponse.status + " " + syncResponse.statusText);
+            return;
         }
 
         let autoScriptData: string = await syncResponse.text();
@@ -251,6 +254,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
         compareResponse = compareResponse as Response;
         if (!compareResponse.ok && compareResponse.status !== 200 && compareResponse.status !== 201) {
             this.vscode.window.showErrorMessage("Error in fetching data " + compareResponse.status + " " + compareResponse.statusText);
+            return;
         }
         let autoScriptData: string = await compareResponse.text();
         if (!autoScriptData.includes('creationDate')) {

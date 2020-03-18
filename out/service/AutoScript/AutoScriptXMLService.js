@@ -93,6 +93,7 @@ class AutoScriptXMLService {
                 downloadAllResponse = downloadAllResponse;
                 if (!downloadAllResponse.ok && downloadAllResponse.status !== 200 && downloadAllResponse.status !== 201) {
                     this.vscode.window.showErrorMessage("Error in fetching data " + downloadAllResponse.status + " " + downloadAllResponse.statusText);
+                    return;
                 }
                 let autoScriptData = yield downloadAllResponse.text();
                 if (!autoScriptData.includes('creationDate')) {
@@ -160,6 +161,7 @@ class AutoScriptXMLService {
             updateResponse = updateResponse;
             if (!updateResponse.ok && updateResponse.status !== 200 && updateResponse.status !== 201) {
                 this.vscode.window.showErrorMessage("Error in fetching data " + updateResponse.status + " " + updateResponse.statusText);
+                return;
             }
             let autoScriptData = yield updateResponse.text();
             if (!autoScriptData.includes('creationDate')) {
@@ -193,7 +195,7 @@ class AutoScriptXMLService {
         });
     }
     // Sync opened script
-    syncScript() {
+    uploadScript() {
         return __awaiter(this, void 0, void 0, function* () {
             var url = new url_1.URL(this.configService.getXMLUrl());
             let headers = this.getAuthHeaders();
@@ -207,7 +209,8 @@ class AutoScriptXMLService {
             });
             syncResponse = syncResponse;
             if (!syncResponse.ok && syncResponse.status !== 200 && syncResponse.status !== 201) {
-                this.vscode.window.showErrorMessage("Error in fetching data " + syncResponse.status + " " + syncResponse.statusText);
+                this.vscode.window.showErrorMessage("Error in uploading script " + syncResponse.status + " " + syncResponse.statusText);
+                return;
             }
             let autoScriptData = yield syncResponse.text();
             if (autoScriptData.includes('creationDate')) {
@@ -234,6 +237,7 @@ class AutoScriptXMLService {
             compareResponse = compareResponse;
             if (!compareResponse.ok && compareResponse.status !== 200 && compareResponse.status !== 201) {
                 this.vscode.window.showErrorMessage("Error in fetching data " + compareResponse.status + " " + compareResponse.statusText);
+                return;
             }
             let autoScriptData = yield compareResponse.text();
             if (!autoScriptData.includes('creationDate')) {

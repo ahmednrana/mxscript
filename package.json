@@ -16,31 +16,31 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sync",
-    "onCommand:extension.update",
-    "onCommand:extension.compare",
-    "onCommand:extension.downloadall"
+    "onCommand:mxscript.upload",
+    "onCommand:mxscript.update",
+    "onCommand:mxscript.compare",
+    "onCommand:mxscript.downloadall"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.sync",
+        "command": "mxscript.upload",
         "title": "Upload Script to Server",
         "category": "Maximo Scripts"
       },
       {
-        "command": "extension.update",
+        "command": "mxscript.update",
         "title": "Update Script from Server",
         "category": "Maximo Scripts"
       },
       {
-        "command": "extension.compare",
+        "command": "mxscript.compare",
         "title": "Compare Script with Server",
         "category": "Maximo Scripts"
       },
       {
-        "command": "extension.downloadall",
+        "command": "mxscript.downloadall",
         "title": "Download All Scripts from Server",
         "category": "Maximo Scripts"
       }

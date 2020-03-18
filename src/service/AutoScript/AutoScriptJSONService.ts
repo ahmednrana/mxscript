@@ -86,7 +86,7 @@ export class AutoScriptJSONService implements IAutoScriptService {
             vscode.window.showWarningMessage("The file open is not valid");
         }
     }
-    public async syncScript() {
+    public async uploadScript() {
         if (!this.authService.isCookieSet()) {
             await this.authService.authenticate();
         }

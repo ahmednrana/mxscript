@@ -13,26 +13,26 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
   };
-  let compare = vscode.commands.registerCommand("extension.compare", () => {
+  let compare = vscode.commands.registerCommand("mxscript.compare", () => {
     let cs: ConfigService = new ConfigService();
     let as: IAutoScriptService = new AutoScriptXMLService(context, cs);
     as.compareWithServer();
   });
-  let sync = vscode.commands.registerCommand("extension.sync", () => {
+  let upload = vscode.commands.registerCommand("mxscript.upload", () => {
     let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
-    as.syncScript();
+    as.uploadScript();
   });
-  let update = vscode.commands.registerCommand("extension.update", () => {
+  let update = vscode.commands.registerCommand("mxscript.update", () => {
     let cs: IConfigService = new ConfigService();
     let as: IAutoScriptService = new AutoScriptXMLService(context, cs);
     as.updateScript();
   });
-  let downloadall = vscode.commands.registerCommand("extension.downloadall", () => {
+  let downloadall = vscode.commands.registerCommand("mxscript.downloadall", () => {
     let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
     as.downloadAllScripts();
   });
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MxScriptScheme, MxScriptProvider));
-  context.subscriptions.push(sync);
+  context.subscriptions.push(upload);
   context.subscriptions.push(downloadall);
   context.subscriptions.push(compare);
   context.subscriptions.push(update);

@@ -81,7 +81,7 @@ class AutoScriptJSONService {
             }
         });
     }
-    syncScript() {
+    uploadScript() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.authService.isCookieSet()) {
                 yield this.authService.authenticate();
