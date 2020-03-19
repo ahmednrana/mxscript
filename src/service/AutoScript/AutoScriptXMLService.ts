@@ -90,11 +90,12 @@ export class AutoScriptXMLService implements IAutoScriptService {
                     return;
                 });
             downloadAllResponse = downloadAllResponse as Response;
+            let autoScriptData: string = await downloadAllResponse.text();
+
             if (!downloadAllResponse.ok && downloadAllResponse.status !== 200 && downloadAllResponse.status !== 201) {
-                this.vscode.window.showErrorMessage("Error in fetching data " + downloadAllResponse.status + " " + downloadAllResponse.statusText);
+                this.vscode.window.showErrorMessage("Error in fetching data " + autoScriptData);
                 return;
             }
-            let autoScriptData: string = await downloadAllResponse.text();
             if (!autoScriptData.includes('creationDate')) {
                 this.vscode.window.showErrorMessage("Empty Response " + autoScriptData);
                 return;
@@ -165,11 +166,11 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 return;
             });
         updateResponse = updateResponse as Response;
+        let autoScriptData: string = await updateResponse.text();
         if (!updateResponse.ok && updateResponse.status !== 200 && updateResponse.status !== 201) {
-            this.vscode.window.showErrorMessage("Error in fetching data " + updateResponse.status + " " + updateResponse.statusText);
+            this.vscode.window.showErrorMessage("Error in fetching data " + autoScriptData);
             return;
         }
-        let autoScriptData: string = await updateResponse.text();
         if (!autoScriptData.includes('creationDate')) {
             this.vscode.window.showErrorMessage("Empty Response " + autoScriptData);
             return;
@@ -225,12 +226,13 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 return;
             });
         syncResponse = syncResponse as Response;
+        let autoScriptData: string = await syncResponse.text();
+
         if (!syncResponse.ok && syncResponse.status !== 200 && syncResponse.status !== 201) {
-            this.vscode.window.showErrorMessage("Error in uploading script " + syncResponse.status + " " + syncResponse.statusText);
+            this.vscode.window.showErrorMessage("Error in uploading script " + autoScriptData);
             return;
         }
 
-        let autoScriptData: string = await syncResponse.text();
         if (autoScriptData.includes('creationDate')) {
             vscode.window.showInformationMessage('Success\n' + autoScriptData);
         }
@@ -252,11 +254,11 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 return;
             });
         compareResponse = compareResponse as Response;
+        let autoScriptData: string = await compareResponse.text();
         if (!compareResponse.ok && compareResponse.status !== 200 && compareResponse.status !== 201) {
-            this.vscode.window.showErrorMessage("Error in fetching data " + compareResponse.status + " " + compareResponse.statusText);
+            this.vscode.window.showErrorMessage("Error in fetching data " + autoScriptData);
             return;
         }
-        let autoScriptData: string = await compareResponse.text();
         if (!autoScriptData.includes('creationDate')) {
             this.vscode.window.showErrorMessage("Empty Response " + autoScriptData);
             return;
