@@ -84,7 +84,15 @@ class AutoScriptXMLService {
                     return;
                 });
                 progress.report({ increment: 0, message: "Downloading scripts. Please wait..." });
-                downloadAllResponse = yield node_fetch_1.default(url, { method: 'POST', body: packet, headers: headers })
+                const https = require('https');
+                const httpsAgent = new https.Agent({
+                    rejectUnauthorized: false,
+                });
+                let payload = { method: 'POST', body: packet, headers: headers };
+                if (this.configService.getHttpProtocol() === "https") {
+                    payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
+                }
+                downloadAllResponse = yield node_fetch_1.default(url, payload)
                     .catch(e => {
                     console.log(e.message);
                     vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -152,7 +160,15 @@ class AutoScriptXMLService {
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.QUERY);
             console.log("PACKET: " + packet);
-            let updateResponse = yield node_fetch_1.default(url, { method: 'POST', body: packet, headers: headers })
+            const https = require('https');
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+            });
+            let payload = { method: 'POST', body: packet, headers: headers };
+            if (this.configService.getHttpProtocol() === "https") {
+                payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
+            }
+            let updateResponse = yield node_fetch_1.default(url, payload)
                 .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -201,7 +217,15 @@ class AutoScriptXMLService {
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.SYNC);
             console.log("PACKET: " + packet);
-            let syncResponse = yield node_fetch_1.default(url, { method: 'POST', body: packet, headers: headers })
+            const https = require('https');
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+            });
+            let payload = { method: 'POST', body: packet, headers: headers };
+            if (this.configService.getHttpProtocol() === "https") {
+                payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
+            }
+            let syncResponse = yield node_fetch_1.default(url, payload)
                 .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -228,7 +252,15 @@ class AutoScriptXMLService {
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.QUERY);
             console.log("PACKET: " + packet);
-            let compareResponse = yield node_fetch_1.default(url, { method: 'POST', body: packet, headers: headers })
+            const https = require('https');
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+            });
+            let payload = { method: 'POST', body: packet, headers: headers };
+            if (this.configService.getHttpProtocol() === "https") {
+                payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
+            }
+            let compareResponse = yield node_fetch_1.default(url, payload)
                 .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
