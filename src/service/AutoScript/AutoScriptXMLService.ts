@@ -19,10 +19,10 @@ export class AutoScriptXMLService implements IAutoScriptService {
 
     getAuthHeaders(): Headers {
         let headers = new Headers();
-        if(this.configService.isLdap()){
+        if (this.configService.isLdap()) {
             headers.set('authorization', "Basic " + new Buffer(this.configService.getUsername() + ":" + this.configService.getPassword()).toString("base64"));
         }
-        else{
+        else {
             headers.set('maxauth', new Buffer(this.configService.getUsername() + ":" + this.configService.getPassword()).toString("base64"));
         }
         headers.set('content-type', 'application/xml');
@@ -82,8 +82,16 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 return;
             });
             progress.report({ increment: 0, message: "Downloading scripts. Please wait..." });
+            const https = require('https');
+            const httpsAgent = new https.Agent({
+                rejectUnauthorized: false,
+            });
+            let payload: any = { method: 'POST', body: packet, headers: headers };
 
-            downloadAllResponse = await fetch(url, { method: 'POST', body: packet, headers: headers })
+            if (this.configService.getHttpProtocol() === "https") {
+                payload = { ...payload, agent: httpsAgent };
+            }
+            downloadAllResponse = await fetch(url, payload)
                 .catch(e => {
                     console.log(e.message);
                     vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -107,7 +115,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 languageToExtension = new Map<string, string>();
                 languageToExtension.set(Constants.LANG_GROOVY, Constants.EXT_GROOVY);
                 languageToExtension.set(Constants.LANG_PYTHON, Constants.EXT_PYTHON);
-                
+
                 languageToExtension.set(Constants.LANG_JYTHON, Constants.EXT_JYTHON);
                 languageToExtension.set(Constants.LANG_NASHORN, Constants.EXT_NASHORN);
                 languageToExtension.set(Constants.LANG_JS, Constants.EXT_JS);
@@ -140,9 +148,9 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 }
             });
             var prom = new Promise(resolve => {
-                    resolve();
-                    console.log('Resolving Progressbar Promise');
-			});
+                resolve();
+                console.log('Resolving Progressbar Promise');
+            });
             console.log('Ending Progressbar');
             progress.report({ increment: 50, message: "Complete" });
             return prom;
@@ -158,8 +166,16 @@ export class AutoScriptXMLService implements IAutoScriptService {
         let headers: Headers = this.getAuthHeaders();
         let packet: string = this.constructPacket(Constants.QUERY);
         console.log("PACKET: " + packet);
+        const https = require('https');
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false,
+        });
+        let payload: any = { method: 'POST', body: packet, headers: headers };
 
-        let updateResponse = await fetch(url, { method: 'POST', body: packet, headers: headers })
+        if (this.configService.getHttpProtocol() === "https") {
+            payload = { ...payload, agent: httpsAgent };
+        }
+        let updateResponse = await fetch(url, payload)
             .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -219,7 +235,16 @@ export class AutoScriptXMLService implements IAutoScriptService {
         let packet: string = this.constructPacket(Constants.SYNC);
         console.log("PACKET: " + packet);
 
-        let syncResponse = await fetch(url, { method: 'POST', body: packet, headers: headers })
+        const https = require('https');
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false,
+        });
+        let payload: any = { method: 'POST', body: packet, headers: headers };
+
+        if (this.configService.getHttpProtocol() === "https") {
+            payload = { ...payload, agent: httpsAgent };
+        }
+        let syncResponse = await fetch(url, payload)
             .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -247,7 +272,16 @@ export class AutoScriptXMLService implements IAutoScriptService {
         let headers: Headers = this.getAuthHeaders();
         let packet: string = this.constructPacket(Constants.QUERY);
         console.log("PACKET: " + packet);
-        let compareResponse = await fetch(url, { method: 'POST', body: packet, headers: headers })
+        const https = require('https');
+        const httpsAgent = new https.Agent({
+            rejectUnauthorized: false,
+        });
+        let payload: any = { method: 'POST', body: packet, headers: headers };
+
+        if (this.configService.getHttpProtocol() === "https") {
+            payload = { ...payload, agent: httpsAgent };
+        }
+        let compareResponse = await fetch(url, payload)
             .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);

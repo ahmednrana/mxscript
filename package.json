@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script Manager for ibm Maximo / Control Desk",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "engines": {
     "vscode": "^1.41.0"
   },
@@ -56,8 +56,7 @@
         },
         "mxscript.serverSettings.port": {
           "type": "number",
-          "default": 9080,
-          "description": "Maximo port. Default is 9080"
+          "description": "Maximo port"
         },
         "mxscript.authentication.username": {
           "type": "string",
