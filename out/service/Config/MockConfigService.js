@@ -21,6 +21,16 @@ class MockConfigService {
         this.nameSpace = 'http://www.ibm.com/maximo';
         this.sourceTag = "SOURCE";
         this.LOG = "LOG";
+        this.languageTag = "SCRIPTLANGUAGE";
+    }
+    getLanguageTag() {
+        return this.languageTag;
+    }
+    getFileExtension() {
+        return "py";
+    }
+    getCreatePythonScriptInEditor() {
+        return this.prefersJython;
     }
     getSourceTag() {
         return this.sourceTag;

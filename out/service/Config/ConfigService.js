@@ -14,14 +14,25 @@ class ConfigService {
         this.ldapAuth = (this.authType === 'internal') ? false : true;
         this.scriptLogLevel = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.logLevel');
         this.isNextGen = this.vscode.workspace.getConfiguration().get('mxscript.version.supportsNextgenApi');
-        this.prefersJython = this.vscode.workspace.getConfiguration().get('mxscript.languageSettings.createPythonFileForJythonScripts');
+        this.prefersPythonInEditor = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.createPythonFileForJythonScripts');
         this.url = this.generateUrl(this.httpProtocol, this.hostname, this.port);
         this.urlXML = this.generateUrlForXML(this.hostname, this.port, this.os);
         this.object = 'AUTOSCRIPT';
         this.nameSpaceAttr = 'xmlns';
         this.nameSpace = 'http://www.ibm.com/maximo';
         this.sourceTag = "SOURCE";
+        this.languageTag = "SCRIPTLANGUAGE";
         this.LOG = "LOG";
+    }
+    getFileExtension() {
+        let currentlyOpenTabfilePath = this.vscode.window.activeTextEditor.document.fileName;
+        let filename = this.path.basename(currentlyOpenTabfilePath);
+        filename = filename.toLowerCase();
+        let extension = filename.substr(filename.lastIndexOf(".") + 1, filename.length);
+        return extension;
+    }
+    getLanguageTag() {
+        return this.languageTag;
     }
     getSourceTag() {
         return this.sourceTag;
@@ -29,8 +40,8 @@ class ConfigService {
     getLogLevel() {
         return this.scriptLogLevel;
     }
-    getPreferesJython() {
-        return this.prefersJython;
+    getCreatePythonScriptInEditor() {
+        return this.prefersPythonInEditor;
     }
     isLdap() {
         return this.ldapAuth;

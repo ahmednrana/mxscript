@@ -12,17 +12,17 @@ Constants.SYNCALL = "SyncALL";
 Constants.ACTIONS_ADDCHANGE = "AddChange";
 Constants.OPERATOR_EQUALTO = "=";
 // Typical supported Languages
-Constants.LANG_GROOVY = "GROOVY";
-Constants.LANG_PYTHON = "PYTHON";
-Constants.LANG_JYTHON = "JYTHON";
-Constants.LANG_NASHORN = "NASHORN";
-Constants.LANG_JAVASCRIPT = "JAVASCRIPT";
-Constants.LANG_JS = "JS";
-Constants.LANG_ECMASCRIPT = "ECMASCRIPT";
+Constants.LANG_GROOVY = "groovy";
+Constants.LANG_PYTHON = "python";
+Constants.LANG_JYTHON = "jython";
+Constants.LANG_NASHORN = "nashorn";
+Constants.LANG_JAVASCRIPT = "javascript";
+Constants.LANG_JS = "js";
+Constants.LANG_ECMASCRIPT = "ecma_script";
 // Language File extensions
 Constants.EXT_PYTHON = "py";
 Constants.EXT_GROOVY = "groovy";
-Constants.EXT_JYTHON = "py";
+Constants.EXT_JYTHON = "jy";
 Constants.EXT_NASHORN = "js";
 Constants.EXT_JAVASCRIPT = "js";
 Constants.EXT_JS = "js";

@@ -1,6 +1,7 @@
 export default interface IConfigService {
   isLdap: () => boolean;
   getSourceTag: () => string;
+  getLanguageTag: () => string;
   getLogLevel: () => any;
   getUrl: () => string;
   getHttpProtocol: () => string;
@@ -16,5 +17,7 @@ export default interface IConfigService {
   getOS: () => string;
   getXMLUrl: () => string;
   getFilename: () => string;
+  getFileExtension: () => string;
+  getCreatePythonScriptInEditor:() => boolean;
   
 }

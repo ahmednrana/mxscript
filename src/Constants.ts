@@ -11,18 +11,18 @@ export class Constants {
     public static OPERATOR_EQUALTO = "=";
 
     // Typical supported Languages
-    public static LANG_GROOVY = "GROOVY";
-    public static LANG_PYTHON = "PYTHON";
-    public static LANG_JYTHON = "JYTHON";
-    public static LANG_NASHORN = "NASHORN";
-    public static LANG_JAVASCRIPT = "JAVASCRIPT";
-    public static LANG_JS = "JS";
-    public static LANG_ECMASCRIPT = "ECMASCRIPT"
+    public static LANG_GROOVY = "groovy";
+    public static LANG_PYTHON = "python";
+    public static LANG_JYTHON = "jython";
+    public static LANG_NASHORN = "nashorn";
+    public static LANG_JAVASCRIPT = "javascript";
+    public static LANG_JS = "js";
+    public static LANG_ECMASCRIPT = "ecma_script";
 
     // Language File extensions
     public static EXT_PYTHON = "py";
     public static EXT_GROOVY = "groovy";
-    public static EXT_JYTHON = "py";
+    public static EXT_JYTHON = "jy";
     public static EXT_NASHORN = "js";
     public static EXT_JAVASCRIPT = "js";
     public static EXT_JS = "js";
