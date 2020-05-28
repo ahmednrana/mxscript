@@ -16,11 +16,28 @@ const vscode_1 = require("vscode");
 const AutoScriptXML_model_1 = require("../../model/AutoScriptXML.model");
 const Constants_1 = require("../../Constants");
 var parseString = require('xml2js').parseString;
+var parseStringPromise = require('xml2js').parseStringPromise;
 class AutoScriptXMLService {
     constructor(context, cs) {
         this.vscode = require("vscode");
         this.builder = require('xmlbuilder');
+        this.languageToExtension = new Map();
         this.configService = cs;
+        this.initializeLanguages();
+    }
+    initializeLanguages() {
+        this.languageToExtension.set(Constants_1.Constants.LANG_GROOVY, Constants_1.Constants.EXT_GROOVY);
+        this.languageToExtension.set(Constants_1.Constants.LANG_NASHORN, Constants_1.Constants.EXT_NASHORN);
+        this.languageToExtension.set(Constants_1.Constants.LANG_JS, Constants_1.Constants.EXT_JS);
+        this.languageToExtension.set(Constants_1.Constants.LANG_JAVASCRIPT, Constants_1.Constants.EXT_JAVASCRIPT);
+        this.languageToExtension.set(Constants_1.Constants.LANG_ECMASCRIPT, Constants_1.Constants.EXT_ECMASCRIPT);
+        this.languageToExtension.set(Constants_1.Constants.LANG_PYTHON, Constants_1.Constants.EXT_PYTHON);
+        if (this.configService.getCreatePythonScriptInEditor()) {
+            this.languageToExtension.set(Constants_1.Constants.LANG_JYTHON, Constants_1.Constants.EXT_PYTHON);
+        }
+        else {
+            this.languageToExtension.set(Constants_1.Constants.LANG_JYTHON, Constants_1.Constants.EXT_JYTHON);
+        }
     }
     getAuthHeaders() {
         let headers = new node_fetch_1.Headers();
@@ -109,40 +126,74 @@ class AutoScriptXMLService {
                     return;
                 }
                 progress.report({ increment: 50, message: "Writing scripts" });
-                parseString(autoScriptData, function (err, parsedXML) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        let languageToExtension;
-                        languageToExtension = new Map();
-                        languageToExtension.set(Constants_1.Constants.LANG_GROOVY, Constants_1.Constants.EXT_GROOVY);
-                        languageToExtension.set(Constants_1.Constants.LANG_PYTHON, Constants_1.Constants.EXT_PYTHON);
-                        languageToExtension.set(Constants_1.Constants.LANG_JYTHON, Constants_1.Constants.EXT_JYTHON);
-                        languageToExtension.set(Constants_1.Constants.LANG_NASHORN, Constants_1.Constants.EXT_NASHORN);
-                        languageToExtension.set(Constants_1.Constants.LANG_JS, Constants_1.Constants.EXT_JS);
-                        languageToExtension.set(Constants_1.Constants.LANG_JAVASCRIPT, Constants_1.Constants.EXT_JAVASCRIPT);
-                        languageToExtension.set(Constants_1.Constants.LANG_ECMASCRIPT, Constants_1.Constants.EXT_ECMASCRIPT);
-                        let firstKeyInParsedXML = Object.keys(parsedXML)[0];
-                        if (parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[0]].rsCount === "0") {
-                            vscode.window.showInformationMessage('No Script by this name is found on server\n' + autoScriptData);
-                            return;
+                // parseStringPromise(autoScriptData).then(function (result: string) {
+                //     console.dir(result);
+                //     console.log('Done');
+                // })
+                //     .catch(function (err: any) {
+                //         // Failed
+                //     });
+                parseStringPromise(autoScriptData).then((parsedXML) => {
+                    console.log(parsedXML);
+                    let firstKeyInParsedXML = Object.keys(parsedXML)[0];
+                    if (parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[0]].rsCount === "0") {
+                        vscode.window.showInformationMessage('No Script by this name is found on server\n' + autoScriptData);
+                        return;
+                    }
+                    let autoScriptXml = parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[1]][0].AUTOSCRIPT;
+                    let scripts = autoScriptXml.map(xml => new AutoScriptXML_model_1.default(xml));
+                    for (let autoScript of scripts) {
+                        let source = autoScript.getSource();
+                        let scriptName = autoScript.getAutoScriptName();
+                        let scriptLanguage = autoScript.getScriptLanguage();
+                        let fileExt = this.languageToExtension.get(scriptLanguage);
+                        let fileToSearch = `${scriptName}.${fileExt}`;
+                        console.log(scriptName + " " + scriptLanguage);
+                        let workspacePath = selectedFolderUriResolved.fsPath;
+                        const fsPromises = require('fs').promises;
+                        if (vscode.workspace.workspaceFolders) {
+                            console.log('Writing file: ', fileToSearch);
+                            fsPromises.writeFile(`${workspacePath}/${fileToSearch}`, source);
                         }
-                        let autoScriptXml = parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[1]][0].AUTOSCRIPT;
-                        let scripts = autoScriptXml.map(xml => new AutoScriptXML_model_1.default(xml));
-                        for (let autoScript of scripts) {
-                            let source = autoScript.getSource();
-                            let scriptName = autoScript.getAutoScriptName();
-                            let scriptLanguage = autoScript.getScriptLanguage();
-                            let fileExt = languageToExtension.get(scriptLanguage.toUpperCase());
-                            let fileToSearch = `${scriptName}.${fileExt}`;
-                            console.log(scriptName + " " + scriptLanguage);
-                            let workspacePath = selectedFolderUriResolved.fsPath;
-                            const fsPromises = require('fs').promises;
-                            if (vscode.workspace.workspaceFolders) {
-                                console.log('Writing file: ', fileToSearch);
-                                fsPromises.writeFile(`${workspacePath}/${fileToSearch}`, source);
-                            }
-                        }
-                    });
+                    }
+                }).catch(function (err) {
+                    console.log(err);
+                    vscode.window.showWarningMessage("There was an error in downloading all scripts\n" + err);
                 });
+                // parseString(autoScriptData, async function (err: any, parsedXML: any) {
+                //     let languageToExtension: Map<string, string>;
+                //     languageToExtension = new Map<string, string>();
+                //     languageToExtension.set(Constants.LANG_GROOVY, Constants.EXT_GROOVY);
+                //     languageToExtension.set(Constants.LANG_PYTHON, Constants.EXT_PYTHON);
+                //     languageToExtension.set(Constants.LANG_JYTHON, Constants.EXT_JYTHON);
+                //     languageToExtension.set(Constants.LANG_NASHORN, Constants.EXT_NASHORN);
+                //     languageToExtension.set(Constants.LANG_JS, Constants.EXT_JS);
+                //     languageToExtension.set(Constants.LANG_JAVASCRIPT, Constants.EXT_JAVASCRIPT);
+                //     languageToExtension.set(Constants.LANG_ECMASCRIPT, Constants.EXT_ECMASCRIPT);
+                //     let firstKeyInParsedXML = Object.keys(parsedXML)[0];
+                //     if (parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[0]].rsCount === "0") {
+                //         vscode.window.showInformationMessage('No Script by this name is found on server\n' + autoScriptData);
+                //         return;
+                //     }
+                //     let autoScriptXml: any[] = parsedXML[Object.keys(parsedXML)[0]][Object.keys(parsedXML[firstKeyInParsedXML])[1]][0].AUTOSCRIPT;
+                //     let scripts: AutoScriptXMLModel[] = autoScriptXml.map(
+                //         xml => new AutoScriptXMLModel(xml)
+                //     );
+                //     for (let autoScript of scripts) {
+                //         let source: string = autoScript.getSource();
+                //         let scriptName: string = autoScript.getAutoScriptName();
+                //         let scriptLanguage: string = autoScript.getScriptLanguage();
+                //         let fileExt = languageToExtension.get(scriptLanguage);
+                //         let fileToSearch = `${scriptName}.${fileExt}`;
+                //         console.log(scriptName + " " + scriptLanguage);
+                //         let workspacePath = selectedFolderUriResolved.fsPath;
+                //         const fsPromises = require('fs').promises;
+                //         if (vscode.workspace.workspaceFolders) {
+                //             console.log('Writing file: ', fileToSearch);
+                //             fsPromises.writeFile(`${workspacePath}/${fileToSearch}`, source);
+                //         }
+                //     }
+                // }).bind(this);
                 var prom = new Promise(resolve => {
                     resolve();
                     console.log('Resolving Progressbar Promise');
@@ -324,12 +375,20 @@ class AutoScriptXMLService {
                 autoScript.ele(this.configService.getObjectName(), this.configService.getFilename()); // 2nd AUTOSCRIPT TAG
                 autoScript.ele(this.configService.getLogTag(), this.configService.getLogLevel()); // Adding log level
                 autoScript.ele(this.configService.getSourceTag(), source); // Adding Source
+                let language = (this.configService.getCreatePythonScriptInEditor() && this.configService.getFileExtension() === 'py') ? 'jython' : this.getLanguageFromExtension(this.configService.getFileExtension());
+                autoScript.ele(this.configService.getLanguageTag(), language);
                 break;
             default:
                 break;
         }
         xml = xml.end({ pretty: true });
         return xml;
+    }
+    getLanguageFromExtension(extension) {
+        let language = [...this.languageToExtension.entries()]
+            .filter(({ 1: v }) => v === extension)
+            .map(([k]) => k);
+        return language[0];
     }
     getSource() {
         this.vscode.window.activeTextEditor.document.save();

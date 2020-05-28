@@ -14,11 +14,12 @@ export class ConfigService implements IConfigService {
   private urlXML: string;
   private url: string;
   private sourceTag: string;
+  private languageTag: string;
   private scriptLogLevel: string;
   private authType: string;
   private LOG: string;
   private isNextGen: boolean;
-  private prefersJython: boolean;
+  private prefersPythonInEditor: boolean;
   private ldapAuth: boolean;
 
   constructor() {
@@ -32,14 +33,25 @@ export class ConfigService implements IConfigService {
     this.ldapAuth = (this.authType === 'internal') ? false: true;
     this.scriptLogLevel = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.logLevel');
     this.isNextGen = this.vscode.workspace.getConfiguration().get('mxscript.version.supportsNextgenApi');
-    this.prefersJython = this.vscode.workspace.getConfiguration().get('mxscript.languageSettings.createPythonFileForJythonScripts');
+    this.prefersPythonInEditor = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.createPythonFileForJythonScripts');
     this.url = this.generateUrl(this.httpProtocol, this.hostname, this.port);
     this.urlXML = this.generateUrlForXML(this.hostname, this.port, this.os);
     this.object = 'AUTOSCRIPT';
     this.nameSpaceAttr = 'xmlns';
     this.nameSpace = 'http://www.ibm.com/maximo';
     this.sourceTag = "SOURCE";
+    this.languageTag = "SCRIPTLANGUAGE";
     this.LOG = "LOG";
+  }
+  getFileExtension(): string{
+    let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
+    let filename: string = this.path.basename(currentlyOpenTabfilePath);
+    filename = filename.toLowerCase();
+    let extension = filename.substr(filename.lastIndexOf(".") + 1, filename.length);
+    return extension;
+  }
+  getLanguageTag(): string{
+    return this.languageTag;
   }
   getSourceTag(): string {
     return this.sourceTag;
@@ -47,8 +59,8 @@ export class ConfigService implements IConfigService {
   getLogLevel(): string {
     return this.scriptLogLevel;
   }
-  public getPreferesJython(): boolean {
-    return this.prefersJython;
+  getCreatePythonScriptInEditor(): boolean {
+    return this.prefersPythonInEditor;
   }
   public isLdap(): boolean {
     return this.ldapAuth;

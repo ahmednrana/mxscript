@@ -1,7 +1,7 @@
 import IConfigService from './IConfigService';
-export class MockConfigService implements IConfigService{
+export class MockConfigService implements IConfigService {
 
- 
+
   private httpProtocol: string;
   private vscode = require("vscode");
   private path = require("path");
@@ -21,6 +21,7 @@ export class MockConfigService implements IConfigService{
   private LOG: string;
   private isNextGen: boolean;
   private prefersJython: boolean;
+  private languageTag: string;
 
   constructor(authType: string) {
     this.hostname = '10.231.105.128';
@@ -40,6 +41,17 @@ export class MockConfigService implements IConfigService{
     this.nameSpace = 'http://www.ibm.com/maximo';
     this.sourceTag = "SOURCE";
     this.LOG = "LOG";
+    this.languageTag = "SCRIPTLANGUAGE";
+
+  }
+  getLanguageTag(): string {
+    return this.languageTag;
+  }
+  getFileExtension(): string {
+    return "py";
+  }
+  getCreatePythonScriptInEditor(): boolean {
+    return this.prefersJython;
   }
 
   getSourceTag(): string {
