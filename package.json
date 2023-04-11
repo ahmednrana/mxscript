@@ -142,6 +142,6 @@
   "dependencies": {
     "@types/node-fetch": "^2.5.5",
     "node-fetch": "^2.6.7",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.5.0"
   }
 }
