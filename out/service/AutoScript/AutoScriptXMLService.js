@@ -112,6 +112,7 @@ class AutoScriptXMLService {
                 if (this.configService.getHttpProtocol() === "https") {
                     payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
                 }
+                console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
                 downloadAllResponse = yield node_fetch_1.default(url, payload)
                     .catch(e => {
                     console.log(e.message);
@@ -213,7 +214,7 @@ class AutoScriptXMLService {
             var url = new url_1.URL(this.configService.getXMLUrl());
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.QUERY);
-            console.log("PACKET: " + packet);
+            console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
             const https = require('https');
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
@@ -270,7 +271,7 @@ class AutoScriptXMLService {
             var url = new url_1.URL(this.configService.getXMLUrl());
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.SYNC);
-            console.log("PACKET: " + packet);
+            console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
             const https = require('https');
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,
@@ -305,7 +306,7 @@ class AutoScriptXMLService {
             var url = new url_1.URL(this.configService.getXMLUrl());
             let headers = this.getAuthHeaders();
             let packet = this.constructPacket(Constants_1.Constants.QUERY);
-            console.log("PACKET: " + packet);
+            console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
             const https = require('https');
             const httpsAgent = new https.Agent({
                 rejectUnauthorized: false,

@@ -8,6 +8,7 @@ Constants.SYNC = "Sync";
 Constants.QUERY = "Query";
 Constants.QUERYALL = 'QueryAll';
 Constants.SYNCALL = "SyncALL";
+Constants.UPDATE = "Update";
 // Actions / operators
 Constants.ACTIONS_ADDCHANGE = "AddChange";
 Constants.OPERATOR_EQUALTO = "=";

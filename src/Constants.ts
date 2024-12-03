@@ -5,6 +5,7 @@ export class Constants {
     public static QUERY = "Query";
     public static QUERYALL = 'QueryAll';
     public static SYNCALL = "SyncALL";
+    public static UPDATE = "Update";
 
     // Actions / operators
     public static ACTIONS_ADDCHANGE = "AddChange";
