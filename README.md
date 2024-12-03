@@ -71,12 +71,12 @@ You should have access to an instance of IBM Maximo / ICD to manage scripts.
 
 #### Configuring Object Structure
 You must have rights to use an object structure having `AUTOSCRIPT` as its base object. 
->There is an object structure `MXAPIAUTOSCRIPT` created by default. You can use it
+>There is an object structure `MXAPIAUTOSCRIPT` created by default. Do not use it. This will cause issues when uploading scripts to server
 
 If somehow your installation does not have this OS then follow the following steps to create an object structure. 
 1. Goto Object Strcutures
 2. Click on `New Object Structure`
-3. Give it any name e.g. `MXAPIAUTOSCRIPT`. In Consumed by field enter `INTEGRATION`
+3. Give it any name e.g. `MXSCRIPTOS`. In Consumed by field enter `INTEGRATION`
 4. In the source object table click on New Row. Then in that new row select `AUTOSCRIPT` in object field.
 5. Save
 

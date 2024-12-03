@@ -90,7 +90,7 @@
         },
         "mxscript.serverSettings.objectStructure": {
           "type": "string",
-          "default": "MXAPIAUTOSCRIPT",
+          "default": "MXSCRIPT",
           "description": "Object Structure to be used scripts uploading / downloading"
         },
         "mxscript.serverSettings.httpProtocol": {
