@@ -9,6 +9,7 @@ class ConfigService {
         this.port = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.port');
         this.username = this.vscode.workspace.getConfiguration().get('mxscript.authentication.username');
         this.password = this.vscode.workspace.getConfiguration().get('mxscript.authentication.password');
+        this.apikey = this.vscode.workspace.getConfiguration().get('mxscript.authentication.apikey');
         this.os = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.objectStructure');
         this.authType = this.vscode.workspace.getConfiguration().get('mxscript.authentication.authenticationType');
         this.ldapAuth = (this.authType === 'internal') ? false : true;
@@ -75,6 +76,9 @@ class ConfigService {
     }
     getPassword() {
         return this.password;
+    }
+    getApiKey() {
+        return this.apikey;
     }
     getCredentials() {
         return this.username + ":" + this.password;

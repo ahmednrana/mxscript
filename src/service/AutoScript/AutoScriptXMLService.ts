@@ -37,7 +37,10 @@ export class AutoScriptXMLService implements IAutoScriptService {
 
     getAuthHeaders(): Headers {
         let headers = new Headers();
-        if (this.configService.isLdap()) {
+        if(this.configService.getAuthType() === 'apikey'){
+            headers.set('apikey', this.configService.getApiKey());
+        }
+        else if (this.configService.isLdap()) {
             headers.set('authorization', "Basic " + new Buffer(this.configService.getUsername() + ":" + this.configService.getPassword()).toString("base64"));
         }
         else {
@@ -109,6 +112,8 @@ export class AutoScriptXMLService implements IAutoScriptService {
             if (this.configService.getHttpProtocol() === "https") {
                 payload = { ...payload, agent: httpsAgent };
             }
+            console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
+
             downloadAllResponse = await fetch(url, payload)
                 .catch(e => {
                     console.log(e.message);
@@ -205,7 +210,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
             //         }
             //     }
             // }).bind(this);
-            var prom = new Promise(resolve => {
+            var prom = new Promise<void>(resolve => {
                 resolve();
                 console.log('Resolving Progressbar Promise');
             });
@@ -223,7 +228,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
         var url = new URL(this.configService.getXMLUrl());
         let headers: Headers = this.getAuthHeaders();
         let packet: string = this.constructPacket(Constants.QUERY);
-        console.log("PACKET: " + packet);
+        console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
         const https = require('https');
         const httpsAgent = new https.Agent({
             rejectUnauthorized: false,
@@ -289,9 +294,8 @@ export class AutoScriptXMLService implements IAutoScriptService {
     public async uploadScript() {
         var url = new URL(this.configService.getXMLUrl());
         let headers: Headers = this.getAuthHeaders();
-
         let packet: string = this.constructPacket(Constants.SYNC);
-        console.log("PACKET: " + packet);
+        console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
 
         const https = require('https');
         const httpsAgent = new https.Agent({
@@ -329,7 +333,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
         var url = new URL(this.configService.getXMLUrl());
         let headers: Headers = this.getAuthHeaders();
         let packet: string = this.constructPacket(Constants.QUERY);
-        console.log("PACKET: " + packet);
+        console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
         const https = require('https');
         const httpsAgent = new https.Agent({
             rejectUnauthorized: false,

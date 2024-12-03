@@ -13,6 +13,7 @@ export default interface IConfigService {
   getNameSpace: () => string;
   getUsername: () => string;
   getPassword: () => string;
+  getApiKey: () => string;
   getCredentials: () => string;
   getOS: () => string;
   getXMLUrl: () => string;

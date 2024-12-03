@@ -7,6 +7,7 @@ export class MockConfigService implements IConfigService {
   private path = require("path");
   private username: string;
   private password: string;
+  private apikey: string;
   private hostname: string;
   private port: number;
   private os: string;
@@ -29,6 +30,7 @@ export class MockConfigService implements IConfigService {
     this.port = 9080;
     this.username = 'maxadmin';
     this.password = 'maxadmin';
+    this.apikey = '';
     this.os = 'MXAPIAUTOSCRIPT';
     this.authType = authType;
     this.scriptLogLevel = 'DEBUG';
@@ -92,6 +94,9 @@ export class MockConfigService implements IConfigService {
   }
   public getPassword(): string {
     return this.password;
+  }
+  public getApiKey(): string {
+    return this.apikey;
   }
   public getCredentials(): string {
     return this.username + ":" + this.password;

@@ -68,15 +68,22 @@
           "default": "maxadmin",
           "description": "Password for Maximo Authentication"
         },
+        "mxscript.authentication.apikey": {
+          "type": "string",
+          "default": "",
+          "description": "API key Maximo Authentication"
+        },
         "mxscript.authentication.authenticationType": {
           "type": "string",
           "enum": [
             "internal",
-            "ldap"
+            "ldap",
+            "apikey"
           ],
           "enumDescriptions": [
             "Maximo's internal authentication",
-            "LDAP based authentication using applciation server"
+            "LDAP based authentication using applciation server",
+            "API key"
           ],
           "default": "internal",
           "description": "Type of Authentication"
