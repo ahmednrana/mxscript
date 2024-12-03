@@ -41,7 +41,10 @@ class AutoScriptXMLService {
     }
     getAuthHeaders() {
         let headers = new node_fetch_1.Headers();
-        if (this.configService.isLdap()) {
+        if (this.configService.getAuthType() === 'apikey') {
+            headers.set('apikey', this.configService.getApiKey());
+        }
+        else if (this.configService.isLdap()) {
             headers.set('authorization', "Basic " + new Buffer(this.configService.getUsername() + ":" + this.configService.getPassword()).toString("base64"));
         }
         else {

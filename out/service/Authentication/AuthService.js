@@ -67,6 +67,9 @@ class AuthService {
             case "maxauth":
                 this.AUTH_PATH = '/oslc/login';
                 break;
+            case 'apikey':
+                this.AUTH_PATH = '/oslc/login';
+                break;
             default:
                 this.AUTH_PATH = '/oslc/login'; // maxauth
                 break;
@@ -75,6 +78,9 @@ class AuthService {
     getInitAuthHeaders() {
         let headers = new node_fetch_1.Headers();
         switch (this.authType) {
+            case "apikey":
+                headers.set('apikey', this.configService.getApiKey());
+                break;
             case "basic":
                 headers.set('Authorization', 'Basic ' + new Buffer(this.configService.getCredentials()).toString('base64'));
                 break;
@@ -93,6 +99,9 @@ class AuthService {
     getAuthHeaders() {
         let headers = new node_fetch_1.Headers();
         switch (this.authType) {
+            case "apikey":
+                headers.set('apikey', this.configService.getApiKey());
+                break;
             case "basic":
                 headers.set('cookie', this._cookie);
                 break;

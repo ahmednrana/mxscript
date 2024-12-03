@@ -9,6 +9,7 @@ class MockConfigService {
         this.port = 9080;
         this.username = 'maxadmin';
         this.password = 'maxadmin';
+        this.apikey = '';
         this.os = 'MXAPIAUTOSCRIPT';
         this.authType = authType;
         this.scriptLogLevel = 'DEBUG';
@@ -70,6 +71,9 @@ class MockConfigService {
     }
     getPassword() {
         return this.password;
+    }
+    getApiKey() {
+        return this.apikey;
     }
     getCredentials() {
         return this.username + ":" + this.password;

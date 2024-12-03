@@ -71,7 +71,9 @@ export class AuthService implements IAuthService {
             case "maxauth":
                 this.AUTH_PATH = '/oslc/login';
                 break;
-
+            case 'apikey':
+                this.AUTH_PATH = '/oslc/login';
+                break;
             default:
                 this.AUTH_PATH = '/oslc/login'; // maxauth
                 break;
@@ -81,6 +83,10 @@ export class AuthService implements IAuthService {
         let headers = new Headers();
 
         switch (this.authType) {
+            case "apikey":
+                headers.set('apikey', this.configService.getApiKey());
+
+                break;
             case "basic":
                 headers.set('Authorization', 'Basic ' + new Buffer(this.configService.getCredentials()).toString('base64'));
 
@@ -106,6 +112,10 @@ export class AuthService implements IAuthService {
         let headers = new Headers();
 
         switch (this.authType) {
+            case "apikey":
+                headers.set('apikey', this.configService.getApiKey());
+                break;
+
             case "basic":
                 headers.set('cookie', this._cookie);
 

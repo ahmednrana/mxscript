@@ -37,7 +37,10 @@ export class AutoScriptXMLService implements IAutoScriptService {
 
     getAuthHeaders(): Headers {
         let headers = new Headers();
-        if (this.configService.isLdap()) {
+        if(this.configService.getAuthType() === 'apikey'){
+            headers.set('apikey', this.configService.getApiKey());
+        }
+        else if (this.configService.isLdap()) {
             headers.set('authorization', "Basic " + new Buffer(this.configService.getUsername() + ":" + this.configService.getPassword()).toString("base64"));
         }
         else {

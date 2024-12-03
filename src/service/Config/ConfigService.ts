@@ -5,6 +5,7 @@ export class ConfigService implements IConfigService {
   private path = require("path");
   private username: string;
   private password: string;
+  private apikey: string;
   private hostname: string;
   private port: number;
   private os: string;
@@ -28,6 +29,7 @@ export class ConfigService implements IConfigService {
     this.port = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.port');
     this.username = this.vscode.workspace.getConfiguration().get('mxscript.authentication.username');
     this.password = this.vscode.workspace.getConfiguration().get('mxscript.authentication.password');
+    this.apikey = this.vscode.workspace.getConfiguration().get('mxscript.authentication.apikey');
     this.os = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.objectStructure');
     this.authType = this.vscode.workspace.getConfiguration().get('mxscript.authentication.authenticationType');
     this.ldapAuth = (this.authType === 'internal') ? false: true;
@@ -94,6 +96,9 @@ export class ConfigService implements IConfigService {
   }
   public getPassword(): string {
     return this.password;
+  }
+  public getApiKey(): string {
+    return this.apikey;
   }
   public getCredentials(): string {
     return this.username + ":" + this.password;
