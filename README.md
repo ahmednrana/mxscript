@@ -71,7 +71,7 @@ You should have access to an instance of IBM Maximo / ICD to manage scripts.
 
 #### Configuring Object Structure
 You must have rights to use an object structure having `AUTOSCRIPT` as its base object. 
->There is an object structure `MXAPIAUTOSCRIPT` created by default. Do not use it. This will cause issues when uploading scripts to server
+>There is an object structure `MXAPIAUTOSCRIPT` created by default. Do NOT use it. This will cause issues when uploading scripts to server
 
 If somehow your installation does not have this OS then follow the following steps to create an object structure. 
 1. Goto Object Strcutures
@@ -108,24 +108,26 @@ This extension contributes the following settings:
 * `mxscript.serverSettings.httpProtocol`: Http protocol. Either `http` or `https`
 * `mxscript.authentication.username`: Username for Maximo Authentication
 * `mxscript.authentication.password`: Password for Maximo Authentication
-* `mxscript.serverSettings.objectStructure`: Object Structure to be used scripts uploading / downloading. Default is `MXAPIAUTOSCRIPT`
+* `mxscript.authentication.apikey`: API key for Maximo Authentication
+* `mxscript.serverSettings.objectStructure`: Object Structure to be used scripts uploading / downloading. Make sure you use an object structure with only `AUTOSCRIPT` as source object and it should not have any child objects in it.
 * `mxscript.scriptSettings.createPythonFileForJythonScripts`: Create Jython script in Maximo even if the file in editor is .py. Helps in intellisense
-* `mxscript.scriptSettings.logLevel`: The log level to set with scripts when creating / updating them. Possible values are `DEBUG,INFO,WARN,ERROR,FATAL`. Leave empty to leave them as it is
+* `mxscript.scriptSettings.logLevel`: The log level to set with scripts when creating / updating them. Possible values are `DEBUG,INFO,WARN,ERROR,FATAL`.
 
 
 ## Known Issues
 
+Using the built in Object Structure `MXAPIAUTOSCRIPT` will delete the launch points when uploading the script to server. Instead create a new OS with only `AUTOSCRIPT` as source object. No child objects in it.
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 
 ## Release Notes
 
-First release I have added basic functions to this extension.
+
 
 ### 0.5.0
 
 Initial release added upload, download, download all and compare with server functions.
 
 
-**Contact** Feel free to reach me at [linkedin](https://www.linkedin.com/in/ranaahmed/) or [wordpress](https://maximomize.wordpress.com). I would love to meet fellow maximo consultants
+**Contact** Feel free to reach me at [linkedin](https://www.linkedin.com/in/ranaahmed/) or [Maximomize](https://maximomize.com) or [wordpress](https://maximomize.wordpress.com). I would love to meet fellow maximo consultants
 >**Note:** This is work of third party and not an IBM official extension
