@@ -31,7 +31,7 @@ export class MockConfigService implements IConfigService {
     this.username = 'maxadmin';
     this.password = 'maxadmin';
     this.apikey = '';
-    this.os = 'MXAPIAUTOSCRIPT';
+    this.os = 'MXSCRIPTOS';
     this.authType = authType;
     this.scriptLogLevel = 'DEBUG';
     this.isNextGen = true;

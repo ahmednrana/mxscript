@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script Manager for ibm Maximo / Control Desk",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "engines": {
     "vscode": "^1.41.0"
   },
@@ -127,7 +127,7 @@
             "Logs very severe errors messages"
           ],
           "type": "string",
-          "description": "The log level tp set with scripts when creating / updating them. Leave empty to leave them as it is"
+          "description": "The log level tp set with scripts when creating / updating them"
         }
       }
     }
