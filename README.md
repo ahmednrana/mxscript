@@ -117,12 +117,16 @@ This extension contributes the following settings:
 ## Known Issues
 
 Using the built in Object Structure `MXAPIAUTOSCRIPT` will delete the launch points when uploading the script to server. Instead create a new OS with only `AUTOSCRIPT` as source object. No child objects in it.
+
+Double check the authentication type, user/pass or the api key provided
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 
 ## Release Notes
 
 
+### 0.6.0
+Added support for API key
 
 ### 0.5.0
 
