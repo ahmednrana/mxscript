@@ -1,0 +1,29 @@
+name: Publish Extension
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish extension
+        uses: lannonbr/vsce-action@4.0.0
+        with:
+          args: "publish -p $DEVOPS_TOKEN"
+        env:
+          DEVOPS_TOKEN: ${{secrets.DEVOPS_TOKEN}}
