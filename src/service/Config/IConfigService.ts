@@ -20,5 +20,5 @@ export default interface IConfigService {
   getFilename: () => string;
   getFileExtension: () => string;
   getCreatePythonScriptInEditor:() => boolean;
-  
+  ignoreSslError:() => boolean;
 }

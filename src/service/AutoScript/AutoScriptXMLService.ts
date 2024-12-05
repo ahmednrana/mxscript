@@ -313,6 +313,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
                 return;
             });
         syncResponse = syncResponse as Response;
+        console.log(`upload script status = ${syncResponse.status}`)
         let autoScriptData: string = await syncResponse.text();
 
         if (!syncResponse.ok && syncResponse.status !== 200 && syncResponse.status !== 201) {
@@ -345,11 +346,12 @@ export class AutoScriptXMLService implements IAutoScriptService {
         }
         let compareResponse = await fetch(url, payload)
             .catch(e => {
-                console.log(e.message);
+                console.log(`Error: ${e.message}`);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
                 return;
             });
         compareResponse = compareResponse as Response;
+        console.log(`upload script status = ${compareResponse.status}`)
         let autoScriptData: string = await compareResponse.text();
         if (!compareResponse.ok && compareResponse.status !== 200 && compareResponse.status !== 201) {
             this.vscode.window.showErrorMessage("Error in fetching data " + autoScriptData);

@@ -22,6 +22,7 @@ export class ConfigService implements IConfigService {
   private isNextGen: boolean;
   private prefersPythonInEditor: boolean;
   private ldapAuth: boolean;
+  private ignoreSsl: boolean;
 
   constructor() {
     this.hostname = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.hostname');
@@ -44,6 +45,7 @@ export class ConfigService implements IConfigService {
     this.sourceTag = "SOURCE";
     this.languageTag = "SCRIPTLANGUAGE";
     this.LOG = "LOG";
+    this.ignoreSsl = this.vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
   }
   getFileExtension(): string{
     let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
@@ -127,6 +129,9 @@ export class ConfigService implements IConfigService {
     filename = filename.toUpperCase();
     filename = filename.substr(0, filename.lastIndexOf("."));
     return filename;
+  }
+  public ignoreSslError(): boolean {
+    return this.ignoreSsl;
   }
 
 }

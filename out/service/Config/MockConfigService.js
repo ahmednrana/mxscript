@@ -23,6 +23,10 @@ class MockConfigService {
         this.sourceTag = "SOURCE";
         this.LOG = "LOG";
         this.languageTag = "SCRIPTLANGUAGE";
+        this.ignoreSsl = true;
+    }
+    ignoreSslError() {
+        return this.ignoreSsl;
     }
     getLanguageTag() {
         return this.languageTag;

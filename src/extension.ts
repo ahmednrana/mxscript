@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { AutoScriptXMLService } from './service/AutoScript/AutoScriptXMLService';
 import { IAutoScriptService } from './service/AutoScript/IAutoScriptService';
 import { ConfigService } from './service/Config/ConfigService';
-import IConfigService from './service/Config/IConfigService';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -14,8 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   };
   let compare = vscode.commands.registerCommand("mxscript.compare", () => {
-    let cs: ConfigService = new ConfigService();
-    let as: IAutoScriptService = new AutoScriptXMLService(context, cs);
+    let as: IAutoScriptService = new AutoScriptXMLService(context, new ConfigService());
     as.compareWithServer();
   });
   let upload = vscode.commands.registerCommand("mxscript.upload", () => {
@@ -23,14 +21,21 @@ export function activate(context: vscode.ExtensionContext) {
     as.uploadScript();
   });
   let update = vscode.commands.registerCommand("mxscript.update", () => {
-    let cs: IConfigService = new ConfigService();
-    let as: IAutoScriptService = new AutoScriptXMLService(context, cs);
+    let as: IAutoScriptService = new AutoScriptXMLService(context, new ConfigService());
     as.updateScript();
   });
   let downloadall = vscode.commands.registerCommand("mxscript.downloadall", () => {
     let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
     as.downloadAllScripts();
   });
+ 
+  vscode.workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
+      let ignoreSsl = vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors")
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = ignoreSsl ? '0' : '1';
+    }
+  });
+
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MxScriptScheme, MxScriptProvider));
   context.subscriptions.push(upload);
   context.subscriptions.push(downloadall);
