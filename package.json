@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script Manager for IBM Maximo",
-  "version": "0.6.5",
+  "version": "0.6.7",
   "engines": {
     "vscode": "^1.41.0"
   },
