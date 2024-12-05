@@ -15,6 +15,12 @@
   "categories": [
     "Other"
   ],
+  "activationEvents": [
+    "onCommand:mxscript.upload",
+    "onCommand:mxscript.update",
+    "onCommand:mxscript.compare",
+    "onCommand:mxscript.downloadall"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
