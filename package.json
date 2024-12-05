@@ -1,8 +1,8 @@
 {
   "name": "mxscript",
   "displayName": "MxScript",
-  "description": "Script Manager for ibm Maximo / Control Desk",
-  "version": "0.6.1",
+  "description": "Script Manager for IBM Maximo",
+  "version": "0.6.5",
   "engines": {
     "vscode": "^1.41.0"
   },
@@ -14,12 +14,6 @@
   "icon": "images/icon.png",
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onCommand:mxscript.upload",
-    "onCommand:mxscript.update",
-    "onCommand:mxscript.compare",
-    "onCommand:mxscript.downloadall"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -51,7 +45,6 @@
       "properties": {
         "mxscript.serverSettings.hostname": {
           "type": "string",
-          "default": null,
           "description": "Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)"
         },
         "mxscript.serverSettings.port": {
@@ -70,7 +63,6 @@
         },
         "mxscript.authentication.apikey": {
           "type": "string",
-          "default": "",
           "description": "API key Maximo Authentication"
         },
         "mxscript.authentication.authenticationType": {
@@ -128,6 +120,11 @@
           ],
           "type": "string",
           "description": "The log level tp set with scripts when creating / updating them"
+        },
+        "mxscript.scriptSettings.ignoresslerrors": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Ignore ssl errors"
         }
       }
     }

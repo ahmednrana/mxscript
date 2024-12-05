@@ -23,6 +23,7 @@ export class MockConfigService implements IConfigService {
   private isNextGen: boolean;
   private prefersJython: boolean;
   private languageTag: string;
+  private ignoreSsl: boolean;
 
   constructor(authType: string) {
     this.hostname = '10.231.105.128';
@@ -44,7 +45,10 @@ export class MockConfigService implements IConfigService {
     this.sourceTag = "SOURCE";
     this.LOG = "LOG";
     this.languageTag = "SCRIPTLANGUAGE";
-
+    this.ignoreSsl = true;
+  }
+  public ignoreSslError(): boolean {
+    return this.ignoreSsl;
   }
   getLanguageTag(): string {
     return this.languageTag;

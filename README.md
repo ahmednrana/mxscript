@@ -67,7 +67,7 @@ This downloads all the scripts from Maximo server to the folder you selected.
 
 ## Requirements
 
-You should have access to an instance of IBM Maximo / ICD to manage scripts.
+You should have access to an instance of IBM Maximo to manage scripts.
 
 #### Configuring Object Structure
 You must have rights to use an object structure having `AUTOSCRIPT` as its base object. 
@@ -76,7 +76,7 @@ You must have rights to use an object structure having `AUTOSCRIPT` as its base 
 If somehow your installation does not have this OS then follow the following steps to create an object structure. 
 1. Goto Object Strcutures
 2. Click on `New Object Structure`
-3. Give it any name e.g. `MXSCRIPTOS`. In Consumed by field enter `INTEGRATION`
+3. Give it any name e.g. `MXSCRIPT`. In Consumed by field enter `INTEGRATION`
 4. In the source object table click on New Row. Then in that new row select `AUTOSCRIPT` in object field.
 5. Save
 
@@ -102,16 +102,20 @@ Before using this extension you need to add a few settings. It's easier to edit 
 Other than that you can also edit them in `settings.json` of your project.
 
 This extension contributes the following settings:
+| Property Name                                           | Type     | Default     | Description                                                                                   |
+|---------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------|
+| `mxscript.serverSettings.hostname`                      | string   |         | Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)                               |
+| `mxscript.serverSettings.port`                          | number   |             | Maximo port                                                                                   |
+| `mxscript.authentication.username`                      | string   | maxadmin    | Username for Maximo Authentication                                                            |
+| `mxscript.authentication.password`                      | string   | maxadmin    | Password for Maximo Authentication                                                            |
+| `mxscript.authentication.apikey`                        | string   |           | API key Maximo Authentication                                                                 |
+| `mxscript.authentication.authenticationType`            | string   | internal    | Type of Authentication (internal, ldap, apikey)                                               |
+| `mxscript.serverSettings.objectStructure`               | string   | MXSCRIPT    | Object Structure to be used for scripts uploading / downloading                               |
+| `mxscript.serverSettings.httpProtocol`                  | string   | http        | Http protocol (http or https)                                                                 |
+| `mxscript.scriptSettings.createPythonFileForJythonScripts` | boolean  | true        | Create Jython script in Maximo even if the file in editor is .py                               |
+| `mxscript.scriptSettings.logLevel`                      | string   |             | The log level to set with scripts when creating / updating them (DEBUG, INFO, WARN, ERROR, FATAL) |
+| `mxscript.scriptSettings.ignoresslerrors`               | boolean  | false       | Ignore SSL errors                                                                             |
 
-* `mxscript.serverSettings.hostname`: Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.yourmaximoserver.com)
-* `mxscript.serverSettings.port`: Maximo port. Default is 9080
-* `mxscript.serverSettings.httpProtocol`: Http protocol. Either `http` or `https`
-* `mxscript.authentication.username`: Username for Maximo Authentication
-* `mxscript.authentication.password`: Password for Maximo Authentication
-* `mxscript.authentication.apikey`: API key for Maximo Authentication
-* `mxscript.serverSettings.objectStructure`: Object Structure to be used scripts uploading / downloading. Make sure you use an object structure with only `AUTOSCRIPT` as source object and it should not have any child objects in it.
-* `mxscript.scriptSettings.createPythonFileForJythonScripts`: Create Jython script in Maximo even if the file in editor is .py. Helps in intellisense
-* `mxscript.scriptSettings.logLevel`: The log level to set with scripts when creating / updating them. Possible values are `DEBUG,INFO,WARN,ERROR,FATAL`.
 
 
 ## Known Issues
@@ -124,6 +128,8 @@ If you encounter any bug then please open an issue at github [repository](https:
 
 ## Release Notes
 
+### 0.6.5
+Added option to ignore SSL based errors
 
 ### 0.6.0
 Added support for API key

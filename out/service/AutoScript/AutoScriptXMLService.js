@@ -287,6 +287,7 @@ class AutoScriptXMLService {
                 return;
             });
             syncResponse = syncResponse;
+            console.log(`upload script status = ${syncResponse.status}`);
             let autoScriptData = yield syncResponse.text();
             if (!syncResponse.ok && syncResponse.status !== 200 && syncResponse.status !== 201) {
                 this.vscode.window.showErrorMessage("Error in uploading script " + autoScriptData);
@@ -317,11 +318,12 @@ class AutoScriptXMLService {
             }
             let compareResponse = yield node_fetch_1.default(url, payload)
                 .catch(e => {
-                console.log(e.message);
+                console.log(`Error: ${e.message}`);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
                 return;
             });
             compareResponse = compareResponse;
+            console.log(`upload script status = ${compareResponse.status}`);
             let autoScriptData = yield compareResponse.text();
             if (!compareResponse.ok && compareResponse.status !== 200 && compareResponse.status !== 201) {
                 this.vscode.window.showErrorMessage("Error in fetching data " + autoScriptData);

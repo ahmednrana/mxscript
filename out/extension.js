@@ -11,8 +11,7 @@ function activate(context) {
         }
     };
     let compare = vscode.commands.registerCommand("mxscript.compare", () => {
-        let cs = new ConfigService_1.ConfigService();
-        let as = new AutoScriptXMLService_1.AutoScriptXMLService(context, cs);
+        let as = new AutoScriptXMLService_1.AutoScriptXMLService(context, new ConfigService_1.ConfigService());
         as.compareWithServer();
     });
     let upload = vscode.commands.registerCommand("mxscript.upload", () => {
@@ -20,13 +19,18 @@ function activate(context) {
         as.uploadScript();
     });
     let update = vscode.commands.registerCommand("mxscript.update", () => {
-        let cs = new ConfigService_1.ConfigService();
-        let as = new AutoScriptXMLService_1.AutoScriptXMLService(context, cs);
+        let as = new AutoScriptXMLService_1.AutoScriptXMLService(context, new ConfigService_1.ConfigService());
         as.updateScript();
     });
     let downloadall = vscode.commands.registerCommand("mxscript.downloadall", () => {
         let as = new AutoScriptXMLService_1.AutoScriptXMLService(context, new ConfigService_1.ConfigService());
         as.downloadAllScripts();
+    });
+    vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
+            let ignoreSsl = vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
+            process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = ignoreSsl ? '0' : '1';
+        }
     });
     context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider(MxScriptScheme, MxScriptProvider));
     context.subscriptions.push(upload);

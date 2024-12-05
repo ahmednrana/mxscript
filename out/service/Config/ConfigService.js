@@ -24,6 +24,7 @@ class ConfigService {
         this.sourceTag = "SOURCE";
         this.languageTag = "SCRIPTLANGUAGE";
         this.LOG = "LOG";
+        this.ignoreSsl = this.vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
     }
     getFileExtension() {
         let currentlyOpenTabfilePath = this.vscode.window.activeTextEditor.document.fileName;
@@ -106,6 +107,9 @@ class ConfigService {
         filename = filename.toUpperCase();
         filename = filename.substr(0, filename.lastIndexOf("."));
         return filename;
+    }
+    ignoreSslError() {
+        return this.ignoreSsl;
     }
 }
 exports.ConfigService = ConfigService;
