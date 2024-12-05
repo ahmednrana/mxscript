@@ -46,6 +46,7 @@ export class ConfigService implements IConfigService {
     this.languageTag = "SCRIPTLANGUAGE";
     this.LOG = "LOG";
     this.ignoreSsl = this.vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
+    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
   }
   getFileExtension(): string{
     let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
