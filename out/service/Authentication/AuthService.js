@@ -9,8 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthService = void 0;
 const node_fetch_1 = require("node-fetch");
 class AuthService {
+    getCookie() {
+        return this.context.workspaceState.get('AUTH_TOKEN', '');
+    }
     constructor(cService, context) {
         this.AUTH_PATH = '';
         this.WHO_AM_I_PATH = '/maximo/oslc/whoami';
@@ -34,9 +38,6 @@ class AuthService {
             redirect: this.authType === 'basic' ? 'follow' : 'manual',
             body: this.getFormBodyForAuth()
         };
-    }
-    getCookie() {
-        return this.context.workspaceState.get('AUTH_TOKEN', '');
     }
     get cookie() {
         if (this._cookie && this._cookie.length > 0) {
@@ -129,7 +130,7 @@ class AuthService {
     }
     authenticate() {
         return __awaiter(this, void 0, void 0, function* () {
-            let authResponse = yield node_fetch_1.default(this.authUrl, this.authOptions);
+            let authResponse = yield (0, node_fetch_1.default)(this.authUrl, this.authOptions);
             if (authResponse.url.endsWith('loginerror.jsp')) {
                 console.log('error');
                 this.vscode.window.showErrorMessage("Error unable to login. Please re check credentials");
@@ -172,7 +173,7 @@ class AuthService {
             if (this.isCookieSet()) {
                 let headers = new node_fetch_1.Headers();
                 headers.set('cookie', this._cookie);
-                let whoAmIResponse = yield node_fetch_1.default(this.whoAmIUrl, { headers: headers });
+                let whoAmIResponse = yield (0, node_fetch_1.default)(this.whoAmIUrl, { headers: headers });
                 let userData = yield whoAmIResponse.json();
                 this.vscode.window.showInformationMessage("You are logged in as " + userData.personid);
             }

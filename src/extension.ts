@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { AutoScriptXMLService } from './service/AutoScript/AutoScriptXMLService';
 import { IAutoScriptService } from './service/AutoScript/IAutoScriptService';
 import { ConfigService } from './service/Config/ConfigService';
-
+import { EnvironmentManagerWebviewProvider } from './webview/EnvironmentManager'
 
 export function activate(context: vscode.ExtensionContext) {
   const MxScriptScheme = 'mxscript';
@@ -41,6 +41,26 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(downloadall);
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
+
+  // Register the environment manager webview
+  const environmentManagerProvider = new EnvironmentManagerWebviewProvider(
+    context.extensionUri,
+    context
+  );
+  
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      EnvironmentManagerWebviewProvider.viewType,
+      environmentManagerProvider
+    )
+  );
+  
+  let manageEnvironments = vscode.commands.registerCommand("mxscript.manageEnvironments", () => {
+    vscode.commands.executeCommand('workbench.view.extension.mxscript-environments-view');
+  });
+
+  // Add to existing subscriptions
+  context.subscriptions.push(manageEnvironments);
 }
 // this method is called when your extension is deactivated
 export function deactivate() { }

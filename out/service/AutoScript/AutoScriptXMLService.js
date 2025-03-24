@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AutoScriptXMLService = void 0;
 const node_fetch_1 = require("node-fetch");
 const url_1 = require("url");
 const vscode = require("vscode");
@@ -113,7 +114,7 @@ class AutoScriptXMLService {
                     payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
                 }
                 console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
-                downloadAllResponse = yield node_fetch_1.default(url, payload)
+                downloadAllResponse = yield (0, node_fetch_1.default)(url, payload)
                     .catch(e => {
                     console.log(e.message);
                     vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -223,7 +224,7 @@ class AutoScriptXMLService {
             if (this.configService.getHttpProtocol() === "https") {
                 payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
             }
-            let updateResponse = yield node_fetch_1.default(url, payload)
+            let updateResponse = yield (0, node_fetch_1.default)(url, payload)
                 .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -280,7 +281,7 @@ class AutoScriptXMLService {
             if (this.configService.getHttpProtocol() === "https") {
                 payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
             }
-            let syncResponse = yield node_fetch_1.default(url, payload)
+            let syncResponse = yield (0, node_fetch_1.default)(url, payload)
                 .catch(e => {
                 console.log(e.message);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);
@@ -316,7 +317,7 @@ class AutoScriptXMLService {
             if (this.configService.getHttpProtocol() === "https") {
                 payload = Object.assign(Object.assign({}, payload), { agent: httpsAgent });
             }
-            let compareResponse = yield node_fetch_1.default(url, payload)
+            let compareResponse = yield (0, node_fetch_1.default)(url, payload)
                 .catch(e => {
                 console.log(`Error: ${e.message}`);
                 vscode.window.showErrorMessage('Error ' + e.status + " : " + e.message + "\n" + e.body);

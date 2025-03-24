@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AutoScriptJSONService = void 0;
 const node_fetch_1 = require("node-fetch");
 const url_1 = require("url");
 const vscode = require("vscode");
@@ -41,7 +42,7 @@ class AutoScriptJSONService {
             var params = { 'oslc.select': 'source', 'oslc.where': `autoscript="${fileName}"` };
             url.search = new url_1.URLSearchParams(params).toString();
             let headers = this.authService.getAuthHeaders();
-            let updateResponse = yield node_fetch_1.default(url, { headers: headers });
+            let updateResponse = yield (0, node_fetch_1.default)(url, { headers: headers });
             if (!updateResponse.ok) {
                 console.error('error');
                 this.vscode.window.showErrorMessage("Error in fetching data " + updateResponse.status + " " + updateResponse.statusText);
@@ -51,7 +52,7 @@ class AutoScriptJSONService {
                 this.authService.disconnect();
                 yield this.authService.authenticate();
                 headers = this.authService.getAuthHeaders();
-                updateResponse = yield node_fetch_1.default(this.autoScriptURL, { headers: headers });
+                updateResponse = yield (0, node_fetch_1.default)(this.autoScriptURL, { headers: headers });
             }
             let autoScriptData = yield updateResponse.json();
             if (!autoScriptData["rdfs:member"]) {
@@ -90,7 +91,7 @@ class AutoScriptJSONService {
             var params = { 'oslc.select': 'autoscript, language, source' };
             url.search = new url_1.URLSearchParams(params).toString();
             let headers = this.authService.getAuthHeaders();
-            let syncResponse = yield node_fetch_1.default(url, { headers: headers });
+            let syncResponse = yield (0, node_fetch_1.default)(url, { headers: headers });
             if (!syncResponse.ok) {
                 console.error('error');
                 this.vscode.window.showErrorMessage("Error in fetching data " + syncResponse.status + " " + syncResponse.statusText);
@@ -100,7 +101,7 @@ class AutoScriptJSONService {
                 this.authService.disconnect();
                 yield this.authService.authenticate();
                 headers = this.authService.getAuthHeaders();
-                syncResponse = yield node_fetch_1.default(this.autoScriptURL, { headers: headers });
+                syncResponse = yield (0, node_fetch_1.default)(this.autoScriptURL, { headers: headers });
             }
             let autoScriptData = yield syncResponse.json();
             if (!autoScriptData["rdfs:member"]) {
@@ -132,7 +133,7 @@ class AutoScriptJSONService {
             var params = { 'oslc.select': 'source', 'oslc.where': `autoscript="${fileName}"` };
             url.search = new url_1.URLSearchParams(params).toString();
             let headers = this.authService.getAuthHeaders();
-            let updateResponse = yield node_fetch_1.default(url, { headers: headers });
+            let updateResponse = yield (0, node_fetch_1.default)(url, { headers: headers });
             if (!updateResponse.ok) {
                 console.error('error');
                 this.vscode.window.showErrorMessage("Error in fetching data " + updateResponse.status + " " + updateResponse.statusText);
@@ -142,7 +143,7 @@ class AutoScriptJSONService {
                 this.authService.disconnect();
                 yield this.authService.authenticate();
                 headers = this.authService.getAuthHeaders();
-                updateResponse = yield node_fetch_1.default(this.autoScriptURL, { headers: headers });
+                updateResponse = yield (0, node_fetch_1.default)(this.autoScriptURL, { headers: headers });
             }
             let autoScriptData = yield updateResponse.json();
             if (!autoScriptData["rdfs:member"]) {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MockConfigService = void 0;
 class MockConfigService {
     constructor(authType) {
         this.vscode = require("vscode");

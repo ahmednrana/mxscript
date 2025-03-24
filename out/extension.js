@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
 const AutoScriptXMLService_1 = require("./service/AutoScript/AutoScriptXMLService");
 const ConfigService_1 = require("./service/Config/ConfigService");
+const EnvironmentManager_1 = require("./webview/EnvironmentManager");
 function activate(context) {
     const MxScriptScheme = 'mxscript';
     const MxScriptProvider = new class {
@@ -37,6 +39,14 @@ function activate(context) {
     context.subscriptions.push(downloadall);
     context.subscriptions.push(compare);
     context.subscriptions.push(update);
+    // Register the environment manager webview
+    const environmentManagerProvider = new EnvironmentManager_1.EnvironmentManagerWebviewProvider(context.extensionUri, context);
+    context.subscriptions.push(vscode.window.registerWebviewViewProvider(EnvironmentManager_1.EnvironmentManagerWebviewProvider.viewType, environmentManagerProvider));
+    let manageEnvironments = vscode.commands.registerCommand("mxscript.manageEnvironments", () => {
+        vscode.commands.executeCommand('workbench.view.extension.mxscript-environments-view');
+    });
+    // Add to existing subscriptions
+    context.subscriptions.push(manageEnvironments);
 }
 exports.activate = activate;
 // this method is called when your extension is deactivated
