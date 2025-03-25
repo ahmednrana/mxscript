@@ -49,6 +49,36 @@
         "title": "Manage Environments",
         "category": "Maximo Scripts",
         "icon": "$(settings-gear)"
+      },
+      {
+        "command": "maximoEnvironments.refreshEnvironments",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.addEnvironment",
+        "title": "Add Environment",
+        "icon": "$(add)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.editEnvironment",
+        "title": "Edit Environment",
+        "icon": "$(edit)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.deleteEnvironment",
+        "title": "Delete Environment",
+        "icon": "$(trash)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.setActiveEnvironment",
+        "title": "Set as Active Environment",
+        "icon": "$(check)",
+        "category": "Maximo Environments"
       }
     ],
     "configuration": {
@@ -140,23 +170,7 @@
         }
       }
     },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "mxscript-environments",
-          "title": "Maximo Environments",
-          "icon": "images/icon.png"
-        }
-      ]
-    },
     "views": {
-      "mxscript-environments": [
-        {
-          "id": "mxscript.environmentManager",
-          "name": "Environments",
-          "type": "webview"
-        }
-      ],
       "explorer": [
         {
           "id": "maximoEnvironments",
@@ -164,64 +178,6 @@
         }
       ]
     },
-    "commands": [
-      {
-        "command": "mxscript.upload",
-        "title": "Upload Script to Server",
-        "category": "Maximo Scripts"
-      },
-      {
-        "command": "mxscript.update",
-        "title": "Update Script from Server",
-        "category": "Maximo Scripts"
-      },
-      {
-        "command": "mxscript.compare",
-        "title": "Compare Script with Server",
-        "category": "Maximo Scripts"
-      },
-      {
-        "command": "mxscript.downloadall",
-        "title": "Download All Scripts from Server",
-        "category": "Maximo Scripts"
-      },
-      {
-        "command": "mxscript.manageEnvironments",
-        "title": "Manage Environments",
-        "category": "Maximo Scripts",
-        "icon": "$(settings-gear)"
-      },
-      {
-        "command": "maximoEnvironments.refreshEnvironments",
-        "title": "Refresh",
-        "icon": "$(refresh)",
-        "category": "Maximo Environments"
-      },
-      {
-        "command": "maximoEnvironments.addEnvironment",
-        "title": "Add Environment",
-        "icon": "$(add)",
-        "category": "Maximo Environments"
-      },
-      {
-        "command": "maximoEnvironments.editEnvironment",
-        "title": "Edit Environment",
-        "icon": "$(edit)",
-        "category": "Maximo Environments"
-      },
-      {
-        "command": "maximoEnvironments.deleteEnvironment",
-        "title": "Delete Environment",
-        "icon": "$(trash)",
-        "category": "Maximo Environments"
-      },
-      {
-        "command": "maximoEnvironments.setActiveEnvironment",
-        "title": "Set as Active Environment",
-        "icon": "$(check)",
-        "category": "Maximo Environments"
-      }
-    ],
     "menus": {
       "view/title": [
         {

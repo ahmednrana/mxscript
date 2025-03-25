@@ -195,6 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Register the environment manager webview
+  /* Commenting out the webview registration to remove it from the left sidebar
   const environmentManagerProvider = new EnvironmentManagerWebviewProvider(
     context.extensionUri,
     context,
@@ -207,6 +208,7 @@ export function activate(context: vscode.ExtensionContext) {
       environmentManagerProvider
     )
   );
+  */
 
   // Register command for webview-to-editor communication
   context.subscriptions.push(

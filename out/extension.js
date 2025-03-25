@@ -13,7 +13,6 @@ exports.deactivate = exports.updateStatusBar = exports.activate = void 0;
 const vscode = require("vscode");
 const AutoScriptXMLService_1 = require("./service/AutoScript/AutoScriptXMLService");
 const ConfigService_1 = require("./service/Config/ConfigService");
-const EnvironmentManager_1 = require("./webview/EnvironmentManager");
 const MaximoEnvironmentTreeProvider_1 = require("./treeview/MaximoEnvironmentTreeProvider");
 const EnvironmentEditorPanel_1 = require("./treeview/EnvironmentEditorPanel");
 // Status bar item to show current environment
@@ -153,9 +152,20 @@ function activate(context) {
         }
     });
     // Register the environment manager webview
-    const environmentManagerProvider = new EnvironmentManager_1.EnvironmentManagerWebviewProvider(context.extensionUri, context, () => updateStatusBar(context) // Pass the status bar update function
+    /* Commenting out the webview registration to remove it from the left sidebar
+    const environmentManagerProvider = new EnvironmentManagerWebviewProvider(
+      context.extensionUri,
+      context,
+      () => updateStatusBar(context) // Pass the status bar update function
     );
-    context.subscriptions.push(vscode.window.registerWebviewViewProvider(EnvironmentManager_1.EnvironmentManagerWebviewProvider.viewType, environmentManagerProvider));
+  
+    context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(
+        EnvironmentManagerWebviewProvider.viewType,
+        environmentManagerProvider
+      )
+    );
+    */
     // Register command for webview-to-editor communication
     context.subscriptions.push(vscode.commands.registerCommand('mxscript.environments.add', () => {
         EnvironmentEditorPanel_1.EnvironmentEditorPanel.createOrShow(context.extensionUri, context, undefined, (environment) => {
