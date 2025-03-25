@@ -634,16 +634,19 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     }
                     
                     function saveEnvironment() {
+                        const portValue = document.getElementById('port').value;
+                        const objectStructureValue = document.getElementById('objectStructure').value;
+                        
                         const newEnvironment = {
                             name: document.getElementById('envName').value,
                             hostname: document.getElementById('hostname').value,
-                            port: parseInt(document.getElementById('port').value, 10),
+                            port: portValue ? parseInt(portValue, 10) : 9080,
                             httpProtocol: document.getElementById('httpProtocol').value,
                             authenticationType: document.getElementById('authType').value,
                             username: document.getElementById('username').value,
                             password: document.getElementById('password').value,
                             apikey: document.getElementById('apikey').value,
-                            objectStructure: document.getElementById('objectStructure').value,
+                            objectStructure: objectStructureValue || 'MXSCRIPT',
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,

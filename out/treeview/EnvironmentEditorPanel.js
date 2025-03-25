@@ -81,7 +81,7 @@ class EnvironmentEditorPanel {
         webview.html = this._getHtmlForWebview();
     }
     _getHtmlForWebview() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
         return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -123,6 +123,10 @@ class EnvironmentEditorPanel {
                 }
                 input.required {
                     border-left: 3px solid var(--vscode-editorError-foreground);
+                }
+                input.required-valid {
+                    border-left: 3px solid var(--vscode-editor-background);
+                    border: 1px solid var(--vscode-input-border);
                 }
                 .checkbox-group {
                     display: flex;
@@ -199,14 +203,14 @@ class EnvironmentEditorPanel {
                     
                     <div class="form-group">
                         <label for="port">Port</label>
-                        <input type="number" id="port" placeholder="9080" value="${((_c = this._environment) === null || _c === void 0 ? void 0 : _c.port) || ''}">
+                        <input type="number" id="port" placeholder="9080" value="${this._environment ? this._environment.port : '9080'}">
                     </div>
                     
                     <div class="form-group">
                         <label for="httpProtocol">HTTP Protocol</label>
                         <select id="httpProtocol">
-                            <option value="http" ${((_d = this._environment) === null || _d === void 0 ? void 0 : _d.httpProtocol) === 'http' ? 'selected' : ''}>HTTP</option>
-                            <option value="https" ${((_e = this._environment) === null || _e === void 0 ? void 0 : _e.httpProtocol) === 'https' ? 'selected' : ''}>HTTPS</option>
+                            <option value="http" ${((_c = this._environment) === null || _c === void 0 ? void 0 : _c.httpProtocol) === 'http' ? 'selected' : ''}>HTTP</option>
+                            <option value="https" ${((_d = this._environment) === null || _d === void 0 ? void 0 : _d.httpProtocol) === 'https' ? 'selected' : ''}>HTTPS</option>
                         </select>
                     </div>
                 </div>
@@ -214,60 +218,60 @@ class EnvironmentEditorPanel {
                 <div class="form-group">
                     <label for="authType">Authentication Type</label>
                     <select id="authType">
+                        <option value="apikey" ${((_e = this._environment) === null || _e === void 0 ? void 0 : _e.authenticationType) === 'apikey' || !this._environment ? 'selected' : ''}>API Key</option>
                         <option value="internal" ${((_f = this._environment) === null || _f === void 0 ? void 0 : _f.authenticationType) === 'internal' ? 'selected' : ''}>Internal</option>
                         <option value="ldap" ${((_g = this._environment) === null || _g === void 0 ? void 0 : _g.authenticationType) === 'ldap' ? 'selected' : ''}>LDAP</option>
-                        <option value="apikey" ${((_h = this._environment) === null || _h === void 0 ? void 0 : _h.authenticationType) === 'apikey' ? 'selected' : ''}>API Key</option>
                     </select>
                 </div>
                 
-                <div id="credentialsContainer" style="${((_j = this._environment) === null || _j === void 0 ? void 0 : _j.authenticationType) === 'apikey' ? 'display: none;' : ''}">
+                <div id="credentialsContainer" style="${((_h = this._environment) === null || _h === void 0 ? void 0 : _h.authenticationType) === 'apikey' ? 'display: none;' : ''}">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="username" class="username-label">Username</label>
-                            <input type="text" id="username" class="username-input" placeholder="maxadmin" value="${((_k = this._environment) === null || _k === void 0 ? void 0 : _k.username) || ''}">
+                            <input type="text" id="username" class="username-input" placeholder="maxadmin" value="${((_j = this._environment) === null || _j === void 0 ? void 0 : _j.username) || ''}">
                         </div>
                         
                         <div class="form-group">
                             <label for="password" class="password-label">Password</label>
                             <div class="password-field">
-                                <input type="password" id="password" class="password-input" placeholder="maxadmin" value="${((_l = this._environment) === null || _l === void 0 ? void 0 : _l.password) || ''}">
+                                <input type="password" id="password" class="password-input" placeholder="maxadmin" value="${((_k = this._environment) === null || _k === void 0 ? void 0 : _k.password) || ''}">
                                 <span class="password-toggle" id="passwordToggle">👁️</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="apikeyContainer" class="form-group" style="${((_m = this._environment) === null || _m === void 0 ? void 0 : _m.authenticationType) !== 'apikey' ? 'display: none;' : ''}">
+                <div id="apikeyContainer" class="form-group" style="${((_l = this._environment) === null || _l === void 0 ? void 0 : _l.authenticationType) !== 'apikey' ? 'display: none;' : ''}">
                     <label for="apikey" class="apikey-label">API Key</label>
-                    <input type="text" id="apikey" class="apikey-input" placeholder="Your API Key" value="${((_o = this._environment) === null || _o === void 0 ? void 0 : _o.apikey) || ''}" style="width: 100%;">
+                    <input type="text" id="apikey" class="apikey-input" placeholder="Your API Key" value="${((_m = this._environment) === null || _m === void 0 ? void 0 : _m.apikey) || ''}">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="objectStructure">Object Structure</label>
-                        <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${((_p = this._environment) === null || _p === void 0 ? void 0 : _p.objectStructure) || 'MXSCRIPT'}">
+                        <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${this._environment ? this._environment.objectStructure : 'MXSCRIPT'}">
                     </div>
                     
                     <div class="form-group">
                         <label for="logLevel">Log Level</label>
                         <select id="logLevel">
-                            <option value="DEBUG" ${((_q = this._environment) === null || _q === void 0 ? void 0 : _q.logLevel) === 'DEBUG' ? 'selected' : ''}>DEBUG</option>
-                            <option value="INFO" ${((_r = this._environment) === null || _r === void 0 ? void 0 : _r.logLevel) === 'INFO' ? 'selected' : ''}>INFO</option>
-                            <option value="WARN" ${((_s = this._environment) === null || _s === void 0 ? void 0 : _s.logLevel) === 'WARN' ? 'selected' : ''}>WARN</option>
-                            <option value="ERROR" ${((_t = this._environment) === null || _t === void 0 ? void 0 : _t.logLevel) === 'ERROR' ? 'selected' : ''}>ERROR</option>
-                            <option value="FATAL" ${((_u = this._environment) === null || _u === void 0 ? void 0 : _u.logLevel) === 'FATAL' ? 'selected' : ''}>FATAL</option>
+                            <option value="DEBUG" ${((_o = this._environment) === null || _o === void 0 ? void 0 : _o.logLevel) === 'DEBUG' ? 'selected' : ''}>DEBUG</option>
+                            <option value="INFO" ${((_p = this._environment) === null || _p === void 0 ? void 0 : _p.logLevel) === 'INFO' ? 'selected' : ''}>INFO</option>
+                            <option value="WARN" ${((_q = this._environment) === null || _q === void 0 ? void 0 : _q.logLevel) === 'WARN' ? 'selected' : ''}>WARN</option>
+                            <option value="ERROR" ${((_r = this._environment) === null || _r === void 0 ? void 0 : _r.logLevel) === 'ERROR' ? 'selected' : ''}>ERROR</option>
+                            <option value="FATAL" ${((_s = this._environment) === null || _s === void 0 ? void 0 : _s.logLevel) === 'FATAL' ? 'selected' : ''}>FATAL</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="checkbox-group">
-                        <input type="checkbox" id="createPythonFile" ${((_v = this._environment) === null || _v === void 0 ? void 0 : _v.createPythonFileForJythonScripts) ? 'checked' : ''}>
+                        <input type="checkbox" id="createPythonFile" ${this._environment ? this._environment.createPythonFileForJythonScripts ? 'checked' : '' : 'checked'}>
                         <label for="createPythonFile">Create Python file for Jython scripts</label>
                     </div>
                     
                     <div class="checkbox-group">
-                        <input type="checkbox" id="ignoreSsl" ${((_w = this._environment) === null || _w === void 0 ? void 0 : _w.ignoreSslErrors) ? 'checked' : ''}>
+                        <input type="checkbox" id="ignoreSsl" ${this._environment ? this._environment.ignoreSslErrors ? 'checked' : '' : 'checked'}>
                         <label for="ignoreSsl">Ignore SSL errors</label>
                     </div>
                 </div>
@@ -279,7 +283,7 @@ class EnvironmentEditorPanel {
                         <label for="scopeGlobal">Global (Available in all workspaces)</label>
                     </div>
                     <div class="radio-group">
-                        <input type="radio" id="scopeWorkspace" name="scope" value="workspace" ${((_x = this._environment) === null || _x === void 0 ? void 0 : _x.scope) === 'workspace' ? 'checked' : ''}>
+                        <input type="radio" id="scopeWorkspace" name="scope" value="workspace" ${((_t = this._environment) === null || _t === void 0 ? void 0 : _t.scope) === 'workspace' ? 'checked' : ''}>
                         <label for="scopeWorkspace">Workspace (Only in this workspace)</label>
                     </div>
                 </div>
@@ -302,6 +306,10 @@ class EnvironmentEditorPanel {
                     const passwordField = document.getElementById('password');
                     const saveBtn = document.getElementById('saveBtn');
                     const cancelBtn = document.getElementById('cancelBtn');
+                    const envName = document.getElementById('envName');
+                    const hostname = document.getElementById('hostname');
+                    const username = document.getElementById('username');
+                    const apikey = document.getElementById('apikey');
                     
                     // Event Listeners
                     authType.addEventListener('change', toggleAuthFields);
@@ -309,6 +317,16 @@ class EnvironmentEditorPanel {
                     cancelBtn.addEventListener('click', () => {
                         vscode.postMessage({ type: 'cancel' });
                     });
+                    
+                    // Add input validation on keyup events
+                    envName.addEventListener('input', validateField);
+                    hostname.addEventListener('input', validateField);
+                    username?.addEventListener('input', validateField);
+                    passwordField?.addEventListener('input', validateField);
+                    apikey?.addEventListener('input', validateField);
+                    
+                    // Run validation on load to set initial state
+                    validateAllFields();
                     
                     if (passwordToggle) {
                         passwordToggle.addEventListener('click', () => {
@@ -331,24 +349,91 @@ class EnvironmentEditorPanel {
                             
                             // Make API key required and reset credentials
                             document.querySelector('.apikey-label').classList.add('required-label');
-                            document.querySelector('.apikey-input').classList.add('required');
+                            document.querySelector('.apikey-input').classList.add(apikey.value ? 'required-valid' : 'required');
                             
                             document.querySelector('.username-label')?.classList.remove('required-label');
                             document.querySelector('.username-input')?.classList.remove('required');
+                            document.querySelector('.username-input')?.classList.remove('required-valid');
                             document.querySelector('.password-label')?.classList.remove('required-label');
                             document.querySelector('.password-input')?.classList.remove('required');
+                            document.querySelector('.password-input')?.classList.remove('required-valid');
                         } else {
                             credentialsContainer.style.display = 'block';
                             apikeyContainer.style.display = 'none';
                             
                             // Make username and password required, reset API key
                             document.querySelector('.username-label').classList.add('required-label');
-                            document.querySelector('.username-input').classList.add('required');
+                            document.querySelector('.username-input').classList.add(username.value ? 'required-valid' : 'required');
                             document.querySelector('.password-label').classList.add('required-label');
-                            document.querySelector('.password-input').classList.add('required');
+                            document.querySelector('.password-input').classList.add(passwordField.value ? 'required-valid' : 'required');
                             
                             document.querySelector('.apikey-label')?.classList.remove('required-label');
                             document.querySelector('.apikey-input')?.classList.remove('required');
+                            document.querySelector('.apikey-input')?.classList.remove('required-valid');
+                        }
+                        
+                        validateAllFields();
+                    }
+                    
+                    function validateField(event) {
+                        const input = event.target;
+                        if (input.classList.contains('required') || input.classList.contains('required-valid')) {
+                            if (input.value) {
+                                input.classList.remove('required');
+                                input.classList.add('required-valid');
+                            } else {
+                                input.classList.remove('required-valid');
+                                input.classList.add('required');
+                            }
+                        }
+                    }
+                    
+                    function validateAllFields() {
+                        // Check environment name
+                        if (envName.value) {
+                            envName.classList.remove('required');
+                            envName.classList.add('required-valid');
+                        } else {
+                            envName.classList.remove('required-valid');
+                            envName.classList.add('required');
+                        }
+                        
+                        // Check hostname
+                        if (hostname.value) {
+                            hostname.classList.remove('required');
+                            hostname.classList.add('required-valid');
+                        } else {
+                            hostname.classList.remove('required-valid');
+                            hostname.classList.add('required');
+                        }
+                        
+                        // Check auth type specific fields
+                        const authTypeValue = authType.value;
+                        
+                        if (authTypeValue === 'apikey') {
+                            if (apikey.value) {
+                                apikey.classList.remove('required');
+                                apikey.classList.add('required-valid');
+                            } else {
+                                apikey.classList.remove('required-valid');
+                                apikey.classList.add('required');
+                            }
+                        } else {
+                            if (username.value) {
+                                username.classList.remove('required');
+                                username.classList.add('required-valid');
+                            } else {
+                                username.classList.remove('required-valid');
+                                username.classList.add('required');
+                            }
+                            
+                            if (passwordField.value) {
+                                passwordField.classList.remove('required');
+                                passwordField.classList.add('required-valid');
+                            } else {
+                                passwordField.classList.remove('required-valid');
+                                passwordField.classList.add('required');
+                            }
                         }
                     }
                     

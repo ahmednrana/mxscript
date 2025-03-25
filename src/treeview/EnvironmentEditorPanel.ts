@@ -156,6 +156,10 @@ export class EnvironmentEditorPanel {
                 input.required {
                     border-left: 3px solid var(--vscode-editorError-foreground);
                 }
+                input.required-valid {
+                    border-left: 3px solid var(--vscode-editor-background);
+                    border: 1px solid var(--vscode-input-border);
+                }
                 .checkbox-group {
                     display: flex;
                     align-items: center;
@@ -231,7 +235,7 @@ export class EnvironmentEditorPanel {
                     
                     <div class="form-group">
                         <label for="port">Port</label>
-                        <input type="number" id="port" placeholder="9080" value="${this._environment?.port || ''}">
+                        <input type="number" id="port" placeholder="9080" value="${this._environment ? this._environment.port : '9080'}">
                     </div>
                     
                     <div class="form-group">
@@ -246,9 +250,9 @@ export class EnvironmentEditorPanel {
                 <div class="form-group">
                     <label for="authType">Authentication Type</label>
                     <select id="authType">
+                        <option value="apikey" ${this._environment?.authenticationType === 'apikey' || !this._environment ? 'selected' : ''}>API Key</option>
                         <option value="internal" ${this._environment?.authenticationType === 'internal' ? 'selected' : ''}>Internal</option>
                         <option value="ldap" ${this._environment?.authenticationType === 'ldap' ? 'selected' : ''}>LDAP</option>
-                        <option value="apikey" ${this._environment?.authenticationType === 'apikey' ? 'selected' : ''}>API Key</option>
                     </select>
                 </div>
                 
@@ -271,13 +275,13 @@ export class EnvironmentEditorPanel {
                 
                 <div id="apikeyContainer" class="form-group" style="${this._environment?.authenticationType !== 'apikey' ? 'display: none;' : ''}">
                     <label for="apikey" class="apikey-label">API Key</label>
-                    <input type="text" id="apikey" class="apikey-input" placeholder="Your API Key" value="${this._environment?.apikey || ''}" style="width: 100%;">
+                    <input type="text" id="apikey" class="apikey-input" placeholder="Your API Key" value="${this._environment?.apikey || ''}">
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="objectStructure">Object Structure</label>
-                        <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${this._environment?.objectStructure || 'MXSCRIPT'}">
+                        <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${this._environment ? this._environment.objectStructure : 'MXSCRIPT'}">
                     </div>
                     
                     <div class="form-group">
@@ -294,12 +298,12 @@ export class EnvironmentEditorPanel {
                 
                 <div class="form-row">
                     <div class="checkbox-group">
-                        <input type="checkbox" id="createPythonFile" ${this._environment?.createPythonFileForJythonScripts ? 'checked' : ''}>
+                        <input type="checkbox" id="createPythonFile" ${this._environment ? this._environment.createPythonFileForJythonScripts ? 'checked' : '' : 'checked'}>
                         <label for="createPythonFile">Create Python file for Jython scripts</label>
                     </div>
                     
                     <div class="checkbox-group">
-                        <input type="checkbox" id="ignoreSsl" ${this._environment?.ignoreSslErrors ? 'checked' : ''}>
+                        <input type="checkbox" id="ignoreSsl" ${this._environment ? this._environment.ignoreSslErrors ? 'checked' : '' : 'checked'}>
                         <label for="ignoreSsl">Ignore SSL errors</label>
                     </div>
                 </div>
@@ -334,6 +338,10 @@ export class EnvironmentEditorPanel {
                     const passwordField = document.getElementById('password');
                     const saveBtn = document.getElementById('saveBtn');
                     const cancelBtn = document.getElementById('cancelBtn');
+                    const envName = document.getElementById('envName');
+                    const hostname = document.getElementById('hostname');
+                    const username = document.getElementById('username');
+                    const apikey = document.getElementById('apikey');
                     
                     // Event Listeners
                     authType.addEventListener('change', toggleAuthFields);
@@ -341,6 +349,16 @@ export class EnvironmentEditorPanel {
                     cancelBtn.addEventListener('click', () => {
                         vscode.postMessage({ type: 'cancel' });
                     });
+                    
+                    // Add input validation on keyup events
+                    envName.addEventListener('input', validateField);
+                    hostname.addEventListener('input', validateField);
+                    username?.addEventListener('input', validateField);
+                    passwordField?.addEventListener('input', validateField);
+                    apikey?.addEventListener('input', validateField);
+                    
+                    // Run validation on load to set initial state
+                    validateAllFields();
                     
                     if (passwordToggle) {
                         passwordToggle.addEventListener('click', () => {
@@ -363,24 +381,91 @@ export class EnvironmentEditorPanel {
                             
                             // Make API key required and reset credentials
                             document.querySelector('.apikey-label').classList.add('required-label');
-                            document.querySelector('.apikey-input').classList.add('required');
+                            document.querySelector('.apikey-input').classList.add(apikey.value ? 'required-valid' : 'required');
                             
                             document.querySelector('.username-label')?.classList.remove('required-label');
                             document.querySelector('.username-input')?.classList.remove('required');
+                            document.querySelector('.username-input')?.classList.remove('required-valid');
                             document.querySelector('.password-label')?.classList.remove('required-label');
                             document.querySelector('.password-input')?.classList.remove('required');
+                            document.querySelector('.password-input')?.classList.remove('required-valid');
                         } else {
                             credentialsContainer.style.display = 'block';
                             apikeyContainer.style.display = 'none';
                             
                             // Make username and password required, reset API key
                             document.querySelector('.username-label').classList.add('required-label');
-                            document.querySelector('.username-input').classList.add('required');
+                            document.querySelector('.username-input').classList.add(username.value ? 'required-valid' : 'required');
                             document.querySelector('.password-label').classList.add('required-label');
-                            document.querySelector('.password-input').classList.add('required');
+                            document.querySelector('.password-input').classList.add(passwordField.value ? 'required-valid' : 'required');
                             
                             document.querySelector('.apikey-label')?.classList.remove('required-label');
                             document.querySelector('.apikey-input')?.classList.remove('required');
+                            document.querySelector('.apikey-input')?.classList.remove('required-valid');
+                        }
+                        
+                        validateAllFields();
+                    }
+                    
+                    function validateField(event) {
+                        const input = event.target;
+                        if (input.classList.contains('required') || input.classList.contains('required-valid')) {
+                            if (input.value) {
+                                input.classList.remove('required');
+                                input.classList.add('required-valid');
+                            } else {
+                                input.classList.remove('required-valid');
+                                input.classList.add('required');
+                            }
+                        }
+                    }
+                    
+                    function validateAllFields() {
+                        // Check environment name
+                        if (envName.value) {
+                            envName.classList.remove('required');
+                            envName.classList.add('required-valid');
+                        } else {
+                            envName.classList.remove('required-valid');
+                            envName.classList.add('required');
+                        }
+                        
+                        // Check hostname
+                        if (hostname.value) {
+                            hostname.classList.remove('required');
+                            hostname.classList.add('required-valid');
+                        } else {
+                            hostname.classList.remove('required-valid');
+                            hostname.classList.add('required');
+                        }
+                        
+                        // Check auth type specific fields
+                        const authTypeValue = authType.value;
+                        
+                        if (authTypeValue === 'apikey') {
+                            if (apikey.value) {
+                                apikey.classList.remove('required');
+                                apikey.classList.add('required-valid');
+                            } else {
+                                apikey.classList.remove('required-valid');
+                                apikey.classList.add('required');
+                            }
+                        } else {
+                            if (username.value) {
+                                username.classList.remove('required');
+                                username.classList.add('required-valid');
+                            } else {
+                                username.classList.remove('required-valid');
+                                username.classList.add('required');
+                            }
+                            
+                            if (passwordField.value) {
+                                passwordField.classList.remove('required');
+                                passwordField.classList.add('required-valid');
+                            } else {
+                                passwordField.classList.remove('required-valid');
+                                passwordField.classList.add('required');
+                            }
                         }
                     }
                     
