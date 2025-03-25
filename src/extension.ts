@@ -2,7 +2,10 @@ import * as vscode from "vscode";
 import { AutoScriptXMLService } from './service/AutoScript/AutoScriptXMLService';
 import { IAutoScriptService } from './service/AutoScript/IAutoScriptService';
 import { ConfigService } from './service/Config/ConfigService';
-import { EnvironmentManagerWebviewProvider } from './webview/EnvironmentManager'
+import { EnvironmentManagerWebviewProvider } from './webview/EnvironmentManager';
+
+// Status bar item to show current environment
+let statusBarItem: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
   const MxScriptScheme = 'mxscript';
@@ -10,8 +13,16 @@ export function activate(context: vscode.ExtensionContext) {
     provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): string {
       return uri.path;
     }
-
   };
+
+  // Create status bar item
+  statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.command = "mxscript.manageEnvironments";
+  statusBarItem.text = "$(globe) Maximo: No Environment";
+  statusBarItem.tooltip = "Click to manage Maximo environments";
+  statusBarItem.show();
+  context.subscriptions.push(statusBarItem);
+
   let compare = vscode.commands.registerCommand("mxscript.compare", () => {
     let as: IAutoScriptService = new AutoScriptXMLService(context, new ConfigService());
     as.compareWithServer();
@@ -28,7 +39,7 @@ export function activate(context: vscode.ExtensionContext) {
     let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
     as.downloadAllScripts();
   });
- 
+
   vscode.workspace.onDidChangeConfiguration(event => {
     if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
       let ignoreSsl = vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors")
@@ -45,22 +56,48 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the environment manager webview
   const environmentManagerProvider = new EnvironmentManagerWebviewProvider(
     context.extensionUri,
-    context
+    context,
+    () => updateStatusBar(context) // Pass the status bar update function
   );
-  
+
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       EnvironmentManagerWebviewProvider.viewType,
       environmentManagerProvider
     )
   );
-  
-  let manageEnvironments = vscode.commands.registerCommand("mxscript.manageEnvironments", () => {
-    vscode.commands.executeCommand('workbench.view.extension.mxscript-environments-view');
+
+  let manageEnvironments = vscode.commands.registerCommand("mxscript.manageEnvironments", async () => {
+    // First attempt - should work if view container ID is "mxscript-environments"
+    vscode.commands.executeCommand('workbench.view.extension.mxscript-environments');
+   
+    vscode.window.showInformationMessage("Click on the Maximo Environments icon in the activity bar");
   });
 
   // Add to existing subscriptions
   context.subscriptions.push(manageEnvironments);
+
+  // Initialize status bar with current environment
+  updateStatusBar(context);
 }
-// this method is called when your extension is deactivated
+
+// Function to update status bar with current environment
+export function updateStatusBar(context: vscode.ExtensionContext) {
+  const environments = context.globalState.get<any[]>('mxscript.environments', []);
+  const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+
+  if (activeEnvId && environments) {
+    const activeEnv = environments.find(env => env.id === activeEnvId);
+    if (activeEnv) {
+      statusBarItem.text = `$(globe) Maximo: ${activeEnv.name}`;
+      statusBarItem.tooltip = `Connected to ${activeEnv.name} (${activeEnv.hostname}:${activeEnv.port})`;
+      return;
+    }
+  }
+
+  // No active environment found
+  statusBarItem.text = "$(globe) Maximo: No Environment";
+  statusBarItem.tooltip = "Click to manage Maximo environments";
+}
+
 export function deactivate() { }

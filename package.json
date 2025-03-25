@@ -47,7 +47,8 @@
       {
         "command": "mxscript.manageEnvironments",
         "title": "Manage Environments",
-        "category": "Maximo Scripts"
+        "category": "Maximo Scripts",
+        "icon": "$(settings-gear)"
       }
     ],
     "configuration": {

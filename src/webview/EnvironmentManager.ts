@@ -14,21 +14,30 @@ export interface MaximoEnvironment {
     createPythonFileForJythonScripts: boolean;
     logLevel: string;
     ignoreSslErrors: boolean;
+    scope: 'global' | 'workspace'; // New property
 }
 
 export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'mxscript.environmentManager';
     private _view?: vscode.WebviewView;
-    private _environments: MaximoEnvironment[] = [];
+    private _globalEnvironments: MaximoEnvironment[] = [];
+    private _workspaceEnvironments: MaximoEnvironment[] = [];
     private _activeEnvironmentId: string | undefined;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
-        private readonly _context: vscode.ExtensionContext
+        private readonly _context: vscode.ExtensionContext,
+        private readonly _updateStatusBar?: () => void // Add this parameter (make it optional for backward compatibility)
     ) {
-        // Load saved environments
-        this._environments = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        // Load environments from both sources
+        this._globalEnvironments = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        this._workspaceEnvironments = this._context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
         this._activeEnvironmentId = this._context.globalState.get<string>('mxscript.activeEnvironment');
+    }
+
+    // Helper property to get all environments
+    private get _environments(): MaximoEnvironment[] {
+        return [...this._globalEnvironments, ...this._workspaceEnvironments];
     }
 
     public resolveWebviewView(
@@ -86,29 +95,73 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
 
     private _addEnvironment(environment: MaximoEnvironment) {
         environment.id = this._generateId();
-        this._environments.push(environment);
+        
+        // Add to appropriate storage based on scope
+        if (environment.scope === 'workspace') {
+            this._workspaceEnvironments.push(environment);
+        } else {
+            this._globalEnvironments.push(environment);
+        }
+        
         this._saveEnvironments();
-        this._sendEnvironmentsToWebview();
         
         // If this is the first environment, make it active
         if (this._environments.length === 1) {
-            this._setActiveEnvironment(environment.id);
+            this._activeEnvironmentId = environment.id;
+            this._saveActiveEnvironment();
+        }
+        
+        this._sendEnvironmentsToWebview();
+        
+        // Update status bar
+        if (this._updateStatusBar) {
+            this._updateStatusBar();
         }
     }
 
     private _updateEnvironment(environment: MaximoEnvironment) {
-        const index = this._environments.findIndex(e => e.id === environment.id);
-        if (index !== -1) {
-            this._environments[index] = environment;
-            this._saveEnvironments();
-            this._sendEnvironmentsToWebview();
+        // First, find where the environment currently exists
+        const globalIndex = this._globalEnvironments.findIndex(e => e.id === environment.id);
+        const workspaceIndex = this._workspaceEnvironments.findIndex(e => e.id === environment.id);
+        
+        // Remove the environment from its current location
+        if (globalIndex !== -1) {
+            this._globalEnvironments.splice(globalIndex, 1);
+        } else if (workspaceIndex !== -1) {
+            this._workspaceEnvironments.splice(workspaceIndex, 1);
+        } else {
+            console.log('Environment not found in either global or workspace storage');
+            return; // Environment not found
+        }
+        
+        // Add the environment to the correct location based on its new scope
+        if (environment.scope === 'workspace') {
+            this._workspaceEnvironments.push(environment);
+        } else {
+            this._globalEnvironments.push(environment);
+        }
+        
+        this._saveEnvironments();
+        this._sendEnvironmentsToWebview();
+        
+        // Update status bar if active environment was updated
+        if (this._activeEnvironmentId === environment.id && this._updateStatusBar) {
+            this._updateStatusBar();
         }
     }
 
     private _deleteEnvironment(id: string) {
         console.log(`Deleting environment: ${id}`);
         console.log(`Before deletion: ${this._environments.length} environments`);
-        this._environments = this._environments.filter(e => e.id !== id);
+        
+        // Find which array contains the environment
+        const globalIndex = this._globalEnvironments.findIndex(e => e.id === id);
+        if (globalIndex !== -1) {
+            this._globalEnvironments.splice(globalIndex, 1);
+        } else {
+            this._workspaceEnvironments = this._workspaceEnvironments.filter(e => e.id !== id);
+        }
+        
         this._saveEnvironments();
         
         // If active environment was deleted, select a new one
@@ -119,6 +172,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         
         this._sendEnvironmentsToWebview();
         console.log(`After deletion: ${this._environments.length} environments`);
+        
+        // Update status bar
+        if (this._updateStatusBar) {
+            this._updateStatusBar();
+        }
     }
 
     private _setActiveEnvironment(id: string) {
@@ -126,6 +184,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         this._saveActiveEnvironment();
         this._applyActiveEnvironmentSettings();
         this._sendEnvironmentsToWebview();
+        
+        // Call the update status bar function
+        if (this._updateStatusBar) {
+            this._updateStatusBar();
+        }
     }
 
     private _applyActiveEnvironmentSettings() {
@@ -151,8 +214,10 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         vscode.window.showInformationMessage(`Switched to Maximo environment: ${activeEnv.name}`);
     }
 
+    // Update save method to store environments in the right place
     private _saveEnvironments() {
-        this._context.globalState.update('mxscript.environments', this._environments);
+        this._context.globalState.update('mxscript.environments', this._globalEnvironments);
+        this._context.workspaceState.update('mxscript.environments', this._workspaceEnvironments);
     }
 
     private _saveActiveEnvironment() {
@@ -285,6 +350,16 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     margin-top: 20px;
                     gap: 10px;
                 }
+                .scope-badge {
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    background-color: var(--vscode-badge-background);
+                    color: var(--vscode-badge-foreground);
+                    padding: 2px 8px;
+                    border-radius: 10px;
+                    font-size: 0.8em;
+                }
             </style>
         </head>
         <body>
@@ -376,6 +451,18 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     <div class="checkbox-group">
                         <input type="checkbox" id="ignoreSsl">
                         <label for="ignoreSsl">Ignore SSL errors</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Environment Scope</label>
+                        <div class="radio-group">
+                            <input type="radio" id="scopeGlobal" name="scope" value="global" checked>
+                            <label for="scopeGlobal">Global (Available in all workspaces)</label>
+                        </div>
+                        <div class="radio-group">
+                            <input type="radio" id="scopeWorkspace" name="scope" value="workspace">
+                            <label for="scopeWorkspace">Workspace (Only in this workspace)</label>
+                        </div>
                     </div>
                     
                     <div class="button-container">
@@ -475,6 +562,12 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                             \`;
                             card.appendChild(details);
                             
+                            // Add scope badge
+                            const scopeBadge = document.createElement('span');
+                            scopeBadge.className = 'scope-badge';
+                            scopeBadge.textContent = env.scope === 'global' ? 'Global' : 'Workspace';
+                            card.appendChild(scopeBadge);
+                            
                             const buttons = document.createElement('div');
                             buttons.className = 'button-container';
                             
@@ -553,7 +646,8 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                             objectStructure: document.getElementById('objectStructure').value,
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
-                            ignoreSslErrors: document.getElementById('ignoreSsl').checked
+                            ignoreSslErrors: document.getElementById('ignoreSsl').checked,
+                            scope: document.getElementById('scopeGlobal').checked ? 'global' : 'workspace'
                         };
                         
                         if (!newEnvironment.name) {
@@ -607,6 +701,8 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('logLevel').value = env.logLevel;
                         document.getElementById('createPythonFile').checked = env.createPythonFileForJythonScripts;
                         document.getElementById('ignoreSsl').checked = env.ignoreSslErrors;
+                        
+                        document.querySelector(\`input[name="scope"][value="\${env.scope}"]\`).checked = true;
                         
                         toggleAuthFields();
                     }
