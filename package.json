@@ -156,6 +156,101 @@
           "name": "Environments",
           "type": "webview"
         }
+      ],
+      "explorer": [
+        {
+          "id": "maximoEnvironments",
+          "name": "Maximo Environments"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mxscript.upload",
+        "title": "Upload Script to Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "mxscript.update",
+        "title": "Update Script from Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "mxscript.compare",
+        "title": "Compare Script with Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "mxscript.downloadall",
+        "title": "Download All Scripts from Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "mxscript.manageEnvironments",
+        "title": "Manage Environments",
+        "category": "Maximo Scripts",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "maximoEnvironments.refreshEnvironments",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.addEnvironment",
+        "title": "Add Environment",
+        "icon": "$(add)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.editEnvironment",
+        "title": "Edit Environment",
+        "icon": "$(edit)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.deleteEnvironment",
+        "title": "Delete Environment",
+        "icon": "$(trash)",
+        "category": "Maximo Environments"
+      },
+      {
+        "command": "maximoEnvironments.setActiveEnvironment",
+        "title": "Set as Active Environment",
+        "icon": "$(check)",
+        "category": "Maximo Environments"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "maximoEnvironments.refreshEnvironments",
+          "when": "view == maximoEnvironments",
+          "group": "navigation"
+        },
+        {
+          "command": "maximoEnvironments.addEnvironment",
+          "when": "view == maximoEnvironments",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "maximoEnvironments.editEnvironment",
+          "when": "view == maximoEnvironments",
+          "group": "inline"
+        },
+        {
+          "command": "maximoEnvironments.deleteEnvironment",
+          "when": "view == maximoEnvironments",
+          "group": "inline"
+        },
+        {
+          "command": "maximoEnvironments.setActiveEnvironment",
+          "when": "view == maximoEnvironments && viewItem == environment",
+          "group": "inline"
+        }
       ]
     }
   },
