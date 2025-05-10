@@ -1,15 +1,51 @@
 import * as vscode from "vscode";
 import { AutoScriptXMLService } from './service/AutoScript/AutoScriptXMLService';
 import { IAutoScriptService } from './service/AutoScript/IAutoScriptService';
+import { MaximoClientProvider } from './client/client';
 import { ConfigService } from './service/Config/ConfigService';
 import { EnvironmentManagerWebviewProvider, MaximoEnvironment } from './webview/EnvironmentManager';
 import { MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
 import { EnvironmentEditorPanel } from './treeview/EnvironmentEditorPanel';
+import { Logger, LogLevel } from './service/Logger/Logger';
+import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
 
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
+  // Initialize logger
+  const logger = Logger.getInstance('MxScript');
+
+  // Configure logger based on settings
+  const config = vscode.workspace.getConfiguration('mxscript');
+  const logLevelSetting = config.get<string>('logging.level', 'info');
+  const configService = new ConfigService();
+  
+  // Initialize the client wrapper (once, at startup)
+  MaximoClientProvider.initialize(context, configService);
+
+  // Set log level
+  switch (logLevelSetting.toLowerCase()) {
+    case 'debug':
+      logger.setLogLevel(LogLevel.DEBUG);
+      break;
+    case 'info':
+      logger.setLogLevel(LogLevel.INFO);
+      break;
+    case 'warn':
+      logger.setLogLevel(LogLevel.WARN);
+      break;
+    case 'error':
+      logger.setLogLevel(LogLevel.ERROR);
+      break;
+    case 'none':
+      logger.setLogLevel(LogLevel.INFO);
+      break;
+  }
+
+  logger.info('MxScript extension activated');
+
+
   const MxScriptScheme = 'mxscript';
   const MxScriptProvider = new class implements vscode.TextDocumentContentProvider {
     provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): string {
@@ -27,63 +63,63 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Create the tree view provider
   const maximoEnvironmentTreeProvider = new MaximoEnvironmentTreeProvider(context);
-  
+
   // Register the tree view
   const environmentTreeView = vscode.window.createTreeView('maximoEnvironments', {
     treeDataProvider: maximoEnvironmentTreeProvider,
     showCollapseAll: false
   });
-  
+
   context.subscriptions.push(environmentTreeView);
-  
+
   // Register tree view commands
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.refreshEnvironments', () => {
       maximoEnvironmentTreeProvider.refresh();
     })
   );
-  
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.addEnvironment', () => {
       // Open the editor webview for adding a new environment
       EnvironmentEditorPanel.createOrShow(
-        context.extensionUri, 
-        context, 
-        undefined, 
+        context.extensionUri,
+        context,
+        undefined,
         (environment: MaximoEnvironment) => {
           // Generate an ID for the new environment
           environment.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
-          
+
           // Save environment to appropriate storage
-          const targetStorage = environment.scope === 'workspace' 
-            ? context.workspaceState 
+          const targetStorage = environment.scope === 'workspace'
+            ? context.workspaceState
             : context.globalState;
-          
+
           const environments = targetStorage.get<MaximoEnvironment[]>('mxscript.environments', []);
           environments.push(environment);
           targetStorage.update('mxscript.environments', environments);
-          
+
           // Set as active if it's the first environment
           const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const allEnvs = [...globalEnvs, ...workspaceEnvs];
-          
+
           if (allEnvs.length === 1) {
             context.globalState.update('mxscript.activeEnvironment', environment.id);
           }
-          
+
           // Refresh the tree view
           maximoEnvironmentTreeProvider.refresh();
-          
+
           // Update status bar
           updateStatusBar(context);
-          
+
           vscode.window.showInformationMessage(`Added Maximo environment: ${environment.name}`);
         }
       );
     })
   );
-  
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.editEnvironment', (item) => {
       if (item && item.environment) {
@@ -96,10 +132,10 @@ export function activate(context: vscode.ExtensionContext) {
             // Find and update environment in appropriate storage
             const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
             const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
-            
+
             const globalIndex = globalEnvs.findIndex(e => e.id === updatedEnvironment.id);
             const workspaceIndex = workspaceEnvs.findIndex(e => e.id === updatedEnvironment.id);
-            
+
             // Remove from current location
             if (globalIndex !== -1) {
               globalEnvs.splice(globalIndex, 1);
@@ -108,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
               workspaceEnvs.splice(workspaceIndex, 1);
               context.workspaceState.update('mxscript.environments', workspaceEnvs);
             }
-            
+
             // Add to appropriate location based on scope
             if (updatedEnvironment.scope === 'workspace') {
               workspaceEnvs.push(updatedEnvironment);
@@ -117,27 +153,27 @@ export function activate(context: vscode.ExtensionContext) {
               globalEnvs.push(updatedEnvironment);
               context.globalState.update('mxscript.environments', globalEnvs);
             }
-            
+
             // If this was the active environment, apply the updated settings
             const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
             if (activeEnvId === updatedEnvironment.id) {
               // Update VSCode settings
               maximoEnvironmentTreeProvider.setActiveEnvironment(updatedEnvironment.id);
             }
-            
+
             // Refresh the tree view
             maximoEnvironmentTreeProvider.refresh();
-            
+
             // Update status bar
             updateStatusBar(context);
-            
+
             vscode.window.showInformationMessage(`Updated Maximo environment: ${updatedEnvironment.name}`);
           }
         );
       }
     })
   );
-  
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.deleteEnvironment', (item) => {
       if (item && item.environment) {
@@ -155,7 +191,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   );
-  
+
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.setActiveEnvironment', (item) => {
       if (item && item.environment) {
@@ -166,24 +202,24 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  // Register commands for existing functionality
-  let compare = vscode.commands.registerCommand("mxscript.compare", () => {
-    let as: IAutoScriptService = new AutoScriptXMLService(context, new ConfigService());
-    as.compareWithServer();
-  });
-  
   let upload = vscode.commands.registerCommand("mxscript.upload", () => {
-    let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
+    // Notice we no longer pass MaximoClientWrapper to the constructor
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.uploadScript();
   });
-  
+
+  let compare = vscode.commands.registerCommand("mxscript.compare", () => {
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
+    as.compareWithServer();
+  });
+
   let update = vscode.commands.registerCommand("mxscript.update", () => {
-    let as: IAutoScriptService = new AutoScriptXMLService(context, new ConfigService());
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.updateScript();
   });
-  
+
   let downloadall = vscode.commands.registerCommand("mxscript.downloadall", () => {
-    let as: AutoScriptXMLService = new AutoScriptXMLService(context, new ConfigService());
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.downloadAllScripts();
   });
 
@@ -220,37 +256,37 @@ export function activate(context: vscode.ExtensionContext) {
         (environment: MaximoEnvironment) => {
           // Generate an ID for the new environment
           environment.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
-          
+
           // Save environment to appropriate storage
-          const targetStorage = environment.scope === 'workspace' 
-            ? context.workspaceState 
+          const targetStorage = environment.scope === 'workspace'
+            ? context.workspaceState
             : context.globalState;
-          
+
           const environments = targetStorage.get<MaximoEnvironment[]>('mxscript.environments', []);
           environments.push(environment);
           targetStorage.update('mxscript.environments', environments);
-          
+
           // Set as active if it's the first environment
           const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const allEnvs = [...globalEnvs, ...workspaceEnvs];
-          
+
           if (allEnvs.length === 1) {
             context.globalState.update('mxscript.activeEnvironment', environment.id);
           }
-          
+
           // Refresh the tree view
           maximoEnvironmentTreeProvider.refresh();
-          
+
           // Update status bar
           updateStatusBar(context);
-          
+
           vscode.window.showInformationMessage(`Added Maximo environment: ${environment.name}`);
         }
       );
     })
   );
-  
+
   context.subscriptions.push(
     vscode.commands.registerCommand('mxscript.environments.edit', (environment: MaximoEnvironment) => {
       EnvironmentEditorPanel.createOrShow(
@@ -261,10 +297,10 @@ export function activate(context: vscode.ExtensionContext) {
           // Find and update environment in appropriate storage
           const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
-          
+
           const globalIndex = globalEnvs.findIndex(e => e.id === updatedEnvironment.id);
           const workspaceIndex = workspaceEnvs.findIndex(e => e.id === updatedEnvironment.id);
-          
+
           // Remove from current location
           if (globalIndex !== -1) {
             globalEnvs.splice(globalIndex, 1);
@@ -273,7 +309,7 @@ export function activate(context: vscode.ExtensionContext) {
             workspaceEnvs.splice(workspaceIndex, 1);
             context.workspaceState.update('mxscript.environments', workspaceEnvs);
           }
-          
+
           // Add to appropriate location based on scope
           if (updatedEnvironment.scope === 'workspace') {
             workspaceEnvs.push(updatedEnvironment);
@@ -282,20 +318,20 @@ export function activate(context: vscode.ExtensionContext) {
             globalEnvs.push(updatedEnvironment);
             context.globalState.update('mxscript.environments', globalEnvs);
           }
-          
+
           // If this was the active environment, apply the updated settings
           const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
           if (activeEnvId === updatedEnvironment.id) {
             // Update VSCode settings
             maximoEnvironmentTreeProvider.setActiveEnvironment(updatedEnvironment.id);
           }
-          
+
           // Refresh the tree view
           maximoEnvironmentTreeProvider.refresh();
-          
+
           // Update status bar
           updateStatusBar(context);
-          
+
           vscode.window.showInformationMessage(`Updated Maximo environment: ${updatedEnvironment.name}`);
         }
       );

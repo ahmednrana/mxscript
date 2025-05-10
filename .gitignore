@@ -2,3 +2,5 @@ node_modules/
 azuretoken
 *.vsix
 src/test/testwp/
+out/
+out

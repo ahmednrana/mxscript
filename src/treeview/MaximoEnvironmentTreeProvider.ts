@@ -118,6 +118,7 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             config.update('scriptSettings.createPythonFileForJythonScripts', environment.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace);
             config.update('scriptSettings.logLevel', environment.logLevel, vscode.ConfigurationTarget.Workspace);
             config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace);
             
             vscode.window.showInformationMessage(`Switched to Maximo environment: ${environment.name}`);
         }

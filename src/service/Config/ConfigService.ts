@@ -22,6 +22,7 @@ export class ConfigService implements IConfigService {
   private isNextGen: boolean;
   private prefersPythonInEditor: boolean;
   private ldapAuth: boolean;
+  private activeEnvironmentName: string;
   private ignoreSsl: boolean;
 
   constructor() {
@@ -33,7 +34,7 @@ export class ConfigService implements IConfigService {
     this.apikey = this.vscode.workspace.getConfiguration().get('mxscript.authentication.apikey');
     this.os = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.objectStructure');
     this.authType = this.vscode.workspace.getConfiguration().get('mxscript.authentication.authenticationType');
-    this.ldapAuth = (this.authType === 'internal') ? false: true;
+    this.ldapAuth = (this.authType === 'internal') ? false : true;
     this.scriptLogLevel = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.logLevel');
     this.isNextGen = this.vscode.workspace.getConfiguration().get('mxscript.version.supportsNextgenApi');
     this.prefersPythonInEditor = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.createPythonFileForJythonScripts');
@@ -45,17 +46,18 @@ export class ConfigService implements IConfigService {
     this.sourceTag = "SOURCE";
     this.languageTag = "SCRIPTLANGUAGE";
     this.LOG = "LOG";
+    this.activeEnvironmentName = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.activeEnvironmentName');
     this.ignoreSsl = this.vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
     process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
   }
-  getFileExtension(): string{
+  getFileExtension(): string {
     let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
     let filename: string = this.path.basename(currentlyOpenTabfilePath);
     filename = filename.toLowerCase();
     let extension = filename.substr(filename.lastIndexOf(".") + 1, filename.length);
     return extension;
   }
-  getLanguageTag(): string{
+  getLanguageTag(): string {
     return this.languageTag;
   }
   getSourceTag(): string {
@@ -133,6 +135,27 @@ export class ConfigService implements IConfigService {
   }
   public ignoreSslError(): boolean {
     return this.ignoreSsl;
+  }
+  public getHostname: () => string = () => {
+    return this.hostname;
+  };
+
+  public getActiveEnvironmentName: () => string = () => {
+    return this.activeEnvironmentName;
+  };
+
+  public toString(): string {
+    return JSON.stringify({
+      username: this.username,
+      password: this.password,
+      apikey: this.apikey,
+      os: this.os,
+      authType: this.authType,
+      ldapAuth: this.ldapAuth,
+      url: this.url,
+      activeEnvironmentName: this.activeEnvironmentName,
+      ignoreSsl: this.ignoreSsl
+    });
   }
 
 }

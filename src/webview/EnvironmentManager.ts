@@ -210,6 +210,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         config.update('scriptSettings.createPythonFileForJythonScripts', activeEnv.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace);
         config.update('scriptSettings.logLevel', activeEnv.logLevel, vscode.ConfigurationTarget.Workspace);
         config.update('scriptSettings.ignoresslerrors', activeEnv.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
+        config.update('serverSettings.activeEnvironmentName', activeEnv.name, vscode.ConfigurationTarget.Workspace);
         
         vscode.window.showInformationMessage(`Switched to Maximo environment: ${activeEnv.name}`);
     }
