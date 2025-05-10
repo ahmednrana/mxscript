@@ -182,8 +182,11 @@ export class AutoScriptJSONService implements IAutoScriptService {
                 vscode.commands.executeCommand('vscode.diff', original, serverScript, title);
             }
         }
+        
 
     }
 
 
+    public deleteScript() { }
+    public executeScript() { }
 }

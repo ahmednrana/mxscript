@@ -39,6 +39,16 @@
         "category": "Maximo Scripts"
       },
       {
+        "command": "mxscript.delete",
+        "title": "Delete Script from Server",
+        "category": "Maximo Scripts"
+      },
+      {
+        "command": "mxscript.execute",
+        "title": "Execute Script on Server",
+        "category": "Maximo Scripts"
+      },
+      {
         "command": "mxscript.manageEnvironments",
         "title": "Manage Environments",
         "category": "Maximo Scripts",

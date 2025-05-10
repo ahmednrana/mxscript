@@ -4,4 +4,6 @@ export interface IAutoScriptService {
     // syncAll : () => any;
     uploadScript : () => any;
     compareWithServer : () => any;
+    deleteScript : () => any;
+    executeScript : () => any;
 }

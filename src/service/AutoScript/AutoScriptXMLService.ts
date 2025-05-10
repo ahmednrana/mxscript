@@ -24,6 +24,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
         this.initializeLanguages();
         this.logger = Logger.getInstance();
     }
+    ;
     initializeLanguages() {
         this.languageToExtension.set(Constants.LANG_GROOVY, Constants.EXT_GROOVY);
         this.languageToExtension.set(Constants.LANG_NASHORN, Constants.EXT_NASHORN);
@@ -41,7 +42,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
 
     getAuthHeaders(): Headers {
         let headers = new Headers();
-        if(this.configService.getAuthType() === 'apikey'){
+        if (this.configService.getAuthType() === 'apikey') {
             headers.set('apikey', this.configService.getApiKey());
         }
         else if (this.configService.isLdap()) {
@@ -436,6 +437,10 @@ export class AutoScriptXMLService implements IAutoScriptService {
         xml = xml.end({ pretty: true });
         return xml;
     }
+
+    public deleteScript() { }
+    public executeScript() { }
+
     getLanguageFromExtension(extension: string): string {
         let language = [...this.languageToExtension.entries()]
             .filter(({ 1: v }) => v === extension)

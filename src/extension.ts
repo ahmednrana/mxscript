@@ -222,6 +222,15 @@ export function activate(context: vscode.ExtensionContext) {
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.downloadAllScripts();
   });
+  let deleteScript = vscode.commands.registerCommand("mxscript.delete", () => {
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
+    as.deleteScript();
+  });
+
+  let execute = vscode.commands.registerCommand("mxscript.execute", () => {
+    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
+    as.executeScript();
+  });
 
   vscode.workspace.onDidChangeConfiguration(event => {
     if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
@@ -357,6 +366,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
   context.subscriptions.push(manageEnvironments);
+  context.subscriptions.push(deleteScript);
+  context.subscriptions.push(execute);
 
   // Initialize status bar with current environment
   updateStatusBar(context);

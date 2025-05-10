@@ -226,6 +226,45 @@ export class AutoScriptNextGen implements IAutoScriptService {
         }
 
     }
+    async deleteScript(): Promise<void> {
+        try {
+            this.logger.debug('Deleting script...');
+            const scriptName = this.configService.getFilename();
+            if (!scriptName) {
+                this.displayError("No valid file is open or filename could not be determined.");
+                return;
+            }
+            const scriptFromServer = await this.getMaximoClient().autoScript.findAll(`autoscript="${scriptName}"`);
+            if (scriptFromServer.length === 0) {
+                vscode.window.showWarningMessage(`No script found on the server with the name ${scriptName}`);
+                this.logger.warn(`No script found on the server with the name ${scriptName}`);
+                return;
+            }
+            this.logger.debug(`Script ${scriptName} found on the server. Proceeding to delete...`);
+            await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
+            this.logger.debug(`Script ${scriptName} deleted successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+            vscode.window.showInformationMessage(`Script ${scriptName} deleted successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+        } catch (error) {
+            this.displayError(`Failed to delete script: ${(error as Error).message}`);
+        }
+    }
+    async executeScript(): Promise<void> {
+        try {
+            this.logger.debug('Executing script...');
+            const source = this.getSource();
+            if (!source || source.length === 0) {
+                this.displayError("No file is open");
+                return;
+            }
+            // Step 1: Create MXSCRIPT -- later
+            // Step 2: Call mxscript with the source
+            // Step 3: Parse and display results
+            // Step 4: Delete MXSCRIPT -- later
+        } catch (error) {
+            this.displayError(`Failed to execute script: ${(error as Error).message}`);
+        }
+
+    }
 
     getSource(): string {
         const editor = vscode.window.activeTextEditor;
