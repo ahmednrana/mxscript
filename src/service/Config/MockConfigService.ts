@@ -119,8 +119,26 @@ export class MockConfigService implements IConfigService {
     url = (port && port > 0) ? url + ":" + port : url;
     return url;
   }
+  getHostname: () => string = () => {
+    return this.hostname;
+  }
   public getFilename(): string {
     return 'OSACTION.MXAPIINSPRESULT.CREATEWO';
   }
 
+  /**
+   * Returns the name of the active environment.
+   * Mock implementation returns a fixed value.
+   */
+  public getActiveEnvironmentName(): string {
+    return "mock-environment";
+  }
+
+  public toString(): string {
+    return JSON.stringify({
+      hostname: this.hostname,
+      filename: this.getFilename(),
+      activeEnvironmentName: this.getActiveEnvironmentName()
+    });
+  }
 }

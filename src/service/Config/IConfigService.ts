@@ -17,8 +17,11 @@ export default interface IConfigService {
   getCredentials: () => string;
   getOS: () => string;
   getXMLUrl: () => string;
+  getHostname: () => string;
   getFilename: () => string;
   getFileExtension: () => string;
-  getCreatePythonScriptInEditor:() => boolean;
-  ignoreSslError:() => boolean;
+  getCreatePythonScriptInEditor: () => boolean;
+  ignoreSslError: () => boolean;
+  getActiveEnvironmentName(): string;
+  toString(): string;
 }

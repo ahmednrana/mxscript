@@ -6,6 +6,8 @@ import AutoScriptXMLModel from '../../model/AutoScriptXML.model';
 import { Constants } from '../../Constants';
 import IConfigService from '../Config/IConfigService';
 import { IAutoScriptService } from './IAutoScriptService';
+import { Logger } from '../Logger/Logger';
+
 var parseString = require('xml2js').parseString;
 var parseStringPromise = require('xml2js').parseStringPromise;
 
@@ -15,11 +17,14 @@ export class AutoScriptXMLService implements IAutoScriptService {
     private builder = require('xmlbuilder');
     private configService: IConfigService;
     private languageToExtension: Map<string, string> = new Map<string, string>();
+    private logger: Logger;
 
     constructor(context: vscode.ExtensionContext, cs: IConfigService) {
         this.configService = cs;
         this.initializeLanguages();
+        this.logger = Logger.getInstance();
     }
+    ;
     initializeLanguages() {
         this.languageToExtension.set(Constants.LANG_GROOVY, Constants.EXT_GROOVY);
         this.languageToExtension.set(Constants.LANG_NASHORN, Constants.EXT_NASHORN);
@@ -37,7 +42,7 @@ export class AutoScriptXMLService implements IAutoScriptService {
 
     getAuthHeaders(): Headers {
         let headers = new Headers();
-        if(this.configService.getAuthType() === 'apikey'){
+        if (this.configService.getAuthType() === 'apikey') {
             headers.set('apikey', this.configService.getApiKey());
         }
         else if (this.configService.isLdap()) {
@@ -295,6 +300,9 @@ export class AutoScriptXMLService implements IAutoScriptService {
         var url = new URL(this.configService.getXMLUrl());
         let headers: Headers = this.getAuthHeaders();
         let packet: string = this.constructPacket(Constants.SYNC);
+        this.logger.info(`Uploading script to URL: ${url}`);
+        this.logger.debug(`Auth type: ${this.configService.getAuthType()}`);
+        this.logger.debug(`Request packet: ${packet}`);
         console.log(`URL: ${url} Auth: ${this.configService.getAuthType()} \nPACKET: \n ${packet}`);
 
         const https = require('https');
@@ -429,6 +437,10 @@ export class AutoScriptXMLService implements IAutoScriptService {
         xml = xml.end({ pretty: true });
         return xml;
     }
+
+    public deleteScript() { }
+    public executeScript() { }
+
     getLanguageFromExtension(extension: string): string {
         let language = [...this.languageToExtension.entries()]
             .filter(({ 1: v }) => v === extension)

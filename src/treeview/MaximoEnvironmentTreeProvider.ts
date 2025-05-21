@@ -118,6 +118,7 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             config.update('scriptSettings.createPythonFileForJythonScripts', environment.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace);
             config.update('scriptSettings.logLevel', environment.logLevel, vscode.ConfigurationTarget.Workspace);
             config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace);
             
             vscode.window.showInformationMessage(`Switched to Maximo environment: ${environment.name}`);
         }
@@ -196,5 +197,31 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
     addEnvironment(): void {
         // Open the editor webview in the main editor area
         vscode.commands.executeCommand('mxscript.environments.add');
+    }
+    
+    /**
+     * Gets all environments from both global and workspace state
+     * @returns Array of all available Maximo environments
+     */
+    public getEnvironments(): MaximoEnvironment[] {
+        // Get environments from both global and workspace state
+        const globalEnvs = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        const workspaceEnvs = this._context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        
+        // Combine both arrays
+        const allEnvironments = [...globalEnvs, ...workspaceEnvs];
+        
+        // Check if there's at least one environment and none is active
+        if (allEnvironments.length > 0) {
+            const activeEnvId = this._context.globalState.get<string>('mxscript.activeEnvironment');
+            const hasActiveEnv = allEnvironments.some(env => env.id === activeEnvId);
+            
+            // If no environment is active, set the first one as active
+            if (!hasActiveEnv && allEnvironments.length > 0) {
+                this.setActiveEnvironment(allEnvironments[0].id);
+            }
+        }
+        
+        return allEnvironments;
     }
 }
