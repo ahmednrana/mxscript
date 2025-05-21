@@ -104,6 +104,7 @@ export class MaximoClientProvider {
             authType: convertAuthType(this.configService.getAuthType()),
             userName: this.configService.getUsername(),
             password: this.configService.getPassword(),
+            apiKey: this.configService.getApiKey(),
             port: Number(this.configService.getPort()),
             logLevel: getLogLevel(this.configService.getLogLevel()),
             leanMode: true,

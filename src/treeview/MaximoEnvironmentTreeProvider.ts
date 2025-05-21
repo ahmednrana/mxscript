@@ -198,4 +198,30 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         // Open the editor webview in the main editor area
         vscode.commands.executeCommand('mxscript.environments.add');
     }
+    
+    /**
+     * Gets all environments from both global and workspace state
+     * @returns Array of all available Maximo environments
+     */
+    public getEnvironments(): MaximoEnvironment[] {
+        // Get environments from both global and workspace state
+        const globalEnvs = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        const workspaceEnvs = this._context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
+        
+        // Combine both arrays
+        const allEnvironments = [...globalEnvs, ...workspaceEnvs];
+        
+        // Check if there's at least one environment and none is active
+        if (allEnvironments.length > 0) {
+            const activeEnvId = this._context.globalState.get<string>('mxscript.activeEnvironment');
+            const hasActiveEnv = allEnvironments.some(env => env.id === activeEnvId);
+            
+            // If no environment is active, set the first one as active
+            if (!hasActiveEnv && allEnvironments.length > 0) {
+                this.setActiveEnvironment(allEnvironments[0].id);
+            }
+        }
+        
+        return allEnvironments;
+    }
 }

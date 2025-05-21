@@ -232,50 +232,39 @@ export class AutoScriptNextGen implements IAutoScriptService {
                 return;
             }
 
-            // Show confirmation dialog to user
+            // Use showWarningMessage with Delete/Cancel buttons
             const serverName = this.configService.getActiveEnvironmentName() || this.configService.getUrl();
-            const answer = await vscode.window.showWarningMessage(
-                `Are you sure you want to delete script "${scriptName}" from server "${serverName}"?`,
-                { modal: true },
-                'Delete'
-            );
-
-            // User canceled or closed the dialog
-            if (answer !== 'Delete') {
-                this.logger.debug(`User canceled deletion of script ${scriptName}`);
-                return;
-            }
-
-            const scriptFromServer = await this.getMaximoClient().autoScript.findAll(`autoscript="${scriptName}"`);
-            if (scriptFromServer.length === 0) {
-                this.showWarning(`No script found on the server ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()} with the name ${scriptName}`);
-                return;
-            }
-            this.logger.debug(`Script ${scriptName} found on the server. Proceeding to delete...`);
-            await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
-            this.logger.debug(`Script ${scriptName} deleted successfully from ${serverName}`);
-            vscode.window.showInformationMessage(`Script ${scriptName} deleted successfully from ${serverName}`);
+            vscode.window.showWarningMessage(
+                `Are you sure you want to delete the script "${scriptName}" from server "${serverName}"?`,
+                "Delete",
+                "Cancel"
+            ).then(async selection => {
+                if (selection === "Delete") {
+                    try {
+                        // User clicked Delete, proceed with deletion
+                        const scriptFromServer = await this.getMaximoClient().autoScript.findAll(`autoscript="${scriptName}"`);
+                        if (scriptFromServer.length === 0) {
+                            this.showWarning(`No script found on the server ${serverName} with the name ${scriptName}`);
+                            return;
+                        }
+                        
+                        this.logger.debug(`Script ${scriptName} found on the server. Proceeding to delete...`);
+                        await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
+                        this.logger.debug(`Script ${scriptName} deleted successfully from ${serverName}`);
+                        this.showInformation(`Script ${scriptName} deleted successfully from ${serverName}`);
+                    } catch (error) {
+                        this.showError(`Failed to delete script: ${(error as Error).message}`);
+                    }
+                } else {
+                    // User clicked Cancel or dismissed the dialog
+                    this.logger.debug(`User canceled deletion of script ${scriptName}`);
+                }
+            });
         } catch (error) {
             this.showError(`Failed to delete script: ${(error as Error).message}`);
         }
     }
-    async executeScript(): Promise<void> {
-        try {
-            this.logger.debug('Executing script...');
-            const source = this.getSource();
-            if (!source || source.length === 0) {
-                this.showError("No file is open");
-                return;
-            }
-            // Step 1: Create MXSCRIPT -- later
-            // Step 2: Call mxscript with the source
-            // Step 3: Parse and display results
-            // Step 4: Delete MXSCRIPT -- later
-        } catch (error) {
-            this.showError(`Failed to execute script: ${(error as Error).message}`);
-        }
 
-    }
 
     getSource(): string {
         const editor = vscode.window.activeTextEditor;
@@ -319,6 +308,6 @@ export class AutoScriptNextGen implements IAutoScriptService {
     private showError(message: string): void {
         vscode.window.showErrorMessage(message);
         this.logger.error(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
-    }
+        }
 
 }

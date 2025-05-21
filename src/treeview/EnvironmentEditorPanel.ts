@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { MaximoEnvironment } from '../webview/EnvironmentManager';
+import { MaximoClient, MaximoClientConfig, AuthType, LogLevel } from 'maximo-api-client'; // Added
+import { convertAuthType, getLogLevel } from '../utils/utils'; // Added
 
 /**
  * WebView panel for adding/editing environments in the main editor area
@@ -79,6 +81,23 @@ export class EnvironmentEditorPanel {
                     case 'showError':
                         vscode.window.showErrorMessage(message.message);
                         break;
+                    case 'verifySettings':
+                        // Show a temporary message in the webview
+                        this._panel.webview.postMessage({ 
+                            type: 'verificationResult', 
+                            success: null, // Indicates processing
+                            message: 'Verifying settings...' 
+                        });
+                        this._verifySettings(message.environment).then(result => {
+                            this._panel.webview.postMessage({
+                                type: 'verificationResult',
+                                ...result
+                            });
+                        }).catch(error => { // Should not happen if _verifySettings handles its errors
+                            vscode.window.showErrorMessage(`Unexpected error during verification: ${error.message}`);
+                        });
+                        break;
+
                 }
             },
             null,
@@ -112,7 +131,44 @@ export class EnvironmentEditorPanel {
             : 'Add New Maximo Environment';
         webview.html = this._getHtmlForWebview();
     }
-    
+
+    private async _verifySettings(environmentData: MaximoEnvironment): Promise<{ success: boolean, message: string }> {
+        try {
+            const clientConfig: MaximoClientConfig = {
+                baseUrl: environmentData.hostname,
+                port: Number(environmentData.port),
+                ssl: environmentData.httpProtocol === 'https',
+                authType: convertAuthType(environmentData.authenticationType),
+                userName: environmentData.username,
+                password: environmentData.password,
+                apiKey: environmentData.apikey,
+                logLevel: getLogLevel(environmentData.logLevel),
+                leanMode: true,
+                autoAuthenticate: true, // Ensure client attempts to auth
+                rejectUnauthorized: !environmentData.ignoreSslErrors,
+                // contextRoot and apiHome will use client defaults based on authType
+            };
+
+            const client = new MaximoClient(clientConfig);
+            // Attempt to get whoami info, which also implies successful authentication
+            const whoamiResponse = await client.oslcInfoService.getWhoAmI();
+            
+            return { 
+                success: true, 
+                message: `Verification successful. Connected as: ${whoamiResponse.displayName || whoamiResponse.loginID}` 
+            };
+        } catch (error: any) {
+            let errorMessage = 'Verification failed.';
+            if (error.message) {
+                errorMessage = `Verification failed: ${error.message}`;
+            }
+            else if (error.code){
+                errorMessage = `Verification failed: ${error.code}`;
+            }
+            return { success: false, message: errorMessage };
+        }
+    }
+
     private _getHtmlForWebview(): string {
         return `<!DOCTYPE html>
         <html lang="en">
@@ -321,7 +377,9 @@ export class EnvironmentEditorPanel {
                 </div>
                 
                 <div class="button-container">
+                    <div id="verificationResultDisplay" style="margin-right: auto; padding-top: 8px;"></div>
                     <button id="cancelBtn">Cancel</button>
+                    <button id="verifyBtn">Verify Settings</button>
                     <button id="saveBtn">Save</button>
                 </div>
             </div>
@@ -337,6 +395,8 @@ export class EnvironmentEditorPanel {
                     const passwordToggle = document.getElementById('passwordToggle');
                     const passwordField = document.getElementById('password');
                     const saveBtn = document.getElementById('saveBtn');
+                    const verifyBtn = document.getElementById('verifyBtn'); // New button
+                    const verificationResultDisplay = document.getElementById('verificationResultDisplay'); // Display area
                     const cancelBtn = document.getElementById('cancelBtn');
                     const envName = document.getElementById('envName');
                     const hostname = document.getElementById('hostname');
@@ -346,6 +406,7 @@ export class EnvironmentEditorPanel {
                     // Event Listeners
                     authType.addEventListener('change', toggleAuthFields);
                     saveBtn.addEventListener('click', saveEnvironment);
+                    verifyBtn.addEventListener('click', verifyCurrentSettings); // Listener for new button
                     cancelBtn.addEventListener('click', () => {
                         vscode.postMessage({ type: 'cancel' });
                     });
@@ -371,6 +432,22 @@ export class EnvironmentEditorPanel {
                             }
                         });
                     }
+
+                    // Listen for messages from the extension
+                    window.addEventListener('message', event => {
+                        const message = event.data;
+                        if (message.type === 'verificationResult') {
+                            verificationResultDisplay.textContent = message.message;
+                            if (message.success === true) {
+                                verificationResultDisplay.style.color = 'var(--vscode-terminal-ansiGreen)';
+                            } else if (message.success === false) {
+                                verificationResultDisplay.style.color = 'var(--vscode-terminal-ansiRed)';
+                            } else { // Still processing
+                                verificationResultDisplay.style.color = 'var(--vscode-foreground)';
+                            }
+                        }
+                    });
+
                     
                     function toggleAuthFields() {
                         const authTypeValue = document.getElementById('authType').value;
@@ -467,6 +544,28 @@ export class EnvironmentEditorPanel {
                                 passwordField.classList.add('required');
                             }
                         }
+                    }
+
+                    function getFormData() {
+                        return {
+                            name: document.getElementById('envName').value,
+                            hostname: document.getElementById('hostname').value,
+                            port: parseInt(document.getElementById('port').value, 10) || 0,
+                            httpProtocol: document.getElementById('httpProtocol').value,
+                            authenticationType: document.getElementById('authType').value,
+                            username: document.getElementById('username')?.value || '',
+                            password: document.getElementById('password')?.value || '',
+                            apikey: document.getElementById('apikey')?.value || '',
+                            objectStructure: document.getElementById('objectStructure').value,
+                            logLevel: document.getElementById('logLevel').value,
+                            createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
+                            ignoreSslErrors: document.getElementById('ignoreSsl').checked,
+                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global'
+                        };
+                    }
+
+                    function verifyCurrentSettings() {
+                        vscode.postMessage({ type: 'verifySettings', environment: getFormData() });
                     }
                     
                     function saveEnvironment() {

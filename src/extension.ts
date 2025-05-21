@@ -120,60 +120,42 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maximoEnvironments.editEnvironment', (item) => {
-      if (item && item.environment) {
-        // Open the editor webview for editing an existing environment
-        EnvironmentEditorPanel.createOrShow(
-          context.extensionUri,
-          context,
-          item.environment,
-          (updatedEnvironment: MaximoEnvironment) => {
-            // Find and update environment in appropriate storage
-            const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
-            const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
-
-            const globalIndex = globalEnvs.findIndex(e => e.id === updatedEnvironment.id);
-            const workspaceIndex = workspaceEnvs.findIndex(e => e.id === updatedEnvironment.id);
-
-            // Remove from current location
-            if (globalIndex !== -1) {
-              globalEnvs.splice(globalIndex, 1);
-              context.globalState.update('mxscript.environments', globalEnvs);
-            } else if (workspaceIndex !== -1) {
-              workspaceEnvs.splice(workspaceIndex, 1);
-              context.workspaceState.update('mxscript.environments', workspaceEnvs);
-            }
-
-            // Add to appropriate location based on scope
-            if (updatedEnvironment.scope === 'workspace') {
-              workspaceEnvs.push(updatedEnvironment);
-              context.workspaceState.update('mxscript.environments', workspaceEnvs);
-            } else {
-              globalEnvs.push(updatedEnvironment);
-              context.globalState.update('mxscript.environments', globalEnvs);
-            }
-
-            // If this was the active environment, apply the updated settings
-            const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
-            if (activeEnvId === updatedEnvironment.id) {
-              // Update VSCode settings
-              maximoEnvironmentTreeProvider.setActiveEnvironment(updatedEnvironment.id);
-            }
-
-            // Refresh the tree view
-            maximoEnvironmentTreeProvider.refresh();
-
-            // Update status bar
-            updateStatusBar(context);
-
-            vscode.window.showInformationMessage(`Updated Maximo environment: ${updatedEnvironment.name}`);
-          }
-        );
+  // Command registration for maximoEnvironments.editEnvironment
+  const editEnvironmentCommandHandler = (item?: any) => {
+    if (item && item.environment) {
+      // Called from the tree view with an item
+      // Original implementation
+      maximoEnvironmentTreeProvider.editEnvironment(item.environment.id);
+    } else {
+      // Called from command palette without an item
+      // Show a quick pick of available environments
+      const environments = maximoEnvironmentTreeProvider.getEnvironments();
+      if (environments.length === 0) {
+        vscode.window.showInformationMessage("No environments found. Add an environment first.");
+        return;
       }
-    })
+
+      const environmentItems = environments.map(env => ({
+        label: env.name,
+          description: `${env.hostname}:${env.port}`,
+        id: env.id
+      }));
+
+      vscode.window.showQuickPick(environmentItems, {
+        placeHolder: "Select an environment to edit"
+      }).then(selectedItem => {
+        if (selectedItem) {
+          maximoEnvironmentTreeProvider.editEnvironment(selectedItem.id);
+        }
+      });
+    }
+  };
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maximoEnvironments.editEnvironment', editEnvironmentCommandHandler)
   );
 
+  // Command registration for environment commands
   context.subscriptions.push(
     vscode.commands.registerCommand('maximoEnvironments.deleteEnvironment', (item) => {
       if (item && item.environment) {
@@ -188,18 +170,79 @@ export function activate(context: vscode.ExtensionContext) {
             updateStatusBar(context);
           }
         });
+      } else {
+        // Called from command palette without an item
+        // Show a quick pick of available environments
+        const environments = maximoEnvironmentTreeProvider.getEnvironments();
+        if (environments.length === 0) {
+          vscode.window.showInformationMessage("No environments found to delete.");
+          return;
+        }
+
+        const environmentItems = environments.map(env => ({
+          label: env.name,
+          description: `${env.hostname}:${env.port}`, 
+          id: env.id
+        }));
+
+        vscode.window.showQuickPick(environmentItems, {
+          placeHolder: "Select an environment to delete"
+        }).then(selectedItem => {
+          if (selectedItem) {
+            vscode.window.showWarningMessage(
+              `Are you sure you want to delete the environment "${selectedItem.label}"?`,
+              "Delete",
+              "Cancel"
+            ).then(selection => {
+              if (selection === "Delete") {
+                maximoEnvironmentTreeProvider.deleteEnvironment(selectedItem.id);
+                // Update status bar if needed
+                updateStatusBar(context);
+              }
+            });
+          }
+        });
       }
     })
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand('maximoEnvironments.setActiveEnvironment', (item) => {
-      if (item && item.environment) {
-        maximoEnvironmentTreeProvider.setActiveEnvironment(item.environment.id);
-        // Update status bar
-        updateStatusBar(context);
+  // Command registration for maximoEnvironments.setActiveEnvironment
+  const setActiveEnvironmentCommandHandler = (item?: any) => {
+    if (item && item.environment) {
+      // Called from the tree view with an item
+      // Original implementation
+      maximoEnvironmentTreeProvider.setActiveEnvironment(item.environment.id);
+      // Update status bar
+      updateStatusBar(context);
+    } else {
+      // Called from command palette without an item
+      // Show a quick pick of available environments
+      const environments = maximoEnvironmentTreeProvider.getEnvironments();
+      if (environments.length === 0) {
+        vscode.window.showInformationMessage("No environments found to set as active.");
+        return;
       }
-    })
+
+      const environmentItems = environments.map(env => ({
+        label: env.name,
+        description: `${env.hostname}:${env.port}`,
+        id: env.id
+      }));
+
+      vscode.window.showQuickPick(environmentItems, {
+        placeHolder: "Select an environment to set as active"
+      }).then(selectedItem => {
+        if (selectedItem) {
+          maximoEnvironmentTreeProvider.setActiveEnvironment(selectedItem.id);
+          // Update status bar
+          updateStatusBar(context);
+        }
+      });
+    }
+  };
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maximoEnvironments.setActiveEnvironment', setActiveEnvironmentCommandHandler)
   );
 
   let upload = vscode.commands.registerCommand("mxscript.upload", () => {
@@ -367,7 +410,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(update);
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteScript);
-  context.subscriptions.push(execute);
+  // context.subscriptions.push(execute);
 
   // Initialize status bar with current environment
   updateStatusBar(context);
