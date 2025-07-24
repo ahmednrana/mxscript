@@ -245,35 +245,36 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('maximoEnvironments.setActiveEnvironment', setActiveEnvironmentCommandHandler)
   );
 
-  let upload = vscode.commands.registerCommand("mxscript.upload", () => {
-    // Notice we no longer pass MaximoClientWrapper to the constructor
+  let upload = vscode.commands.registerCommand("mxscript.upload", async () => {
+    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.uploadScript();
   });
 
-  let compare = vscode.commands.registerCommand("mxscript.compare", () => {
+  let compare = vscode.commands.registerCommand("mxscript.compare", async () => {
+    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.compareWithServer();
   });
 
-  let update = vscode.commands.registerCommand("mxscript.update", () => {
+  let update = vscode.commands.registerCommand("mxscript.update", async () => {
+    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.updateScript();
   });
 
-  let downloadall = vscode.commands.registerCommand("mxscript.downloadall", () => {
+  let downloadall = vscode.commands.registerCommand("mxscript.downloadall", async () => {
+    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.downloadAllScripts();
   });
-  let deleteScript = vscode.commands.registerCommand("mxscript.delete", () => {
+  let deleteScript = vscode.commands.registerCommand("mxscript.delete", async () => {
+    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);  
     let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
     as.deleteScript();
   });
 
-  let execute = vscode.commands.registerCommand("mxscript.execute", () => {
-    let as: IAutoScriptService = new AutoScriptNextGen(context, new ConfigService());
-    as.executeScript();
-  });
+
 
   vscode.workspace.onDidChangeConfiguration(event => {
     if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
@@ -435,6 +436,35 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
   // No active environment found
   statusBarItem.text = "$(globe) Maximo: No Environment";
   statusBarItem.tooltip = "Click to manage Maximo environments";
+}
+
+/**
+ * Ensures the workspace has the necessary Maximo configuration before running a command.
+ * If the configuration is missing, it silently applies the settings from the
+ * globally active environment.
+ * @param context The extension context.
+ * @param treeProvider The instance of the environment tree provider.
+ */
+async function ensureWorkspaceConfigured(
+    context: vscode.ExtensionContext, 
+    treeProvider: MaximoEnvironmentTreeProvider
+): Promise<void> {
+    const config = vscode.workspace.getConfiguration('mxscript');
+    const hostname = config.get<string>('serverSettings.hostname');
+
+    // If hostname is missing, we assume the workspace is not configured.
+    if (!hostname) {
+        const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+        if (activeEnvId) {
+            // A globally active environment exists, so apply its settings to this workspace silently.
+            console.log('MXScript: Workspace not configured. Applying active environment settings.');
+            treeProvider.setActiveEnvironment(activeEnvId, true); // Use the silent flag
+        } else {
+            // No active environment is set globally
+            vscode.window.showWarningMessage('No active Maximo environment. Please set one from the Maximo Environments view.');
+            vscode.commands.executeCommand('workbench.view.extension.mxscript-sidebar');
+        }
+    }
 }
 
 export function deactivate() { }

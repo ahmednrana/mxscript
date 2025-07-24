@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { Logger } from "../service/Logger/Logger";
 import { convertAuthType, getLogLevel } from "../utils/utils";
 import { ConfigService } from "../service/Config/ConfigService";
+import { MaximoEnvironment } from "../webview/EnvironmentManager";
 
 /**
  * A singleton provider for MaximoClient that manages client lifecycle
@@ -23,7 +24,11 @@ export class MaximoClientProvider {
         'mxscript.authentication.username',
         'mxscript.authentication.password',
         'mxscript.serverSettings.hostname',
-        'mxscript.serverSettings.port'
+        'mxscript.serverSettings.port',
+        'mxscript.serverSettings.objectStructure',
+        'mxscript.scriptSettings.logLevel',
+        'mxscript.scriptSettings.ignoresslerrors',
+        'mxscript.serverSettings.activeEnvironmentName'
     ];
 
     /**
@@ -54,7 +59,7 @@ export class MaximoClientProvider {
     public static initialize(context: vscode.ExtensionContext, cs: IConfigService): MaximoClientProvider {
         if (!MaximoClientProvider.instance) {
             MaximoClientProvider.instance = new MaximoClientProvider(cs);
-            
+
             // Listen for configuration changes
             context.subscriptions.push(
                 vscode.workspace.onDidChangeConfiguration(e => {
@@ -94,6 +99,31 @@ export class MaximoClientProvider {
     }
 
     /**
+     * Force reinitialize the client with current configuration
+     * Useful when environment settings change and we need a fresh client instance
+     */
+    public reinitializeClient(): void {
+        this.initializeClient();
+    }
+
+    /**
+     * Static method to force reinitialize the client
+     */
+    public static reinitializeClient(): void {
+        MaximoClientProvider.instance.reinitializeClient();
+    }
+    /**
+     * Static method to force reinitialize the client with custom config
+     */
+    public static forceReinitializeClient(environment: MaximoEnvironment): void {
+        MaximoClientProvider.instance.forceReinitializeClient(environment);
+    }
+
+    public forceReinitializeClient(environment: MaximoEnvironment): void {
+        this.initializeClient(environment);
+    }
+
+    /**
      * Create client configuration from current settings
      */
     private createClientConfig(): MaximoClientConfig {
@@ -111,14 +141,29 @@ export class MaximoClientProvider {
             autoAuthenticate: true
         };
     }
+    private createClientConfigFromEnvironment(environment: MaximoEnvironment): MaximoClientConfig {
+        return {
+            baseUrl: environment.hostname,
+            ssl: environment.httpProtocol === 'https',
+            authType: convertAuthType(environment.authenticationType),
+            userName: environment.username,
+            password: environment.password,
+            apiKey: environment.apikey,
+            port: Number(environment.port),
+            logLevel: getLogLevel(environment.logLevel),
+            leanMode: true,
+            autoAuthenticate: true
+        };
+    }
 
     /**
      * Create a new MaximoClient instance with current config
      */
-    private initializeClient(): void {
-        // Create a new MaximoClient instance with current configuration
-        this.configService = new ConfigService()
-        const newConfig = this.createClientConfig();
+    private initializeClient(environment?: MaximoEnvironment): void {
+        this.configService = new ConfigService();
+        // If an environment is provided, use its settings to create the client config
+        const newConfig = (environment) ? this.createClientConfigFromEnvironment(environment) : this.createClientConfig();
+
         this.logger.info('Creating new MaximoClient instance with updated configuration');
         this.maximoClient = new MaximoClient(newConfig);
     }

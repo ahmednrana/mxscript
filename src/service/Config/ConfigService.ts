@@ -1,5 +1,4 @@
 import IConfigService from './IConfigService';
-import * as vscode from 'vscode';
 import * as path from 'path';
 
 export class ConfigService implements IConfigService {
@@ -25,9 +24,10 @@ export class ConfigService implements IConfigService {
   private ldapAuth: boolean;
   private activeEnvironmentName: string;
   private ignoreSsl: boolean;
+  private vscode = require("vscode");
 
   constructor() {
-    const config = vscode.workspace.getConfiguration('mxscript');
+    const config = this.vscode.workspace.getConfiguration('mxscript');
 
     this.hostname = config.get('serverSettings.hostname');
     this.httpProtocol = config.get('serverSettings.httpProtocol');
@@ -37,7 +37,7 @@ export class ConfigService implements IConfigService {
     this.apikey = config.get('authentication.apikey');
     this.os = config.get('serverSettings.objectStructure');
     this.authType = config.get('authentication.authenticationType');
-    this.ldapAuth = (this.authType === 'internal') ? false : true;
+    this.ldapAuth = (this.authType === 'internal' || this.authType === 'api') ? false : true;
     this.scriptLogLevel = config.get('scriptSettings.logLevel');
     this.isNextGen = config.get('version.supportsNextgenApi');
     this.prefersPythonInEditor = config.get('scriptSettings.createPythonFileForJythonScripts');
@@ -56,7 +56,7 @@ export class ConfigService implements IConfigService {
     // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
   }
   getFileExtension(): string {
-    const currentlyOpenTabfilePath: string = vscode.window.activeTextEditor?.document.fileName;
+    const currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor?.document.fileName;
     if (!currentlyOpenTabfilePath) { return ''; }
     let filename: string = path.basename(currentlyOpenTabfilePath);
     filename = filename.toLowerCase();
@@ -132,7 +132,7 @@ export class ConfigService implements IConfigService {
     return url;
   }
   public getFilename(): string {
-    const currentlyOpenTabfilePath: string = vscode.window.activeTextEditor?.document.fileName;
+    const currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor?.document.fileName;
     if (!currentlyOpenTabfilePath) { return ''; }
     let filename: string = path.basename(currentlyOpenTabfilePath);
     filename = filename.toUpperCase();
