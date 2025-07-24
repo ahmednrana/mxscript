@@ -136,6 +136,7 @@ export class MaximoClientProvider {
             password: this.configService.getPassword(),
             apiKey: this.configService.getApiKey(),
             port: Number(this.configService.getPort()),
+            autoscriptObjectStructure: this.configService.getOS(),
             logLevel: getLogLevel(this.configService.getLogLevel()),
             leanMode: true,
             autoAuthenticate: true
@@ -150,6 +151,7 @@ export class MaximoClientProvider {
             password: environment.password,
             apiKey: environment.apikey,
             port: Number(environment.port),
+            autoscriptObjectStructure: environment.objectStructure,
             logLevel: getLogLevel(environment.logLevel),
             leanMode: true,
             autoAuthenticate: true
