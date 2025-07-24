@@ -11,6 +11,7 @@ This adds the following four actions to vs code.
 2. [Compare Script with Server](#compare-script-with-server)
 3. [Upload Script to Server](#upload-script-to-server)
 4. [Download All Scripts from Server](#download-all-scripts-from-server)
+5. [Delete Script on Server](#delete-script-on-server)
 
 ### Update Script from Server
 
@@ -65,6 +66,18 @@ On command palette search and select this option
 This downloads all the scripts from Maximo server to the folder you selected.
 
 ![DownloadAll](./images/downloadall.gif)
+
+[Back to Top](#mxscript)
+
+### Delete Script on Server
+
+#### Activate
+
+On command palette search and select this option
+
+#### Functionality
+
+This deletes that script on the server
 
 [Back to Top](#mxscript)
 
@@ -155,6 +168,10 @@ Double check the authentication type, user/pass or the api key provided
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 0.9.2
+
+Fixed OS not being read correctly
 
 ### 0.7.0
 

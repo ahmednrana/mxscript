@@ -22,7 +22,6 @@
     "onCommand:mxscript.compare",
     "onCommand:mxscript.downloadall",
     "onCommand:mxscript.delete",
-    "onCommand:mxscript.execute",
     "onCommand:mxscript.manageEnvironments",
     "onView:maximoEnvironments"
   ],
@@ -53,12 +52,7 @@
         "title": "Delete Script from Server",
         "category": "Maximo [mxscript]"
       },
-      {
-        "command": "mxscript.execute",
-        "title": "Execute Script on Server",
-        "category": "Maximo [mxscript]",
-        "enablement": "false"
-      },
+
       {
         "command": "mxscript.manageEnvironments",
         "title": "Manage Environments",
