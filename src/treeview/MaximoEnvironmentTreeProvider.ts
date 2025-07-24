@@ -13,6 +13,7 @@ export class MaximoEnvironmentTreeItem extends vscode.TreeItem {
         
         // Set different icons based on active state and scope
         if (this.isActive) {
+            const fileIcon = new vscode.ThemeIcon('file');
             this.iconPath = new vscode.ThemeIcon('radio-tower');
         } else if (environment.scope === 'global') {
             this.iconPath = new vscode.ThemeIcon('globe');
@@ -93,7 +94,7 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
     /**
      * Set an environment as active
      */
-    setActiveEnvironment(environmentId: string): void {
+    setActiveEnvironment(environmentId: string, silent: boolean = false): void {
         // Save active environment ID
         this._context.globalState.update('mxscript.activeEnvironment', environmentId);
         
@@ -120,7 +121,9 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
             config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace);
             
-            vscode.window.showInformationMessage(`Switched to Maximo environment: ${environment.name}`);
+            if (!silent) {
+                vscode.window.showInformationMessage(`Switched to Maximo environment: ${environment.name}`);
+            }
         }
         
         // Refresh the tree view
@@ -209,19 +212,6 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         const workspaceEnvs = this._context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
         
         // Combine both arrays
-        const allEnvironments = [...globalEnvs, ...workspaceEnvs];
-        
-        // Check if there's at least one environment and none is active
-        if (allEnvironments.length > 0) {
-            const activeEnvId = this._context.globalState.get<string>('mxscript.activeEnvironment');
-            const hasActiveEnv = allEnvironments.some(env => env.id === activeEnvId);
-            
-            // If no environment is active, set the first one as active
-            if (!hasActiveEnv && allEnvironments.length > 0) {
-                this.setActiveEnvironment(allEnvironments[0].id);
-            }
-        }
-        
-        return allEnvironments;
+        return [...globalEnvs, ...workspaceEnvs];
     }
 }

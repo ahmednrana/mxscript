@@ -1,8 +1,9 @@
 import IConfigService from './IConfigService';
+import * as vscode from 'vscode';
+import * as path from 'path';
+
 export class ConfigService implements IConfigService {
   private httpProtocol: string;
-  private vscode = require("vscode");
-  private path = require("path");
   private username: string;
   private password: string;
   private apikey: string;
@@ -26,36 +27,40 @@ export class ConfigService implements IConfigService {
   private ignoreSsl: boolean;
 
   constructor() {
-    this.hostname = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.hostname');
-    this.httpProtocol = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.httpProtocol');
-    this.port = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.port');
-    this.username = this.vscode.workspace.getConfiguration().get('mxscript.authentication.username');
-    this.password = this.vscode.workspace.getConfiguration().get('mxscript.authentication.password');
-    this.apikey = this.vscode.workspace.getConfiguration().get('mxscript.authentication.apikey');
-    this.os = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.objectStructure');
-    this.authType = this.vscode.workspace.getConfiguration().get('mxscript.authentication.authenticationType');
+    const config = vscode.workspace.getConfiguration('mxscript');
+
+    this.hostname = config.get('serverSettings.hostname');
+    this.httpProtocol = config.get('serverSettings.httpProtocol');
+    this.port = config.get('serverSettings.port');
+    this.username = config.get('authentication.username');
+    this.password = config.get('authentication.password');
+    this.apikey = config.get('authentication.apikey');
+    this.os = config.get('serverSettings.objectStructure');
+    this.authType = config.get('authentication.authenticationType');
     this.ldapAuth = (this.authType === 'internal') ? false : true;
-    this.scriptLogLevel = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.logLevel');
-    this.isNextGen = this.vscode.workspace.getConfiguration().get('mxscript.version.supportsNextgenApi');
-    this.prefersPythonInEditor = this.vscode.workspace.getConfiguration().get('mxscript.scriptSettings.createPythonFileForJythonScripts');
+    this.scriptLogLevel = config.get('scriptSettings.logLevel');
+    this.isNextGen = config.get('version.supportsNextgenApi');
+    this.prefersPythonInEditor = config.get('scriptSettings.createPythonFileForJythonScripts');
     this.url = this.generateUrl(this.httpProtocol, this.hostname, this.port);
     this.urlXML = this.generateUrlForXML(this.hostname, this.port, this.os);
     this.object = 'AUTOSCRIPT';
     this.nameSpaceAttr = 'xmlns';
     this.nameSpace = 'http://www.ibm.com/maximo';
-    this.sourceTag = "SOURCE";
-    this.languageTag = "SCRIPTLANGUAGE";
-    this.LOG = "LOG";
-    this.activeEnvironmentName = this.vscode.workspace.getConfiguration().get('mxscript.serverSettings.activeEnvironmentName');
-    this.ignoreSsl = this.vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors");
-    process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
+    this.sourceTag = 'SOURCE';
+    this.languageTag = 'SCRIPTLANGUAGE';
+    this.LOG = 'LOG';
+    this.activeEnvironmentName = config.get('serverSettings.activeEnvironmentName');
+    this.ignoreSsl = config.get("scriptSettings.ignoresslerrors");
+    // NOTE: The line below is a global side-effect. It's better to manage this in extension.ts
+    // using vscode.workspace.onDidChangeConfiguration to avoid race conditions and redundancy.
+    // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
   }
   getFileExtension(): string {
-    let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
-    let filename: string = this.path.basename(currentlyOpenTabfilePath);
+    const currentlyOpenTabfilePath: string = vscode.window.activeTextEditor?.document.fileName;
+    if (!currentlyOpenTabfilePath) { return ''; }
+    let filename: string = path.basename(currentlyOpenTabfilePath);
     filename = filename.toLowerCase();
-    let extension = filename.substr(filename.lastIndexOf(".") + 1, filename.length);
-    return extension;
+    return filename.substring(filename.lastIndexOf('.') + 1);
   }
   getLanguageTag(): string {
     return this.languageTag;
@@ -127,22 +132,23 @@ export class ConfigService implements IConfigService {
     return url;
   }
   public getFilename(): string {
-    let currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor.document.fileName;
-    let filename: string = this.path.basename(currentlyOpenTabfilePath);
+    const currentlyOpenTabfilePath: string = vscode.window.activeTextEditor?.document.fileName;
+    if (!currentlyOpenTabfilePath) { return ''; }
+    let filename: string = path.basename(currentlyOpenTabfilePath);
     filename = filename.toUpperCase();
-    filename = filename.substr(0, filename.lastIndexOf("."));
+    filename = filename.substring(0, filename.lastIndexOf('.'));
     return filename;
   }
   public ignoreSslError(): boolean {
     return this.ignoreSsl;
   }
-  public getHostname: () => string = () => {
+  public getHostname(): string {
     return this.hostname;
-  };
+  }
 
-  public getActiveEnvironmentName: () => string = () => {
+  public getActiveEnvironmentName(): string {
     return this.activeEnvironmentName;
-  };
+  }
 
   public toString(): string {
     return JSON.stringify({

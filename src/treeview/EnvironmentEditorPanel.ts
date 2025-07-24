@@ -144,9 +144,9 @@ export class EnvironmentEditorPanel {
                 apiKey: environmentData.apikey,
                 logLevel: getLogLevel(environmentData.logLevel),
                 leanMode: true,
-                autoAuthenticate: true, // Ensure client attempts to auth
+                autoAuthenticate: true,
                 rejectUnauthorized: !environmentData.ignoreSslErrors,
-                // contextRoot and apiHome will use client defaults based on authType
+                autoscriptObjectStructure: environmentData.objectStructure,
             };
 
             const client = new MaximoClient(clientConfig);

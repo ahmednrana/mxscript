@@ -181,7 +181,7 @@ export class AutoScriptNextGen implements IAutoScriptService {
                 }
             }
             else {
-                this.showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.data}`);
+                this.showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
             this.showError(`Failed to upload script: ${(error as Error).message}`);
@@ -247,7 +247,7 @@ export class AutoScriptNextGen implements IAutoScriptService {
                             this.showWarning(`No script found on the server ${serverName} with the name ${scriptName}`);
                             return;
                         }
-                        
+
                         this.logger.debug(`Script ${scriptName} found on the server. Proceeding to delete...`);
                         await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
                         this.logger.debug(`Script ${scriptName} deleted successfully from ${serverName}`);
@@ -295,6 +295,38 @@ export class AutoScriptNextGen implements IAutoScriptService {
         return languageToExtension[language.toLowerCase()] || 'txt'; // Default to 'txt' if language is unknown
     }
 
+    async executeScript(): Promise<void> {
+        try {
+            this.logger.debug('Executing script...');
+            const source = this.getSource();
+            if (!source || source.length === 0) {
+                this.showError("No file is open");
+                return;
+            }
+            // Step 1: Create MXSCRIPT -- later
+            // const mxscript = await this.getMaximoClient().autoScript.create({
+            //     name: `MXSCRIPT_${Date.now()}`,
+            //     language: this.getFileExtensionFromLanguage(vscode.window.activeTextEditor.document.languageId),
+            //     source: source
+            // });
+            // Step 2: Call mxscript with the source
+            const result = await this.getMaximoClient().scriptHandler.executeScript('scriptrun', {
+                method: 'POST',
+                body: source,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            // Step 3: Parse and display results
+            this.logger.debug(`Script executed successfully: ${JSON.stringify(result)}`);
+            this.showInformation(`Script executed successfully: ${result.output}`);
+            // Step 4: Delete MXSCRIPT -- later
+        } catch (error) {
+            this.showError(`Failed to execute script: ${(error as Error).message}`);
+        }
+
+    }
+
     private showWarning(message: string): void {
         vscode.window.showWarningMessage(message);
         this.logger.warn(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
@@ -308,6 +340,6 @@ export class AutoScriptNextGen implements IAutoScriptService {
     private showError(message: string): void {
         vscode.window.showErrorMessage(message);
         this.logger.error(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
-        }
+    }
 
 }
