@@ -24,6 +24,7 @@ export class MockConfigService implements IConfigService {
   private prefersJython: boolean;
   private languageTag: string;
   private ignoreSsl: boolean;
+  private formatXmlOnDownloadAndCompare: boolean;
 
   constructor(authType: string) {
     this.hostname = '10.231.105.128';
@@ -45,6 +46,7 @@ export class MockConfigService implements IConfigService {
     this.sourceTag = "SOURCE";
     this.LOG = "LOG";
     this.languageTag = "SCRIPTLANGUAGE";
+    this.formatXmlOnDownloadAndCompare = true;
     this.ignoreSsl = true;
   }
   public ignoreSslError(): boolean {
@@ -140,5 +142,9 @@ export class MockConfigService implements IConfigService {
       filename: this.getFilename(),
       activeEnvironmentName: this.getActiveEnvironmentName()
     });
+  }
+
+  public getFormatXmlOnDownloadAndCompare(): boolean {
+    return this.formatXmlOnDownloadAndCompare;
   }
 }

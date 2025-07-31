@@ -121,6 +121,7 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             config.update('scriptSettings.logLevel', environment.logLevel, vscode.ConfigurationTarget.Workspace);
             config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
             config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace);
+            config.update('appxml.formatOnDownloadAndCompare', environment.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace);
             
             // Reinitialize the Maximo client with new environment settings
             try {

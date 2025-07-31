@@ -14,7 +14,9 @@ export interface MaximoEnvironment {
     createPythonFileForJythonScripts: boolean;
     logLevel: string;
     ignoreSslErrors: boolean;
-    scope: 'global' | 'workspace'; // New property
+    scope: 'global' | 'workspace'; 
+    formatXmlOnDownloadAndCompare: boolean;
+    appxml_objectStructure: string;
 }
 
 export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProvider {
@@ -211,7 +213,9 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         config.update('scriptSettings.logLevel', activeEnv.logLevel, vscode.ConfigurationTarget.Workspace);
         config.update('scriptSettings.ignoresslerrors', activeEnv.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
         config.update('serverSettings.activeEnvironmentName', activeEnv.name, vscode.ConfigurationTarget.Workspace);
-        
+        config.update('appxml.formatOnDownloadAndCompare', activeEnv.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace);
+        config.update('appxml.objectStructure', activeEnv.appxml_objectStructure, vscode.ConfigurationTarget.Workspace);
+
         vscode.window.showInformationMessage(`Switched to Maximo environment: ${activeEnv.name}`);
     }
 
@@ -429,8 +433,13 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     </div>
                     
                     <div class="form-group">
-                        <label for="objectStructure">Object Structure</label>
+                        <label for="objectStructure">Script Object Structure</label>
                         <input type="text" id="objectStructure" placeholder="MXSCRIPT">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appxmlObjectStructure">App XML Object Structure</label>
+                        <input type="text" id="appxmlObjectStructure" placeholder="MXPRESENTATION">
                     </div>
                     
                     <div class="form-group">
@@ -452,6 +461,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     <div class="checkbox-group">
                         <input type="checkbox" id="ignoreSsl">
                         <label for="ignoreSsl">Ignore SSL errors</label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="formatXmlOnDownload">
+                        <label for="formatXmlOnDownload">Format XML on download and compare</label>
                     </div>
                     
                     <div class="form-group">
@@ -615,9 +629,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('password').value = '';
                         document.getElementById('apikey').value = '';
                         document.getElementById('objectStructure').value = 'MXSCRIPT';
+                        document.getElementById('appxmlObjectStructure').value = 'MXPRESENTATION';
                         document.getElementById('logLevel').value = 'ERROR';
                         document.getElementById('createPythonFile').checked = true;
                         document.getElementById('ignoreSsl').checked = false;
+                        document.getElementById('formatXmlOnDownload').checked = true;
                         
                         toggleAuthFields();
                     }
@@ -637,6 +653,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     function saveEnvironment() {
                         const portValue = document.getElementById('port').value;
                         const objectStructureValue = document.getElementById('objectStructure').value;
+                        const appxmlObjectStructureValue = document.getElementById('appxmlObjectStructure').value;
                         
                         const newEnvironment = {
                             name: document.getElementById('envName').value,
@@ -648,9 +665,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                             password: document.getElementById('password').value,
                             apikey: document.getElementById('apikey').value,
                             objectStructure: objectStructureValue || 'MXSCRIPT',
+                            appxml_objectStructure: appxmlObjectStructureValue || 'MXPRESENTATION',
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
+                            formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
                             scope: document.getElementById('scopeGlobal').checked ? 'global' : 'workspace'
                         };
                         
@@ -702,9 +721,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('password').value = env.password || '';
                         document.getElementById('apikey').value = env.apikey || '';
                         document.getElementById('objectStructure').value = env.objectStructure;
+                        document.getElementById('appxmlObjectStructure').value = env.appxml_objectStructure || 'MXPRESENTATION';
                         document.getElementById('logLevel').value = env.logLevel;
                         document.getElementById('createPythonFile').checked = env.createPythonFileForJythonScripts;
                         document.getElementById('ignoreSsl').checked = env.ignoreSslErrors;
+                        document.getElementById('formatXmlOnDownload').checked = env.formatXmlOnDownloadAndCompare !== false;
                         
                         document.querySelector(\`input[name="scope"][value="\${env.scope}"]\`).checked = true;
                         

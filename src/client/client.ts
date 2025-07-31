@@ -28,7 +28,8 @@ export class MaximoClientProvider {
         'mxscript.serverSettings.objectStructure',
         'mxscript.scriptSettings.logLevel',
         'mxscript.scriptSettings.ignoresslerrors',
-        'mxscript.serverSettings.activeEnvironmentName'
+        'mxscript.serverSettings.activeEnvironmentName',
+        'mxscript.appxml.formatOnDownloadAndCompare'
     ];
 
     /**

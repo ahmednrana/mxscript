@@ -1,12 +1,17 @@
 {
   "name": "mxscript",
   "displayName": "MxScript",
-  "description": "Script Manager for IBM Maximo",
-  "version": "0.9.2",
+  "description": "Script / App Xml Manager for IBM Maximo",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.44.0"
   },
   "publisher": "Rana",
+  "author": {
+    "name": "Rana Ahmed Naazir",
+    "email": "ahmed.naazer@gmail.com",
+    "url": "https://github.com/ahmednrana"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ahmednrana/mxscript.git"
@@ -23,23 +28,24 @@
     "onCommand:mxscript.downloadall",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
-    "onView:maximoEnvironments"
+    "onView:maximoEnvironments",
+    "onCommand:mxscript.downloadallappxml"
   ],
   "contributes": {
     "commands": [
       {
         "command": "mxscript.upload",
-        "title": "Upload Script to Server",
+        "title": "Upload Script / XML to Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.update",
-        "title": "Download (Update) Script from Server",
+        "title": "Download (Update) Script / XML from Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.compare",
-        "title": "Compare Script with Server",
+        "title": "Compare Script / XML with Server",
         "category": "Maximo [mxscript]"
       },
       {
@@ -48,11 +54,15 @@
         "category": "Maximo [mxscript]"
       },
       {
+        "command": "mxscript.downloadallappxml",
+        "title": "Download All Application's xml from Server",
+        "category": "Maximo [mxscript]"
+      },
+      {
         "command": "mxscript.delete",
         "title": "Delete Script from Server",
         "category": "Maximo [mxscript]"
       },
-
       {
         "command": "mxscript.manageEnvironments",
         "title": "Manage Environments",
@@ -136,6 +146,11 @@
           "default": "MXSCRIPT",
           "description": "Object Structure to be used scripts uploading / downloading"
         },
+        "mxscript.appxml.objectStructure": {
+          "type": "string",
+          "default": "MXAPPXML",
+          "description": "Object Structure to be used for App XML uploading / downloading"
+        },
         "mxscript.serverSettings.httpProtocol": {
           "type": "string",
           "enum": [
@@ -194,6 +209,12 @@
           "scope": "window",
           "default": "",
           "description": "The friendly name of the currently active Maximo environment profile"
+        },
+        "mxscript.appxml.formatOnDownloadAndCompare": {
+          "type": "boolean",
+          "scope": "window",
+          "default": true,
+          "description": "Whether to format XML on download and compare"
         }
       }
     },
@@ -252,17 +273,14 @@
     "@types/mocha": "^2.2.42",
     "@types/node": "^10.12.21",
     "@types/vscode": "^1.44.0",
+    "rimraf": "^3.0.2",
     "tslint": "^5.12.1",
-    "typescript": "^4.0.0",
-    "rimraf": "^3.0.2" 
+    "typescript": "^4.0.0"
   },
   "dependencies": {
     "@types/node-fetch": "^2.5.5",
     "node-fetch": "^2.6.7",
-    "xml2js": "^0.6.2",
-    "maximo-api-client": "*"
-  },
-  "bundleDependencies": [
-    "maximo-api-client"
-  ]
+    "xml-formatter": "^3.6.2",
+    "xml2js": "^0.6.2"
+  }
 }

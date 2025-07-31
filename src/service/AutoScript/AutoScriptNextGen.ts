@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
-import { IAutoScriptService } from './IAutoScriptService';
+import { SimpleOSService } from './ISimpleOSService';
 import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
-import { getLanguageFromExtension } from '../../utils/utils';
+import { getFilename, getLanguageFromExtension, showError, showInformation, showWarning } from '../../utils/utils';
+
 import { AutoScript } from 'maximo-api-client';
 
-export class AutoScriptNextGen implements IAutoScriptService {
+export class AutoScriptNextGen implements SimpleOSService {
     private context: vscode.ExtensionContext;
     private configService: ConfigService;
     private logger: Logger;
@@ -27,17 +28,13 @@ export class AutoScriptNextGen implements IAutoScriptService {
         return MaximoClientProvider.getInstance().getClient();
     }
 
-    async updateScript(): Promise<void> {
+    async update(): Promise<void> {
         try {
             this.logger.debug('Updating script...');
-            const fileName = this.configService.getFilename();
-            if (!fileName) {
-                this.showError("No valid file is open");
-                return;
-            }
+            const fileName = getFilename();
             const sourceFromServer = await this.getMaximoClient().autoScript.downloadScriptSource(fileName);
             if (!sourceFromServer) {
-                this.showWarning(`No script source found for the script ${fileName} on ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                showWarning(`No script source found for the script ${fileName} on ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -52,22 +49,26 @@ export class AutoScriptNextGen implements IAutoScriptService {
 
                 const edit = new vscode.WorkspaceEdit();
                 edit.replace(document.uri, fullRange, sourceFromServer);
-                vscode.workspace.applyEdit(edit);
-                this.showInformation(`Script ${this.configService.getFilename()} updated successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                const success = await vscode.workspace.applyEdit(edit);
+                if (success) {
+                    showInformation(`Script ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                } else {
+                    showError(`Failed to apply edits to the document.`);
+                }
             } else {
-                this.showWarning("The file open is not valid");
+                showWarning("The file open is not valid");
             }
         } catch (error) {
-            this.showError(`Failed to download script: ${(error as Error).message}`);
+            showError(`Failed to download script: ${(error as Error).message}`);
         }
 
     }
 
-    async downloadAllScripts(): Promise<void> {
+    async downloadAll(): Promise<void> {
         try {
             this.logger.debug('Downloading all scripts...');
             if (!vscode.workspace.workspaceFolders) {
-                this.showError("Please open a workspace or folder first");
+                showError("Please open a workspace or folder first");
                 return;
             }
 
@@ -88,7 +89,7 @@ export class AutoScriptNextGen implements IAutoScriptService {
                     let selectedFolder = folderUri[0]; // User selected folder
                     let selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selectedFolder);
                     if (selectedFolderRoot !== rootFolder) { // The selected folder is NOT part of already opened project
-                        this.showError("The selected folder is not part of the project. Please select a folder from the current project.");
+                        showError("The selected folder is not part of the project. Please select a folder from the current project.");
                         return;
                     }
                     this.logger.debug('Selected file: ' + selectedFolder.fsPath);
@@ -98,7 +99,7 @@ export class AutoScriptNextGen implements IAutoScriptService {
             });
 
             if (!selectedFolderUri) {
-                this.showError("Folder selection error. It might not be part of the project.");
+                showError("Folder selection error. It might not be part of the project.");
                 return;
             }
 
@@ -144,21 +145,21 @@ export class AutoScriptNextGen implements IAutoScriptService {
                 vscode.window.showInformationMessage(successMsg);
             });
         } catch (error) {
-            this.showError(`Failed to download all scripts: ${(error as Error).message}`);
+            showError(`Failed to download all scripts: ${(error as Error).message}`);
         }
     }
 
-    async uploadScript(): Promise<void> {
+    async upload(): Promise<void> {
         try {
             let language = getLanguageFromExtension(this.configService);
             this.logger.debug('Uploading script...');
             const source = this.getSource();
             if (!source || source.length === 0) {
-                this.showError("No file is open");
+                showError("No file is open");
                 return;
             }
             const autoscript: Partial<AutoScript> = {
-                autoscript: this.configService.getFilename(),
+                autoscript: getFilename(),
                 description: '',
                 scriptlanguage: language,
                 source: source,
@@ -171,31 +172,27 @@ export class AutoScriptNextGen implements IAutoScriptService {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    this.showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                    showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    this.showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses[0].status}`);
                 }
                 else {
-                    this.showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.data}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.data}`);
                 }
             }
             else {
-                this.showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
-            this.showError(`Failed to upload script: ${(error as Error).message}`);
+            showError(`Failed to upload script: ${(error as Error).message}`);
         }
     }
 
     async compareWithServer(): Promise<void> {
         try {
             this.logger.debug('Comparing script with server...');
-            const scriptName = this.configService.getFilename();
-            if (!scriptName) {
-                this.showError("No valid file is open or filename could not be determined.");
-                return;
-            }
+            const scriptName = getFilename();
             const sourceFromServer = await this.getMaximoClient().autoScript.downloadScriptSource(scriptName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No script source found for the script ${scriptName}`);
@@ -213,22 +210,22 @@ export class AutoScriptNextGen implements IAutoScriptService {
                     let title: string = `Local: ${scriptName} ↔ Server (${this.configService.getActiveEnvironmentName() || this.configService.getUrl()})`;
                     vscode.commands.executeCommand('vscode.diff', original, serverScript, title);
                 } else {
-                    this.showError("No active text editor found to compare the script.");
+                    showError("No active text editor found to compare the script.");
                 }
             } else {
-                this.showError("No active text editor found to compare the script.");
+                showError("No active text editor found to compare the script.");
             }
         } catch (error) {
-            this.showError(`Failed to download script: ${(error as Error).message}`);
+            showError(`Failed to download script: ${(error as Error).message}`);
         }
 
     }
-    async deleteScript(): Promise<void> {
+    async delete(): Promise<void> {
         try {
             this.logger.debug('Deleting script...');
-            const scriptName = this.configService.getFilename();
+            const scriptName = getFilename();
             if (!scriptName) {
-                this.showWarning("No valid file is open or filename could not be determined.");
+                showWarning("No valid file is open or filename could not be determined.");
                 return;
             }
 
@@ -244,16 +241,16 @@ export class AutoScriptNextGen implements IAutoScriptService {
                         // User clicked Delete, proceed with deletion
                         const scriptFromServer = await this.getMaximoClient().autoScript.findAll(`autoscript="${scriptName}"`);
                         if (scriptFromServer.length === 0) {
-                            this.showWarning(`No script found on the server ${serverName} with the name ${scriptName}`);
+                            showWarning(`No script found on the server ${serverName} with the name ${scriptName}`);
                             return;
                         }
 
                         this.logger.debug(`Script ${scriptName} found on the server. Proceeding to delete...`);
                         await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
                         this.logger.debug(`Script ${scriptName} deleted successfully from ${serverName}`);
-                        this.showInformation(`Script ${scriptName} deleted successfully from ${serverName}`);
+                        showInformation(`Script ${scriptName} deleted successfully from ${serverName}`);
                     } catch (error) {
-                        this.showError(`Failed to delete script: ${(error as Error).message}`);
+                        showError(`Failed to delete script: ${(error as Error).message}`);
                     }
                 } else {
                     // User clicked Cancel or dismissed the dialog
@@ -261,7 +258,7 @@ export class AutoScriptNextGen implements IAutoScriptService {
                 }
             });
         } catch (error) {
-            this.showError(`Failed to delete script: ${(error as Error).message}`);
+            showError(`Failed to delete script: ${(error as Error).message}`);
         }
     }
 
@@ -295,51 +292,6 @@ export class AutoScriptNextGen implements IAutoScriptService {
         return languageToExtension[language.toLowerCase()] || 'txt'; // Default to 'txt' if language is unknown
     }
 
-    async executeScript(): Promise<void> {
-        try {
-            this.logger.debug('Executing script...');
-            const source = this.getSource();
-            if (!source || source.length === 0) {
-                this.showError("No file is open");
-                return;
-            }
-            // Step 1: Create MXSCRIPT -- later
-            // const mxscript = await this.getMaximoClient().autoScript.create({
-            //     name: `MXSCRIPT_${Date.now()}`,
-            //     language: this.getFileExtensionFromLanguage(vscode.window.activeTextEditor.document.languageId),
-            //     source: source
-            // });
-            // Step 2: Call mxscript with the source
-            const result = await this.getMaximoClient().scriptHandler.executeScript('scriptrun', {
-                method: 'POST',
-                body: source,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            // Step 3: Parse and display results
-            this.logger.debug(`Script executed successfully: ${JSON.stringify(result)}`);
-            this.showInformation(`Script executed successfully: ${result.output}`);
-            // Step 4: Delete MXSCRIPT -- later
-        } catch (error) {
-            this.showError(`Failed to execute script: ${(error as Error).message}`);
-        }
 
-    }
-
-    private showWarning(message: string): void {
-        vscode.window.showWarningMessage(message);
-        this.logger.warn(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
-    }
-
-    private showInformation(message: string): void {
-        vscode.window.showInformationMessage(message);
-        this.logger.info(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
-    }
-
-    private showError(message: string): void {
-        vscode.window.showErrorMessage(message);
-        this.logger.error(`${message} [Environment: ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}]`);
-    }
 
 }

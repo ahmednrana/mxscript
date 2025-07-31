@@ -1,8 +1,32 @@
 import { Constants } from "../Constants";
 import IConfigService from "../service/Config/IConfigService";
 import { AuthType, LogLevel } from "maximo-api-client";
+import * as vscode from 'vscode';
+import * as path from 'path';
+import { ConfigService } from "../service/Config/ConfigService";
+import { Logger } from "../service/Logger/Logger";
+/**
+ * Gets the file extension of the currently open editor tab.
+ */
+export function getFileExtension(): string {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { return ''; }
+    const fileName = path.basename(editor.document.fileName);
+    return fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
+}
 
-
+/**
+ * Gets the filename in Upper case without extension from the currently open editor tab.
+ * @returns The filename without extension from the currently open editor tab.
+ */
+export function getFilename(): string {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) { return ''; }
+    let filename = path.basename(editor.document.fileName);
+    filename = filename.toUpperCase();
+    filename = filename.substring(0, filename.lastIndexOf('.'));
+    return filename;
+}
 
 export function getLanguageFromExtension(configService: IConfigService): string | undefined {
     let languageToExtension: Map<string, string> = new Map<string, string>();
@@ -19,7 +43,7 @@ export function getLanguageFromExtension(configService: IConfigService): string 
     else {
         languageToExtension.set(Constants.LANG_PYTHON, Constants.EXT_PYTHON);
     }
-    const entry = [...languageToExtension.entries()].find(([_, v]) => v === configService.getFileExtension());
+    const entry = [...languageToExtension.entries()].find(([_, v]) => v === getFileExtension());
     return entry ? entry[0] : Constants.LANG_JYTHON;
 }
 
@@ -54,4 +78,25 @@ export function getLogLevel(logLevel: string): LogLevel {
         default:
             return LogLevel.INFO;
     }
+}
+
+export function showWarning(message: string): void {
+    let configService = new ConfigService();
+    const logger = Logger.getInstance();
+    vscode.window.showWarningMessage(message);
+    logger.warn(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
+}
+
+export function showInformation(message: string): void {
+    let configService = new ConfigService();
+    const logger = Logger.getInstance();
+    vscode.window.showInformationMessage(message);
+    logger.info(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
+}
+
+export function showError(message: string): void {
+    let configService = new ConfigService();
+    const logger = Logger.getInstance();
+    vscode.window.showErrorMessage(message);
+    logger.error(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
 }
