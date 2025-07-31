@@ -336,8 +336,13 @@ export class EnvironmentEditorPanel {
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="objectStructure">Object Structure</label>
+                        <label for="objectStructure">Script Object Structure</label>
                         <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${this._environment ? this._environment.objectStructure : 'MXSCRIPT'}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appxmlObjectStructure">App XML Object Structure</label>
+                        <input type="text" id="appxmlObjectStructure" placeholder="MXAPPXML" value="${this._environment ? this._environment.appxml_objectStructure : 'MXAPPXML'}">
                     </div>
                     
                     <div class="form-group">
@@ -361,6 +366,11 @@ export class EnvironmentEditorPanel {
                     <div class="checkbox-group">
                         <input type="checkbox" id="ignoreSsl" ${this._environment ? this._environment.ignoreSslErrors ? 'checked' : '' : 'checked'}>
                         <label for="ignoreSsl">Ignore SSL errors</label>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="formatXmlOnDownload" ${this._environment ? (this._environment.formatXmlOnDownloadAndCompare !== false ? 'checked' : '') : 'checked'}>
+                        <label for="formatXmlOnDownload">Format XML on download and compare</label>
                     </div>
                 </div>
                 
@@ -557,9 +567,11 @@ export class EnvironmentEditorPanel {
                             password: document.getElementById('password')?.value || '',
                             apikey: document.getElementById('apikey')?.value || '',
                             objectStructure: document.getElementById('objectStructure').value,
+                            appxml_objectStructure: document.getElementById('appxmlObjectStructure').value,
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
+                            formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
                             scope: document.querySelector('input[name="scope"]:checked')?.value || 'global'
                         };
                     }
@@ -579,9 +591,11 @@ export class EnvironmentEditorPanel {
                             password: document.getElementById('password')?.value || '',
                             apikey: document.getElementById('apikey')?.value || '',
                             objectStructure: document.getElementById('objectStructure').value,
+                            appxml_objectStructure: document.getElementById('appxmlObjectStructure').value,
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
+                            formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
                             scope: document.querySelector('input[name="scope"]:checked')?.value || 'global'
                         };
                         

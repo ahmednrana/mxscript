@@ -25,6 +25,7 @@ export class ConfigService implements IConfigService {
   private activeEnvironmentName: string;
   private ignoreSsl: boolean;
   private vscode = require("vscode");
+  private formatXmlOnDownloadAndCompare: boolean;
 
   constructor() {
     const config = this.vscode.workspace.getConfiguration('mxscript');
@@ -54,13 +55,7 @@ export class ConfigService implements IConfigService {
     // NOTE: The line below is a global side-effect. It's better to manage this in extension.ts
     // using vscode.workspace.onDidChangeConfiguration to avoid race conditions and redundancy.
     // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
-  }
-  getFileExtension(): string {
-    const currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor?.document.fileName;
-    if (!currentlyOpenTabfilePath) { return ''; }
-    let filename: string = path.basename(currentlyOpenTabfilePath);
-    filename = filename.toLowerCase();
-    return filename.substring(filename.lastIndexOf('.') + 1);
+    this.formatXmlOnDownloadAndCompare = config.get("appxml.formatOnDownloadAndCompare") !== false;
   }
   getLanguageTag(): string {
     return this.languageTag;
@@ -131,14 +126,6 @@ export class ConfigService implements IConfigService {
     url = (port && port > 0) ? url + ":" + port : url;
     return url;
   }
-  public getFilename(): string {
-    const currentlyOpenTabfilePath: string = this.vscode.window.activeTextEditor?.document.fileName;
-    if (!currentlyOpenTabfilePath) { return ''; }
-    let filename: string = path.basename(currentlyOpenTabfilePath);
-    filename = filename.toUpperCase();
-    filename = filename.substring(0, filename.lastIndexOf('.'));
-    return filename;
-  }
   public ignoreSslError(): boolean {
     return this.ignoreSsl;
   }
@@ -148,6 +135,10 @@ export class ConfigService implements IConfigService {
 
   public getActiveEnvironmentName(): string {
     return this.activeEnvironmentName;
+  }
+
+  public getFormatXmlOnDownloadAndCompare(): boolean {
+    return this.formatXmlOnDownloadAndCompare;
   }
 
   public toString(): string {
