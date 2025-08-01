@@ -23,4 +23,6 @@ export default interface IConfigService {
   getActiveEnvironmentName(): string;
   getFormatXmlOnDownloadAndCompare(): boolean;
   toString(): string;
+  getAppxmlOs: () => string;
+  getIgnoreSslErrors: () => boolean;
 }

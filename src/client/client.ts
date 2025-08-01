@@ -29,7 +29,8 @@ export class MaximoClientProvider {
         'mxscript.scriptSettings.logLevel',
         'mxscript.scriptSettings.ignoresslerrors',
         'mxscript.serverSettings.activeEnvironmentName',
-        'mxscript.appxml.formatOnDownloadAndCompare'
+        'mxscript.appxml.formatOnDownloadAndCompare',
+        'mxscript.appxml.appxmlObjectStructure'
     ];
 
     /**
@@ -138,9 +139,11 @@ export class MaximoClientProvider {
             apiKey: this.configService.getApiKey(),
             port: Number(this.configService.getPort()),
             autoscriptObjectStructure: this.configService.getOS(),
+            appXmlObjectStructure: this.configService.getAppxmlOs(),
             logLevel: getLogLevel(this.configService.getLogLevel()),
             leanMode: true,
-            autoAuthenticate: true
+            autoAuthenticate: true,
+            rejectUnauthorized: !this.configService.getIgnoreSslErrors()
         };
     }
     private createClientConfigFromEnvironment(environment: MaximoEnvironment): MaximoClientConfig {
@@ -153,9 +156,10 @@ export class MaximoClientProvider {
             apiKey: environment.apikey,
             port: Number(environment.port),
             autoscriptObjectStructure: environment.objectStructure,
+            appXmlObjectStructure: environment.appxml_objectStructure,
             logLevel: getLogLevel(environment.logLevel),
-            leanMode: true,
-            autoAuthenticate: true
+            autoAuthenticate: true,
+            rejectUnauthorized: !environment.ignoreSslErrors
         };
     }
 

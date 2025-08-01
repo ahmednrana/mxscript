@@ -25,6 +25,7 @@ export class MockConfigService implements IConfigService {
   private languageTag: string;
   private ignoreSsl: boolean;
   private formatXmlOnDownloadAndCompare: boolean;
+  private appxmlOs: string;
 
   constructor(authType: string) {
     this.hostname = '10.231.105.128';
@@ -48,6 +49,14 @@ export class MockConfigService implements IConfigService {
     this.languageTag = "SCRIPTLANGUAGE";
     this.formatXmlOnDownloadAndCompare = true;
     this.ignoreSsl = true;
+    this.appxmlOs = 'mxappxml';
+    this.ignoreSsl = true;
+  }
+  public getIgnoreSslErrors(): boolean {
+    return this.ignoreSsl;
+  };
+  public getAppxmlOs(): string {
+    return this.appxmlOs;
   }
   public ignoreSslError(): boolean {
     return this.ignoreSsl;

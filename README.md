@@ -219,6 +219,15 @@ If you encounter any bug then please open an issue at github [repository](https:
 
 ## Release Notes
 
+### 1.0.5
+
+Fixed ssl ignore settings
+
+
+### 1.0.1
+
+Fixed app xml OS not being saved
+
 ### 1.0.0
 
 Added support for managing application xml

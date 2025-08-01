@@ -9,6 +9,7 @@ export class ConfigService implements IConfigService {
   private hostname: string;
   private port: number;
   private os: string;
+  private appxmlOs: string;
   private object: string;
   private nameSpaceAttr: string;
   private nameSpace: string;
@@ -37,6 +38,7 @@ export class ConfigService implements IConfigService {
     this.password = config.get('authentication.password');
     this.apikey = config.get('authentication.apikey');
     this.os = config.get('serverSettings.objectStructure');
+    this.appxmlOs = config.get('appxml.objectStructure');
     this.authType = config.get('authentication.authenticationType');
     this.ldapAuth = (this.authType === 'internal' || this.authType === 'api') ? false : true;
     this.scriptLogLevel = config.get('scriptSettings.logLevel');
@@ -141,12 +143,20 @@ export class ConfigService implements IConfigService {
     return this.formatXmlOnDownloadAndCompare;
   }
 
+  public getAppxmlOs(): string {
+    return this.appxmlOs;
+  }
+  public getIgnoreSslErrors(): boolean {
+    return this.ignoreSsl;
+  }
+
   public toString(): string {
     return JSON.stringify({
       username: this.username,
       password: this.password,
       apikey: this.apikey,
       os: this.os,
+      appxmlOs: this.appxmlOs,
       authType: this.authType,
       ldapAuth: this.ldapAuth,
       url: this.url,
