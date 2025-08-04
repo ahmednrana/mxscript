@@ -219,6 +219,10 @@ If you encounter any bug then please open an issue at github [repository](https:
 
 ## Release Notes
 
+### 1.1.0
+
+Fixed script creation error for non english languages
+
 ### 1.0.5
 
 Fixed ssl ignore settings
