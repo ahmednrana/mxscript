@@ -291,7 +291,7 @@ export class EnvironmentEditorPanel {
                     
                     <div class="form-group">
                         <label for="port">Port</label>
-                        <input type="number" id="port" placeholder="9080" value="${this._environment ? this._environment.port : '9080'}">
+                        <input type="number" id="port" placeholder="443" value="${this._environment ? this._environment.port : '443'}">
                     </div>
                     
                     <div class="form-group">

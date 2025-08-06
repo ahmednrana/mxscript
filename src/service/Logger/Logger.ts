@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { format } from 'util';
+import { ILogger } from 'maximo-api-client';
 
 export enum LogLevel {
   ERROR = 'error',
@@ -8,7 +10,7 @@ export enum LogLevel {
   TRACE = 'trace'
 }
 
-export class Logger {
+export class Logger implements ILogger {
     private static instance: Logger;
     private outputChannel: vscode.OutputChannel;
     private logLevel: LogLevel;
@@ -32,11 +34,24 @@ export class Logger {
         return Logger.instance;
     }
 
-    public setLogLevel(level: LogLevel): void {
-        this.logLevel = level;
+    /**
+     * Sets the log level for the logger.
+     * @param level The log level as a string (e.g., 'info', 'debug').
+     */
+    public setLogLevel(level: string): void {
+        const newLevel = level.toLowerCase() as LogLevel;
+        if (Object.values(LogLevel).includes(newLevel)) {
+            this.logLevel = newLevel;
+        } else {
+            this.warn(`Attempted to set invalid log level: ${level}. Keeping ${this.logLevel}.`);
+        }
     }
 
-    public getLogLevel(): LogLevel {
+    /**
+     * Gets the current log level as a string.
+     * @returns The current log level.
+     */
+    public getLogLevel(): string {
         return this.logLevel;
     }
 
@@ -44,36 +59,33 @@ export class Logger {
         return this.logLevelOrder[level] <= this.logLevelOrder[this.logLevel];
     }
 
-    public trace(message: string): void {
+    public trace(...args: any[]): void {
         if (this.isLevelEnabled(LogLevel.TRACE)) {
-            this.log(message, 'TRACE');
+            this.log(format(...args), 'TRACE');
         }
     }
 
-    public debug(message: string): void {
+    public debug(...args: any[]): void {
         if (this.isLevelEnabled(LogLevel.DEBUG)) {
-            this.log(message, 'DEBUG');
+            this.log(format(...args), 'DEBUG');
         }
     }
 
-    public info(message: string): void {
+    public info(...args: any[]): void {
         if (this.isLevelEnabled(LogLevel.INFO)) {
-            this.log(message, 'INFO');
+            this.log(format(...args), 'INFO');
         }
     }
 
-    public warn(message: string): void {
+    public warn(...args: any[]): void {
         if (this.isLevelEnabled(LogLevel.WARN)) {
-            this.log(message, 'WARN');
+            this.log(format(...args), 'WARN');
         }
     }
 
-    public error(message: string, error?: Error): void {
+    public error(...args: any[]): void {
         if (this.isLevelEnabled(LogLevel.ERROR)) {
-            this.log(message, 'ERROR');
-            if (error) {
-                this.log(error.stack || error.toString(), 'ERROR');
-            }
+            this.log(format(...args), 'ERROR');
         }
     }
 
@@ -93,4 +105,14 @@ export class Logger {
         const timestamp = new Date().toISOString();
         this.outputChannel.appendLine(`[${timestamp}] [${level}] ${message}`);
     }
+
+    /**
+     * Disposes the output channel.
+     * Should be called when the extension is deactivated.
+     */
+    public dispose(): void {
+        this.outputChannel.dispose();
+    }
+
+    
 }

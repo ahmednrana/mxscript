@@ -45,6 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   logger.info('MxScript extension activated');
+  logger.debug('Debug message', { context: 'Sample debug' });
+  logger.error('Error occurred', { error: 'Sample error' });
+  logger.trace('Trace message with additional context', { context: 'Initialization' });
+  logger.warn('Warning message', { warning: 'Sample warning' });
 
 
   const MxScriptScheme = 'mxscript';
@@ -524,4 +528,4 @@ async function ensureWorkspaceConfigured(
   }
 }
 
-export function deactivate() { }
+export function deactivate() { Logger.getInstance().dispose() }

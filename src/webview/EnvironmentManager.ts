@@ -392,7 +392,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     
                     <div class="form-group">
                         <label for="port">Port</label>
-                        <input type="number" id="port" placeholder="9080">
+                        <input type="number" id="port" placeholder="443">
                     </div>
                     
                     <div class="form-group">
@@ -658,8 +658,8 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         const newEnvironment = {
                             name: document.getElementById('envName').value,
                             hostname: document.getElementById('hostname').value,
-                            port: portValue ? parseInt(portValue, 10) : 9080,
                             httpProtocol: document.getElementById('httpProtocol').value,
+                            port: portValue ? parseInt(portValue, 10) : document.getElementById('httpProtocol').value === 'https' ? 443 : 9080,
                             authenticationType: document.getElementById('authType').value,
                             username: document.getElementById('username').value,
                             password: document.getElementById('password').value,

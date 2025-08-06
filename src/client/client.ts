@@ -143,7 +143,8 @@ export class MaximoClientProvider {
             logLevel: getLogLevel(this.configService.getLogLevel()),
             leanMode: true,
             autoAuthenticate: true,
-            rejectUnauthorized: !this.configService.getIgnoreSslErrors()
+            rejectUnauthorized: !this.configService.getIgnoreSslErrors(),
+            logger: this.logger
         };
     }
     private createClientConfigFromEnvironment(environment: MaximoEnvironment): MaximoClientConfig {
@@ -159,7 +160,9 @@ export class MaximoClientProvider {
             appXmlObjectStructure: environment.appxml_objectStructure,
             logLevel: getLogLevel(environment.logLevel),
             autoAuthenticate: true,
-            rejectUnauthorized: !environment.ignoreSslErrors
+            rejectUnauthorized: !environment.ignoreSslErrors,
+            leanMode: true,
+            logger: this.logger
         };
     }
 
