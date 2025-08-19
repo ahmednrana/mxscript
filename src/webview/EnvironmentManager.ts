@@ -439,7 +439,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     
                     <div class="form-group">
                         <label for="appxmlObjectStructure">App XML Object Structure</label>
-                        <input type="text" id="appxmlObjectStructure" placeholder="MXAPPXML">
+                        <input type="text" id="appxmlObjectStructure" placeholder="MXL_APPS">
                     </div>
                     
                     <div class="form-group">
@@ -629,7 +629,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('password').value = '';
                         document.getElementById('apikey').value = '';
                         document.getElementById('objectStructure').value = 'MXSCRIPT';
-                        document.getElementById('appxmlObjectStructure').value = 'MXAPPXML';
+                        document.getElementById('appxmlObjectStructure').value = 'MXL_APPS';
                         document.getElementById('logLevel').value = 'ERROR';
                         document.getElementById('createPythonFile').checked = true;
                         document.getElementById('ignoreSsl').checked = false;
@@ -665,7 +665,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                             password: document.getElementById('password').value,
                             apikey: document.getElementById('apikey').value,
                             objectStructure: objectStructureValue || 'MXSCRIPT',
-                            appxml_objectStructure: appxmlObjectStructureValue || 'MXAPPXML',
+                            appxml_objectStructure: appxmlObjectStructureValue || 'MXL_APPS',
                             logLevel: document.getElementById('logLevel').value,
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
@@ -721,7 +721,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('password').value = env.password || '';
                         document.getElementById('apikey').value = env.apikey || '';
                         document.getElementById('objectStructure').value = env.objectStructure;
-                        document.getElementById('appxmlObjectStructure').value = env.appxml_objectStructure || 'MXAPPXML';
+                        document.getElementById('appxmlObjectStructure').value = env.appxml_objectStructure || 'MXL_APPS';
                         document.getElementById('logLevel').value = env.logLevel;
                         document.getElementById('createPythonFile').checked = env.createPythonFileForJythonScripts;
                         document.getElementById('ignoreSsl').checked = env.ignoreSslErrors;

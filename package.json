@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.1.5",
+  "version": "1.1.8",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -165,7 +165,7 @@
         },
         "mxscript.appxml.objectStructure": {
           "type": "string",
-          "default": "MXAPPXML",
+          "default": "MXL_APPS",
           "description": "Object Structure to be used for App XML uploading / downloading"
         },
         "mxscript.serverSettings.httpProtocol": {

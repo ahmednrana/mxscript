@@ -342,7 +342,7 @@ export class EnvironmentEditorPanel {
                     
                     <div class="form-group">
                         <label for="appxmlObjectStructure">App XML Object Structure</label>
-                        <input type="text" id="appxmlObjectStructure" placeholder="MXAPPXML" value="${this._environment ? this._environment.appxml_objectStructure : 'MXAPPXML'}">
+                        <input type="text" id="appxmlObjectStructure" placeholder="MXL_APPS" value="${this._environment ? this._environment.appxml_objectStructure : 'MXL_APPS'}">
                     </div>
                     
                     <div class="form-group">

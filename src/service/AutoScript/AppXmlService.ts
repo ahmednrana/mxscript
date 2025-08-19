@@ -34,7 +34,7 @@ export class AppXmlService implements SimpleOSService {
             this.logger.debug('Updating xml...');
             const fileName = getFilename();
 
-            let xmlFromServer = await this.getMaximoClient().appXml.downloadAppXml(fileName);
+            let xmlFromServer = await this.getMaximoClient().getMaxAppService().getAppPresentation(fileName);
             if (!xmlFromServer) {
                 showWarning(`No application xml found for the ${fileName} on ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
                 return;
@@ -118,7 +118,7 @@ export class AppXmlService implements SimpleOSService {
             }, async (progress) => {
                 // Step 1: Start downloading application xmls
                 progress.report({ increment: 0, message: "Downloading application xmls..." });
-                let downloadAllResponse = (await this.getMaximoClient().appXml.downloadAllAppXmls());
+                let downloadAllResponse = (await this.getMaximoClient().getMaxAppService().getAllAppPresentations());
 
                 if (downloadAllResponse.length === 0) {
                     vscode.window.showWarningMessage("No application xmls found on the server");
@@ -135,8 +135,10 @@ export class AppXmlService implements SimpleOSService {
                     const fileExtension = 'xml';
                     const fileName = `${appName}.${fileExtension}`;
                     const filePath = vscode.Uri.joinPath(selectedFolderUriResolved, fileName);
-                    const xmlContent = (this.configService.getFormatXmlOnDownloadAndCompare()) ? await this.formatXmlContent(appxml.presentation || '')
-                     : appxml.presentation;
+                    // Safely obtain presentation XML from possible locations (maxpresentation array or presentation prop)
+                    const xmlRaw = appxml.maxpresentation?.[0]?.presentation ? appxml.maxpresentation[0].presentation : '';
+                    const xmlContent = (this.configService.getFormatXmlOnDownloadAndCompare()) ? await this.formatXmlContent(xmlRaw)
+                        : xmlRaw;
                     await vscode.workspace.fs.writeFile(filePath, Buffer.from(xmlContent || '', 'utf8'));
                 }
 
@@ -194,7 +196,7 @@ export class AppXmlService implements SimpleOSService {
         try {
             this.logger.debug('Comparing application xml with server...');
             const appName = getFilename();
-            let sourceFromServer = await this.getMaximoClient().appXml.downloadAppXml(appName);
+            let sourceFromServer = await this.getMaximoClient().getMaxAppService().getAppPresentation(appName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No application xml source found for the app ${appName}`);
                 this.logger.warn(`No application xml found for the app ${appName} from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);

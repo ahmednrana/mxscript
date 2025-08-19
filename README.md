@@ -205,7 +205,7 @@ This extension contributes the following settings:
 | `mxscript.authentication.apikey`                           | string  |          | API key Maximo Authentication                                                                     |
 | `mxscript.authentication.authenticationType`               | string  | internal | Type of Authentication (internal, ldap, apikey)                                                   |
 | `mxscript.serverSettings.objectStructure`                  | string  | MXSCRIPT | Object Structure to be used for scripts uploading / downloading / deletion                        |
-| `mxscript.appxml.objectStructure`                          | string  | MXAPPXML | Object Structure to be used for App XML uploading / downloading                                   |
+| `mxscript.appxml.objectStructure`                          | string  | MXL_APPS | Object Structure to be used for App XML uploading / downloading                                   |
 | `mxscript.serverSettings.httpProtocol`                     | string  | http     | Http protocol (http or https)                                                                     |
 | `mxscript.scriptSettings.createPythonFileForJythonScripts` | boolean | true     | Create Jython script in Maximo even if the file in editor is .py                                  |
 | `mxscript.scriptSettings.logLevel`                         | string  |          | The log level to set with scripts when creating / updating them (DEBUG, INFO, WARN, ERROR, FATAL) |
@@ -213,11 +213,17 @@ This extension contributes the following settings:
 | `mxscript.appxml.formatOnDownloadAndCompare`               | boolean | true     | Whether to format XML on download and compare                                                     |
 
 ## Known Issues
+In previous version the OS for apps was a simple one which had only one object in it i.e. MAXPRESENTATION. Now it requires an OS with at least objects in it. MAXAPPS and MAXPRESENTATION. You might need to re create that.
+
 
 Double check the authentication type, user/pass or the api key provided.  
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 1.1.8
+
+Fixed a bug where updating an XML wont be reflected in Maximo UI
 
 ### 1.1.5
 
