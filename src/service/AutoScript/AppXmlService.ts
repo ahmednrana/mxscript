@@ -166,7 +166,7 @@ export class AppXmlService implements SimpleOSService {
             }
             const appxml: Partial<MaxPresentation> = {
                 app: getFilename(),
-                presentation: source,
+                maxpresentation: [{presentation: source}],
                 properties: 'app'
             }
             const addUpdateBuilder = this.getMaximoClient().appXml.bulkOperation().addUpdate(appxml);
