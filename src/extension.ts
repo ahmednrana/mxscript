@@ -14,41 +14,16 @@ import { AppXmlService } from "./service/AutoScript/AppXmlService";
 let statusBarItem: vscode.StatusBarItem;
 
 export function activate(context: vscode.ExtensionContext) {
-  // Initialize logger
-  const logger = Logger.getInstance('MxScript');
 
-  // Configure logger based on settings
-  const config = vscode.workspace.getConfiguration('mxscript');
-  const logLevelSetting = config.get<string>('logging.level', 'info');
+
   const configService = new ConfigService();
+  // Configure the logger instance based on settings *before* anything else uses it.
+  const logger = Logger.getInstance('MxScript', configService.getLogLevel());
+  logger.info(`Logger level set to: ${configService.getLogLevel()}`);
 
   // Initialize the client wrapper (once, at startup)
   MaximoClientProvider.initialize(context, configService);
-
-  // Set log level
-  switch (logLevelSetting.toLowerCase()) {
-    case 'debug':
-      logger.setLogLevel(LogLevel.DEBUG);
-      break;
-    case 'info':
-      logger.setLogLevel(LogLevel.INFO);
-      break;
-    case 'warn':
-      logger.setLogLevel(LogLevel.WARN);
-      break;
-    case 'error':
-      logger.setLogLevel(LogLevel.ERROR);
-      break;
-    case 'none':
-      logger.setLogLevel(LogLevel.INFO);
-      break;
-  }
-
   logger.info('MxScript extension activated');
-  logger.debug('Debug message', { context: 'Sample debug' });
-  logger.error('Error occurred', { error: 'Sample error' });
-  logger.trace('Trace message with additional context', { context: 'Initialization' });
-  logger.warn('Warning message', { warning: 'Sample warning' });
 
 
   const MxScriptScheme = 'mxscript';
@@ -57,6 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
       return uri.path;
     }
   };
+
 
   // Create status bar item
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);

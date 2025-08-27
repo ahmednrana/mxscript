@@ -66,7 +66,7 @@ export function convertAuthType(authType: string): AuthType {
 }
 
 export function getLogLevel(logLevel: string): LogLevel {
-    switch (logLevel) {
+    switch (logLevel.toLowerCase()) {
         case 'error':
             return LogLevel.ERROR;
         case 'warn':

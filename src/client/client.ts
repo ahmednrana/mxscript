@@ -130,6 +130,7 @@ export class MaximoClientProvider {
      */
     private createClientConfig(): MaximoClientConfig {
         const hostname = this.configService.getHostname();
+        this.logger.setLogLevel(getLogLevel(this.configService.getLogLevel()))
         return {
             baseUrl: hostname,
             ssl: this.configService.getHttpProtocol() === 'https',
@@ -147,7 +148,9 @@ export class MaximoClientProvider {
             logger: this.logger
         };
     }
+    // This is needed sometimes becuase vscode is still reading older values
     private createClientConfigFromEnvironment(environment: MaximoEnvironment): MaximoClientConfig {
+        this.logger.setLogLevel(getLogLevel(environment.logLevel));
         return {
             baseUrl: environment.hostname,
             ssl: environment.httpProtocol === 'https',

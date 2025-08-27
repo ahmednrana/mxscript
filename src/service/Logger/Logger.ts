@@ -27,9 +27,10 @@ export class Logger implements ILogger {
         this.logLevel = LogLevel.INFO; // Default log level
     }
 
-    public static getInstance(channelName: string = 'MxScript'): Logger {
+    public static getInstance(channelName: string = 'MxScript', logLevel: string = 'INFO'): Logger {
         if (!Logger.instance) {
             Logger.instance = new Logger(channelName);
+            Logger.instance.setLogLevel(logLevel);
         }
         return Logger.instance;
     }
