@@ -199,6 +199,22 @@ This extension contributes the following settings:
 | Property Name                                              | Type    | Default  | Description                                                                                       |
 | --- | --- | --- | --- |
 | `mxscript.serverSettings.hostname`                         | string  |          | Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)                                  |
+
+---
+
+## Experimental React Playground
+
+An experimental React + `@vscode-elements/react-elements` playground view has been added to prototype a future rewrite of the environment manager UI.
+
+How to use:
+
+1. Run `npm run build:webviews` (or rely on `vscode:prepublish`) to build the bundle under `media/playground.js`.
+2. Reload the extension (Developer: Reload Window).
+3. Run the command: `MxScript: Open React Playground (Experimental)` – it now opens in an editor tab instead of the Explorer sidebar.
+4. A minimal counter + ping demo with a prominent "Hello World" heading is shown. Use the button inside the Environment Editor panel ("Open React Playground (Experimental)") to open it directly while editing environments.
+
+This is intentionally isolated—no existing environment CRUD logic has been moved yet. Once satisfied, components from the playground can be ported into a React-based environment manager.
+
 | `mxscript.serverSettings.port`                             | number  |          | Maximo port                                                                                       |
 | `mxscript.authentication.username`                         | string  | maxadmin | Username for Maximo Authentication                                                                |
 | `mxscript.authentication.password`                         | string  | maxadmin | Password for Maximo Authentication                                                                |

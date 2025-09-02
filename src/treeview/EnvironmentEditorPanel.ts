@@ -97,6 +97,11 @@ export class EnvironmentEditorPanel {
                             vscode.window.showErrorMessage(`Unexpected error during verification: ${error.message}`);
                         });
                         break;
+                    case 'executeCommand':
+                        if (message.command) {
+                            vscode.commands.executeCommand(message.command);
+                        }
+                        break;
 
                 }
             },
@@ -277,6 +282,9 @@ export class EnvironmentEditorPanel {
         <body>
             <div class="form-container">
                 <h2>${this._environment ? 'Edit Maximo Environment' : 'Add New Maximo Environment'}</h2>
+                <div style="margin-bottom:10px;">
+                    <button id="openPlaygroundBtn" style="background-color:var(--vscode-button-secondaryBackground);color:var(--vscode-button-foreground);">Open React Playground (Experimental)</button>
+                </div>
                 
                 <div class="form-group">
                     <label for="envName" class="required-label">Environment Name</label>
@@ -412,6 +420,7 @@ export class EnvironmentEditorPanel {
                     const hostname = document.getElementById('hostname');
                     const username = document.getElementById('username');
                     const apikey = document.getElementById('apikey');
+                    const openPlaygroundBtn = document.getElementById('openPlaygroundBtn');
                     
                     // Event Listeners
                     authType.addEventListener('change', toggleAuthFields);
@@ -419,6 +428,9 @@ export class EnvironmentEditorPanel {
                     verifyBtn.addEventListener('click', verifyCurrentSettings); // Listener for new button
                     cancelBtn.addEventListener('click', () => {
                         vscode.postMessage({ type: 'cancel' });
+                    });
+                    openPlaygroundBtn.addEventListener('click', () => {
+                        vscode.postMessage({ type: 'executeCommand', command: 'mxscript.openPlayground' });
                     });
                     
                     // Add input validation on keyup events

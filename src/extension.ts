@@ -3,6 +3,7 @@ import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoClientProvider } from './client/client';
 import { ConfigService } from './service/Config/ConfigService';
 import { EnvironmentManagerWebviewProvider, MaximoEnvironment } from './webview/EnvironmentManager';
+import { PlaygroundPanel } from './webview/PlaygroundWebviewProvider';
 import { MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
 import { EnvironmentEditorPanel } from './treeview/EnvironmentEditorPanel';
 import { Logger, LogLevel } from './service/Logger/Logger';
@@ -335,6 +336,13 @@ export function activate(context: vscode.ExtensionContext) {
     )
   );
   */
+
+  // Command to open playground panel in editor
+  context.subscriptions.push(
+    vscode.commands.registerCommand('mxscript.openPlayground', async () => {
+      PlaygroundPanel.createOrShow(context.extensionUri);
+    })
+  );
 
   // Register command for webview-to-editor communication
   context.subscriptions.push(

@@ -29,11 +29,12 @@
   ],
   "main": "./out/extension.js",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run build:webviews && npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
     "build": "tsc -p tsconfig.json",
+    "build:webviews": "node ./scripts/build-webview.js",
     "package": "vsce package",
     "publish": "vsce publish",
     "package:bundle-local": "echo \"[MXSCRIPT-BUILD] Starting VSIX packaging with local library...\" && cd ../../api/maximo-api-client && echo \"[MXSCRIPT-BUILD] Building maximo-api-client...\" && npm run build && echo \"[MXSCRIPT-BUILD] Cleaning up existing tarball in mxscript dir (if any)...\" && npx rimraf ../../vscode/mxscript/maximo-api-client-*.tgz && echo \"[MXSCRIPT-BUILD] Packing maximo-api-client to mxscript directory...\" && npm pack --pack-destination ../../vscode/mxscript/ && cd ../../vscode/mxscript && echo \"[MXSCRIPT-BUILD] Unlinking maximo-api-client from mxscript (if linked)...\" && (npm unlink --no-save maximo-api-client || true) && echo \"[MXSCRIPT-BUILD] Temporarily installing maximo-api-client from tarball (using PowerShell)...\" && powershell -NoProfile -NonInteractive -Command \"$tarball = Get-ChildItem -Path . -Filter 'maximo-api-client-*.tgz' | Select-Object -ExpandProperty Name -First 1; if ($tarball) { Write-Host \\\"[MXSCRIPT-BUILD] PowerShell: Found tarball: $($tarball). Installing...\\\"; npm install --no-save \\\"./$($tarball)\\\" } else { Write-Error 'ERROR: Maximo API client tarball not found in current directory.' ; exit 1 }\" && echo \"[MXSCRIPT-BUILD] Packaging mxscript extension (VSIX)...\" && vsce package && echo \"[MXSCRIPT-BUILD] Cleaning up: Uninstalling tarball version of maximo-api-client...\" && npm uninstall --no-save maximo-api-client && echo \"[MXSCRIPT-BUILD] Cleaning up: Deleting newly created local tarball...\" && npx rimraf ./maximo-api-client-*.tgz && echo \"[MXSCRIPT-BUILD] Restoring: Re-linking maximo-api-client for development...\" && npm link maximo-api-client && echo \"[MXSCRIPT-BUILD] Packaging complete. VSIX created and development environment restored.\""
@@ -45,6 +46,7 @@
     "onCommand:mxscript.downloadall",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
+    "onCommand:mxscript.openPlayground",
     "onView:maximoEnvironments",
     "onCommand:mxscript.downloadallappxml"
   ],
@@ -115,6 +117,12 @@
         "title": "Set as Active Environment",
         "icon": "$(check)",
         "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.openPlayground",
+        "title": "Open React Playground (Experimental)",
+        "category": "Maximo [mxscript]",
+        "icon": "$(beaker)"
       }
     ],
     "configuration": {
@@ -255,6 +263,11 @@
           "command": "maximoEnvironments.addEnvironment",
           "when": "view == maximoEnvironments",
           "group": "navigation"
+        },
+        {
+          "command": "mxscript.openPlayground",
+          "when": "view == maximoEnvironments",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
@@ -279,13 +292,17 @@
   "devDependencies": {
     "@types/mocha": "^2.2.42",
     "@types/node": "^20.4.1",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
     "@types/vscode": "^1.44.0",
+    "esbuild": "^0.25.9",
     "rimraf": "^3.0.2",
     "tslint": "^5.12.1",
     "typescript": "^5.7.2"
   },
   "dependencies": {
     "@types/node-fetch": "^2.5.5",
+    "@vscode-elements/react-elements": "^2.3.1",
     "node-fetch": "^2.6.7",
     "xml-formatter": "^3.6.2",
     "xml2js": "^0.6.2"

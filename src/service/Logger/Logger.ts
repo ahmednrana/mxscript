@@ -102,7 +102,7 @@ export class Logger implements ILogger {
         this.outputChannel.clear();
     }
 
-    private log(message: string, level: string): void {
+    public log(message: string, level: string): void {
         const timestamp = new Date().toISOString();
         this.outputChannel.appendLine(`[${timestamp}] [${level}] ${message}`);
     }
