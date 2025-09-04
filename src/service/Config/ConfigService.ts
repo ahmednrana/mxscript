@@ -25,6 +25,7 @@ export class ConfigService implements IConfigService {
   private ldapAuth: boolean;
   private activeEnvironmentName: string;
   private ignoreSsl: boolean;
+  private sslcertificate: string;
   private vscode = require("vscode");
   private formatXmlOnDownloadAndCompare: boolean;
 
@@ -54,6 +55,7 @@ export class ConfigService implements IConfigService {
     this.LOG = 'LOG';
     this.activeEnvironmentName = config.get('serverSettings.activeEnvironmentName');
     this.ignoreSsl = config.get("scriptSettings.ignoresslerrors");
+    this.sslcertificate = config.get("scriptSettings.sslcertificate");
     // NOTE: The line below is a global side-effect. It's better to manage this in extension.ts
     // using vscode.workspace.onDidChangeConfiguration to avoid race conditions and redundancy.
     // process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = this.ignoreSsl ? '0' : '1';
@@ -148,6 +150,9 @@ export class ConfigService implements IConfigService {
   }
   public getIgnoreSslErrors(): boolean {
     return this.ignoreSsl;
+  }
+  public getSslCertificate(): string {
+    return this.sslcertificate;
   }
 
   public toString(): string {

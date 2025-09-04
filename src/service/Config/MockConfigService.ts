@@ -26,6 +26,7 @@ export class MockConfigService implements IConfigService {
   private ignoreSsl: boolean;
   private formatXmlOnDownloadAndCompare: boolean;
   private appxmlOs: string;
+  private sslcertificate: string = '';
 
   constructor(authType: string) {
     this.hostname = '10.231.105.128';
@@ -51,6 +52,9 @@ export class MockConfigService implements IConfigService {
     this.ignoreSsl = true;
     this.appxmlOs = 'mxappxml';
     this.ignoreSsl = true;
+  }
+  public getSslCertificate(): string {
+    return this.sslcertificate;
   }
   public getIgnoreSslErrors(): boolean {
     return this.ignoreSsl;
