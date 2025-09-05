@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface MaximoEnvironment {
+    sslcertificate: string;
     id: string;
     name: string;
     hostname: string;

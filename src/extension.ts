@@ -391,7 +391,7 @@ export function activate(context: vscode.ExtensionContext) {
         context.extensionUri,
         context,
         environment,
-        (updatedEnvironment: MaximoEnvironment) => {
+        async (updatedEnvironment: MaximoEnvironment) => { // made async
           // Find and update environment in appropriate storage
           const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
           const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
@@ -399,35 +399,39 @@ export function activate(context: vscode.ExtensionContext) {
           const globalIndex = globalEnvs.findIndex(e => e.id === updatedEnvironment.id);
           const workspaceIndex = workspaceEnvs.findIndex(e => e.id === updatedEnvironment.id);
 
+          const updatePromises: Thenable<any>[] = [];
+
           // Remove from current location
           if (globalIndex !== -1) {
             globalEnvs.splice(globalIndex, 1);
-            context.globalState.update('mxscript.environments', globalEnvs);
+            updatePromises.push(context.globalState.update('mxscript.environments', globalEnvs));
           } else if (workspaceIndex !== -1) {
             workspaceEnvs.splice(workspaceIndex, 1);
-            context.workspaceState.update('mxscript.environments', workspaceEnvs);
+            updatePromises.push(context.workspaceState.update('mxscript.environments', workspaceEnvs));
           }
 
           // Add to appropriate location based on scope
           if (updatedEnvironment.scope === 'workspace') {
             workspaceEnvs.push(updatedEnvironment);
-            context.workspaceState.update('mxscript.environments', workspaceEnvs);
+            updatePromises.push(context.workspaceState.update('mxscript.environments', workspaceEnvs));
           } else {
             globalEnvs.push(updatedEnvironment);
-            context.globalState.update('mxscript.environments', globalEnvs);
+            updatePromises.push(context.globalState.update('mxscript.environments', globalEnvs));
           }
+
+          // Wait for all state updates to persist to the Mementos
+          await Promise.all(updatePromises);
 
           // If this was the active environment, apply the updated settings
           const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
           if (activeEnvId === updatedEnvironment.id) {
-            // Update VSCode settings
-            maximoEnvironmentTreeProvider.setActiveEnvironment(updatedEnvironment.id);
+            // Re-apply the active environment after storage is up-to-date.
+            // Use silent=true if you don't want UI noise
+            maximoEnvironmentTreeProvider.setActiveEnvironment(updatedEnvironment.id, true);
           }
 
-          // Refresh the tree view
+          // Refresh the tree view and update status bar
           maximoEnvironmentTreeProvider.refresh();
-
-          // Update status bar
           updateStatusBar(context);
 
           vscode.window.showInformationMessage(`Updated Maximo environment: ${updatedEnvironment.name}`);

@@ -28,6 +28,7 @@ export class MaximoClientProvider {
         'mxscript.serverSettings.objectStructure',
         'mxscript.scriptSettings.logLevel',
         'mxscript.scriptSettings.ignoresslerrors',
+        'mxscript.scriptSettings.sslcertificate',
         'mxscript.serverSettings.activeEnvironmentName',
         'mxscript.appxml.formatOnDownloadAndCompare',
         'mxscript.appxml.objectStructure'
@@ -145,7 +146,8 @@ export class MaximoClientProvider {
             leanMode: true,
             autoAuthenticate: true,
             rejectUnauthorized: !this.configService.getIgnoreSslErrors(),
-            logger: this.logger
+            logger: this.logger,
+            ca: this.configService.getSslCertificate() ? this.configService.getSslCertificate() : undefined
         };
     }
     // This is needed sometimes becuase vscode is still reading older values
@@ -165,7 +167,8 @@ export class MaximoClientProvider {
             autoAuthenticate: true,
             rejectUnauthorized: !environment.ignoreSslErrors,
             leanMode: true,
-            logger: this.logger
+            logger: this.logger,
+            ca: environment.sslcertificate ? environment.sslcertificate : undefined
         };
     }
 

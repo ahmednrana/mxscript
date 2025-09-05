@@ -12,7 +12,7 @@ export class EnvironmentEditorPanel {
     public static currentPanel: EnvironmentEditorPanel | undefined;
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
-    
+
     public static createOrShow(
         extensionUri: vscode.Uri,
         context: vscode.ExtensionContext,
@@ -22,7 +22,7 @@ export class EnvironmentEditorPanel {
         const column = vscode.window.activeTextEditor
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
-            
+
         // If we already have a panel, show it
         if (EnvironmentEditorPanel.currentPanel) {
             EnvironmentEditorPanel.currentPanel._panel.reveal(column);
@@ -30,7 +30,7 @@ export class EnvironmentEditorPanel {
             EnvironmentEditorPanel.currentPanel._onSave = onSave;
             return;
         }
-        
+
         // Otherwise, create a new panel
         const panel = vscode.window.createWebviewPanel(
             'maximoEnvironmentEditor',
@@ -42,10 +42,10 @@ export class EnvironmentEditorPanel {
                 localResourceRoots: [extensionUri]
             }
         );
-        
+
         EnvironmentEditorPanel.currentPanel = new EnvironmentEditorPanel(panel, extensionUri, context, environment, onSave);
     }
-    
+
     private constructor(
         panel: vscode.WebviewPanel,
         private readonly _extensionUri: vscode.Uri,
@@ -54,13 +54,13 @@ export class EnvironmentEditorPanel {
         private _onSave?: (environment: MaximoEnvironment) => void
     ) {
         this._panel = panel;
-        
+
         // Set the webview's initial html content
         this._update();
-        
+
         // Listen for when the panel is disposed
         this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-        
+
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(
             message => {
@@ -83,10 +83,10 @@ export class EnvironmentEditorPanel {
                         break;
                     case 'verifySettings':
                         // Show a temporary message in the webview
-                        this._panel.webview.postMessage({ 
-                            type: 'verificationResult', 
+                        this._panel.webview.postMessage({
+                            type: 'verificationResult',
                             success: null, // Indicates processing
-                            message: 'Verifying settings...' 
+                            message: 'Verifying settings...'
                         });
                         this._verifySettings(message.environment).then(result => {
                             this._panel.webview.postMessage({
@@ -109,13 +109,13 @@ export class EnvironmentEditorPanel {
             this._disposables
         );
     }
-    
+
     public dispose() {
         EnvironmentEditorPanel.currentPanel = undefined;
-        
+
         // Clean up resources
         this._panel.dispose();
-        
+
         while (this._disposables.length) {
             const x = this._disposables.pop();
             if (x) {
@@ -123,16 +123,16 @@ export class EnvironmentEditorPanel {
             }
         }
     }
-    
+
     public update(environment?: MaximoEnvironment) {
         this._environment = environment;
         this._update();
     }
-    
+
     private _update() {
         const webview = this._panel.webview;
-        this._panel.title = this._environment 
-            ? `Edit Environment: ${this._environment.name}` 
+        this._panel.title = this._environment
+            ? `Edit Environment: ${this._environment.name}`
             : 'Add New Maximo Environment';
         webview.html = this._getHtmlForWebview();
     }
@@ -152,22 +152,23 @@ export class EnvironmentEditorPanel {
                 autoAuthenticate: true,
                 rejectUnauthorized: !environmentData.ignoreSslErrors,
                 autoscriptObjectStructure: environmentData.objectStructure,
+                ca: environmentData.sslcertificate ? environmentData.sslcertificate : undefined,
             };
 
             const client = new MaximoClient(clientConfig);
             // Attempt to get whoami info, which also implies successful authentication
             const whoamiResponse = await client.oslcInfoService.getWhoAmI();
-            
-            return { 
-                success: true, 
-                message: `Verification successful. Connected as: ${whoamiResponse.displayName || whoamiResponse.loginID}` 
+
+            return {
+                success: true,
+                message: `Verification successful. Connected as: ${whoamiResponse.displayName || whoamiResponse.loginID}`
             };
         } catch (error: any) {
             let errorMessage = 'Verification failed.';
             if (error.message) {
                 errorMessage = `Verification failed: ${error.message}`;
             }
-            else if (error.code){
+            else if (error.code) {
                 errorMessage = `Verification failed: ${error.code}`;
             }
             return { success: false, message: errorMessage };
@@ -306,7 +307,7 @@ export class EnvironmentEditorPanel {
                         <label for="httpProtocol">HTTP Protocol</label>
                         <select id="httpProtocol">
                             <option value="http" ${this._environment?.httpProtocol === 'http' ? 'selected' : ''}>HTTP</option>
-                            <option value="https" ${this._environment?.httpProtocol === 'https' ? 'selected' : ''}>HTTPS</option>
+                            <option value="https" ${!this._environment || this._environment?.httpProtocol === 'https' ? 'selected' : ''}>HTTPS</option>
                         </select>
                     </div>
                 </div>
@@ -382,6 +383,11 @@ export class EnvironmentEditorPanel {
                     </div>
                 </div>
                 
+                <div class="form-group">
+                    <label for="sslcertificate">SSL Certificate (PEM format)</label>
+                    <textarea id="sslcertificate" rows="3" style="resize:vertical; overflow:auto;" placeholder="Paste PEM certificate here">${this._environment?.sslcertificate || ''}</textarea>
+                </div>
+
                 <div class="form-group">
                     <label>Environment Scope</label>
                     <div class="radio-group">
@@ -584,7 +590,8 @@ export class EnvironmentEditorPanel {
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
                             formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
-                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global'
+                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global',
+                            sslcertificate: document.getElementById('sslcertificate')?.value || ''
                         };
                     }
 
@@ -608,7 +615,8 @@ export class EnvironmentEditorPanel {
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
                             formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
-                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global'
+                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global',
+                            sslcertificate: document.getElementById('sslcertificate')?.value || ''
                         };
                         
                         // Validate required fields

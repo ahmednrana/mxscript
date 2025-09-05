@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.2.0",
+  "version": "1.2.8",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -216,6 +216,10 @@
           "type": "boolean",
           "default": false,
           "markdownDescription": "Ignore ssl errors"
+        },
+        "mxscript.scriptSettings.sslcertificate": {
+          "type": "string",
+          "markdownDescription": "Use custom SSL certificate"
         },
         "mxscript.logging.level": {
           "type": "string",

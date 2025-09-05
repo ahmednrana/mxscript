@@ -226,6 +226,7 @@ This is intentionally isolated—no existing environment CRUD logic has been mov
 | `mxscript.scriptSettings.createPythonFileForJythonScripts` | boolean | true     | Create Jython script in Maximo even if the file in editor is .py                                  |
 | `mxscript.scriptSettings.logLevel`                         | string  |          | The log level to set with scripts when creating / updating them (DEBUG, INFO, WARN, ERROR, FATAL) |
 | `mxscript.scriptSettings.ignoresslerrors`                  | boolean | false    | Ignore SSL errors                                                                                 |
+| `mxscript.scriptSettings.sslcertificate `                  | string  |          | a custom certifcate                                                                               |
 | `mxscript.appxml.formatOnDownloadAndCompare`               | boolean | true     | Whether to format XML on download and compare                                                     |
 
 ## Known Issues
@@ -236,6 +237,10 @@ Double check the authentication type, user/pass or the api key provided.
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 1.2.5
+
+Added option to add a custom ssl certificate
 
 ### 1.1.8
 

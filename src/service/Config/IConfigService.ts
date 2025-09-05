@@ -1,4 +1,5 @@
 export default interface IConfigService {
+  getSslCertificate: () => string;
   isLdap: () => boolean;
   getSourceTag: () => string;
   getLanguageTag: () => string;
