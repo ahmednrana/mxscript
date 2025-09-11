@@ -1,7 +1,3 @@
-// A launch configuration that compiles the extension and then opens it inside a new window
-// Use IntelliSense to learn about possible attributes.
-// Hover to view descriptions of existing attributes.
-// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 {
 	"version": "0.2.0",
 	"configurations": [
@@ -10,27 +6,15 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": [
-				"--disable-extensions",
-				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--folder-uri",
-				"${workspaceFolder}/../mxscripttest",
-			],
+			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+			"preLaunchTask": "npm: watch (webview)",
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js",
-				"${workspaceFolder}/../maximo-api-client/dist/**/*.js"
+				"${workspaceFolder}/out/**/*.js"
 			],
-			// "preLaunchTask": "npm: watch",
-			"preLaunchTask": "npm: compile",
 			"skipFiles": [
-				"${workspaceFolder}/bower_components/**/*.js",
-				"${workspaceFolder}/public/bower_components/**/*.js",
-				"**/bower_components/**/*.js",
 				"${workspaceFolder}/node_modules/**/*.js",
 				"**/node_modules/**/*.js",
-				"node_modules/**/*.js",
 				"<node_internals>/**/*.js"
-				// "**/*.js"
 			]
 		},
 		{
@@ -39,41 +23,12 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"-g '/workspaces/mxscript/src/test/testwp/'",
-				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test"
 			],
-			"outFiles": [
-				"${workspaceFolder}/out/test/**/*.js"
-			],
-			"preLaunchTask": "npm: watch",
-			"skipFiles": [
-				"${workspaceFolder}/bower_components/**/*.js",
-				"${workspaceFolder}/public/bower_components/**/*.js",
-				"**/bower_components/**/*.js",
-				"${workspaceFolder}/node_modules/**/*.js",
-				"**/node_modules/**/*.js",
-				"node_modules/**/*.js",
-				"<node_internals>/**/*.js"
-				// "**/*.js"
-			]
-		},
-		{
-			"name": "Current File",
-			"type": "node",
-			"request": "launch",
-			"runtimeArgs": [
-				"-r",
-				"ts-node/register"
-			],
-			"args": [
-				"-r",
-				"ts-node/register"
-			],
-			"cwd": "${workspaceRoot}",
-			// "protocol": "inspector",
-			"internalConsoleOptions": "openOnSessionStart"
+			"outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+			"preLaunchTask": "npm: watch (webview)",
+			"skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "<node_internals>/**/*.js"]
 		}
 	]
 }

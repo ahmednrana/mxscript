@@ -34,11 +34,11 @@ export const EnvironmentEditor: React.FC = () => {
         <VscodeTextfield label="API Key" placeholder="your-api-key" type="password" />
         <VscodeTextfield label="Username" placeholder="your-username" />
         <VscodeTextfield label="Password" placeholder="your-password" type="password" />
-        <VscodeCheckbox>Ignore SSL Errors</VscodeCheckbox>
+        <VscodeCheckbox>Ignore SSLs Errors</VscodeCheckbox>
         <VscodeButton >Save Environment</VscodeButton>
         <p>
           <VscodeTextfield placeholder="Type something">
-            <VscodeBadge slot="content-after">308 Settings Found</VscodeBadge>
+            <VscodeBadge slot="content-after">46 Settings Founds</VscodeBadge>
             <VscodeIcon
               slot="content-after"
               name="clear-all"
@@ -153,7 +153,7 @@ export const EnvironmentEditor: React.FC = () => {
         </VscodeTabHeader>
         <VscodeTabPanel>
           <p>
-            Aliquam malesuada rhoncus nulla...
+            Aliquam malesuada rhoncus nulla...bfbfbf
           </p>
         </VscodeTabPanel>
         <VscodeTabHeader>Dolor</VscodeTabHeader>

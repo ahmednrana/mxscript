@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 import { MaximoClient, MaximoClientConfig } from 'maximo-api-client';
 import { convertAuthType, getLogLevel } from '../utils/utils';
 
@@ -7,6 +9,7 @@ export class PlaygroundPanel {
   public static readonly viewType = 'mxscript.playgroundPanel';
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
+  private _watcher: fs.FSWatcher | undefined;
 
   public static createOrShow(extensionUri: vscode.Uri) {
     const column = vscode.window.activeTextEditor?.viewColumn;
@@ -86,11 +89,33 @@ export class PlaygroundPanel {
     }, null, this._disposables);
 
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+
+    // Watch the built playground bundle and notify the webview to reload when it changes.
+    try {
+      const scriptPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'playground.js').fsPath;
+      if (fs.existsSync(scriptPath)) {
+        this._watcher = fs.watch(scriptPath, { persistent: false }, (eventType) => {
+          if (eventType === 'change' || eventType === 'rename') {
+            try {
+              this._panel.webview.postMessage({ type: 'reload' });
+            } catch (err) {
+              // ignore
+            }
+          }
+        });
+      }
+    } catch (err) {
+      // ignore watcher errors in environments where fs.watch may not be available
+    }
   }
 
   public dispose() {
     PlaygroundPanel.currentPanel = undefined;
     this._panel.dispose();
+    if (this._watcher) {
+      try { this._watcher.close(); } catch {}
+      this._watcher = undefined;
+    }
     while (this._disposables.length) {
       const d = this._disposables.pop();
       try { d?.dispose(); } catch {}
@@ -110,6 +135,18 @@ export class PlaygroundPanel {
 </head>
 <body>
   <div id="root"></div>
+  <script nonce="${nonce}">
+    // Listen for reload messages from the extension and reload the webview when the bundle changes
+    window.addEventListener('message', event => {
+      try {
+        const msg = event.data;
+        if (msg && msg.type === 'reload') {
+          // Reload to pick up the rebuilt bundle
+          location.reload();
+        }
+      } catch (e) {}
+    });
+  </script>
   <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
