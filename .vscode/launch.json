@@ -20,7 +20,8 @@
 				"${workspaceFolder}/out/**/*.js",
 				"${workspaceFolder}/../maximo-api-client/dist/**/*.js"
 			],
-			"preLaunchTask": "npm: watch",
+			// "preLaunchTask": "npm: watch",
+			"preLaunchTask": "npm: compile",
 			"skipFiles": [
 				"${workspaceFolder}/bower_components/**/*.js",
 				"${workspaceFolder}/public/bower_components/**/*.js",

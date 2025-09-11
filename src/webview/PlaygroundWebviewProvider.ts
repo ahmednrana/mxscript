@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { MaximoClient, MaximoClientConfig } from 'maximo-api-client';
+import { convertAuthType, getLogLevel } from '../utils/utils';
 
 export class PlaygroundPanel {
   public static currentPanel: PlaygroundPanel | undefined;
@@ -34,9 +36,52 @@ export class PlaygroundPanel {
     this._panel.webview.html = this._getHtml(this._panel.webview);
 
     this._panel.webview.onDidReceiveMessage(msg => {
+      // Simple ping/pong
       if (msg?.type === 'ping') {
         vscode.window.showInformationMessage(`[Playground] Received ping with count = ${msg.count}`);
         this._panel.webview.postMessage({ type: 'pong', received: msg.count, ts: Date.now() });
+        return;
+      }
+
+      // Handle request/response pattern: messages with id should be replied to with same id
+      if (msg?.type === 'requestAuth' && msg.id) {
+        // In a real implementation you'd perform secure auth; here we return a mock token
+        const token = `mock-token-${Date.now()}`;
+        this._panel.webview.postMessage({ type: 'response', id: msg.id, payload: { token } });
+        return;
+      }
+
+      if (msg?.type === 'verifySettings' && msg.id && msg.payload) {
+        // Payload expected to be environment data similar to EnvironmentEditorPanel
+        (async () => {
+          try {
+            const env = msg.payload;
+            const clientConfig: MaximoClientConfig = {
+              baseUrl: env.hostname,
+              port: Number(env.port) || 443,
+              ssl: env.httpProtocol === 'https',
+              authType: convertAuthType(env.authenticationType),
+              userName: env.username,
+              password: env.password,
+              apiKey: env.apikey,
+              logLevel: getLogLevel(env.logLevel),
+              leanMode: true,
+              autoAuthenticate: true,
+              rejectUnauthorized: !env.ignoreSslErrors,
+              autoscriptObjectStructure: env.objectStructure,
+              ca: env.sslcertificate ? env.sslcertificate : undefined,
+            };
+
+            const client = new MaximoClient(clientConfig);
+            const whoami = await client.oslcInfoService.getWhoAmI();
+            const message = `Verification successful. Connected as: ${whoami.displayName || whoami.loginID}`;
+            this._panel.webview.postMessage({ type: 'response', id: msg.id, payload: { success: true, message } });
+          } catch (err:any) {
+            const message = err?.message || err?.code || 'Verification failed.';
+            this._panel.webview.postMessage({ type: 'response', id: msg.id, payload: { success: false, message } });
+          }
+        })();
+        return;
       }
     }, null, this._disposables);
 
