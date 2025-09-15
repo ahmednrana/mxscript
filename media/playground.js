@@ -1097,7 +1097,7 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
-          function useEffect5(create, deps) {
+          function useEffect6(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useEffect(create, deps);
           }
@@ -1880,7 +1880,7 @@
           exports.useContext = useContext3;
           exports.useDebugValue = useDebugValue;
           exports.useDeferredValue = useDeferredValue;
-          exports.useEffect = useEffect5;
+          exports.useEffect = useEffect6;
           exports.useId = useId;
           exports.useImperativeHandle = useImperativeHandle;
           exports.useInsertionEffect = useInsertionEffect;
@@ -24488,7 +24488,7 @@
   });
 
   // src/webview/react/playground/index.tsx
-  var import_react77 = __toESM(require_react());
+  var import_react78 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // node_modules/react-router-dom/dist/index.js
@@ -37672,7 +37672,30 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // src/webview/react/playground/EnvironmentEditor.tsx
+  var import_react76 = __toESM(require_react());
+
+  // src/webview/react/hooks/useSyncSelectValue.ts
   var import_react75 = __toESM(require_react());
+  function useSyncSelectValue(controlId, currentValue, onChange) {
+    (0, import_react75.useEffect)(() => {
+      const selector = `[data-control-id="${controlId}"] vscode-single-select`;
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const sync = () => {
+        const val = el.value;
+        if (val !== currentValue) {
+          onChange(val);
+        }
+      };
+      sync();
+      el.addEventListener("change", sync);
+      el.addEventListener("input", sync);
+      return () => {
+        el.removeEventListener("change", sync);
+        el.removeEventListener("input", sync);
+      };
+    }, [controlId, currentValue, onChange]);
+  }
 
   // src/webview/react/components/SettingItem.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime());
@@ -37704,19 +37727,22 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         onClick: () => onSelect == null ? void 0 : onSelect(id),
         style,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "setting-item-label", children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "label-text", children: [
-            label,
-            badges && badges.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "badges", children: badges.map((b3, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
-              VscodeBadge_default,
-              {
-                variant: b3.variant === "counter" ? "counter" : void 0,
-                title: b3.title,
-                className: b3.variant && b3.variant !== "counter" && b3.variant !== "default" ? `badge-${b3.variant}` : void 0,
-                children: b3.text
-              },
-              idx
-            )) })
-          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "setting-item-label", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "label-text", children: [
+              label,
+              badges && badges.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "badges", children: badges.map((b3, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+                VscodeBadge_default,
+                {
+                  variant: b3.variant === "counter" ? "counter" : void 0,
+                  title: b3.title,
+                  className: b3.variant && b3.variant !== "counter" && b3.variant !== "default" ? `badge-${b3.variant}` : void 0,
+                  children: b3.text
+                },
+                idx
+              )) })
+            ] }),
+            helperText && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "label-help", children: helperText })
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "setting-item-control", "data-control-id": id, children: [
             children,
             actions && actions.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "setting-item-actions", children: actions.map((a3) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(
@@ -37799,10 +37825,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "port", label: "Port", group: "connection", type: "number", placeholder: "443", defaultValue: 443, description: "Port to connect to the Maximo server (usually 443 for HTTPS)." },
     { id: "httpProtocol", label: "HTTP Protocol", group: "connection", type: "select", placeholder: "https", defaultValue: "https", options: ["http", "https"], description: "Choose HTTPS for secure connections when supported." },
     // Auth
-    { id: "authenticationType", label: "Authentication Type", group: "auth", type: "select", defaultValue: "internal", options: ["apikey", "internal", "ldap"], description: "Select how to authenticate with Maximo (API key, internal, or LDAP)." },
-    { id: "apiKey", label: "API Key", group: "auth", type: "password", placeholder: "your-api-key", description: "Required if using API key authentication." },
-    { id: "username", label: "Username", group: "auth", type: "string", placeholder: "maxadmin", description: "Username for internal/LDAP authentication." },
-    { id: "password", label: "Password", group: "auth", type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
+    { id: "authenticationType", label: "Authentication Type", group: "auth", order: 1, type: "select", defaultValue: "internal", options: ["apikey", "internal", "ldap"], description: "Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey." },
+    { id: "apiKey", label: "API Key", group: "auth", order: 2, type: "password", placeholder: "your-api-key", description: "Required if using API key authentication." },
+    { id: "username", label: "Username", group: "auth", order: 3, type: "string", placeholder: "maxadmin", description: "Username for internal/LDAP authentication." },
+    { id: "password", label: "Password", group: "auth", order: 4, type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
     // Behavior
     { id: "ignoreSslErrors", label: "Ignore SSL Errors", group: "behavior", type: "boolean", defaultValue: true, description: "When enabled, SSL certificate errors will be ignored. Not recommended for production." },
     { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXSCRIPT2", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts.", badges: [{ text: "Experimental", variant: "warning", title: "Experimental setting" }] },
@@ -37824,32 +37850,38 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     return state;
   };
   var EnvironmentEditor = () => {
-    const [form, setForm] = (0, import_react75.useState)(() => buildInitialState());
-    const [search, setSearch] = (0, import_react75.useState)("");
-    const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react75.useState)(false);
-    const [selectedId, setSelectedId] = (0, import_react75.useState)(null);
-    const [saveStatus, setSaveStatus] = (0, import_react75.useState)("idle");
-    const [lastError, setLastError] = (0, import_react75.useState)();
-    const validateField = (0, import_react75.useCallback)((meta, value) => {
+    var _a6;
+    const [form, setForm] = (0, import_react76.useState)(() => buildInitialState());
+    const [search, setSearch] = (0, import_react76.useState)("");
+    const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react76.useState)(false);
+    const [selectedId, setSelectedId] = (0, import_react76.useState)(null);
+    const [saveStatus, setSaveStatus] = (0, import_react76.useState)("idle");
+    const [lastError, setLastError] = (0, import_react76.useState)();
+    const validateField = (0, import_react76.useCallback)((meta, value) => {
       if (meta.validate) return meta.validate(value);
       if (meta.required && (value === void 0 || value === null || value === "")) return `${meta.label} is required`;
       return void 0;
     }, []);
-    const invalidCount = (0, import_react75.useMemo)(() => SETTINGS.reduce((acc, s8) => {
-      var _a6;
-      const err = validateField(s8, (_a6 = form[s8.id]) == null ? void 0 : _a6.value);
+    const invalidCount = (0, import_react76.useMemo)(() => SETTINGS.reduce((acc, s8) => {
+      var _a7;
+      const err = validateField(s8, (_a7 = form[s8.id]) == null ? void 0 : _a7.value);
       return acc + (err ? 1 : 0);
     }, 0), [form, validateField]);
-    const filteredSettings = (0, import_react75.useMemo)(() => {
+    const filteredSettings = (0, import_react76.useMemo)(() => {
+      var _a7;
       const term = search.trim().toLowerCase();
+      const authType = ((_a7 = form["authenticationType"]) == null ? void 0 : _a7.value) || "internal";
       return SETTINGS.filter((s8) => {
-        var _a6;
+        var _a8;
+        if (s8.id === "authenticationType") return true;
+        if (s8.id === "apiKey" && authType !== "apikey") return false;
+        if ((s8.id === "username" || s8.id === "password") && authType === "apikey") return false;
         if (showOnlyInvalid && !validateField(s8, form[s8.id].value)) return false;
         if (!term) return true;
-        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a6 = s8.description) == null ? void 0 : _a6.toLowerCase().includes(term));
+        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a8 = s8.description) == null ? void 0 : _a8.toLowerCase().includes(term));
       });
     }, [search, showOnlyInvalid, form, validateField]);
-    const grouped = (0, import_react75.useMemo)(() => {
+    const grouped = (0, import_react76.useMemo)(() => {
       const map = {};
       for (const s8 of filteredSettings) {
         if (!map[s8.group]) map[s8.group] = [];
@@ -37858,26 +37890,26 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       for (const g2 of Object.keys(map)) map[g2] = sortByOrder(map[g2]);
       return map;
     }, [filteredSettings]);
-    const groupsOrdered = (0, import_react75.useMemo)(() => sortByOrder(GROUPS), []);
+    const groupsOrdered = (0, import_react76.useMemo)(() => sortByOrder(GROUPS), []);
     const updateValue = (id, value) => {
       setForm((f3) => ({
         ...f3,
         [id]: { value, touched: true, error: validateField(SETTINGS.find((s8) => s8.id === id), value) }
       }));
     };
-    (0, import_react75.useEffect)(() => {
-      var _a6;
+    (0, import_react76.useEffect)(() => {
+      var _a7;
       if (selectedId && filteredSettings.some((s8) => s8.id === selectedId)) return;
       const firstGroup = groupsOrdered.find((g2) => (grouped[g2.id] || []).length);
-      const firstId = firstGroup ? (_a6 = grouped[firstGroup.id][0]) == null ? void 0 : _a6.id : void 0;
+      const firstId = firstGroup ? (_a7 = grouped[firstGroup.id][0]) == null ? void 0 : _a7.id : void 0;
       setSelectedId(firstId != null ? firstId : null);
     }, [filteredSettings, grouped, groupsOrdered, selectedId]);
     const focusControl = (id) => {
-      var _a6, _b2;
+      var _a7, _b2;
       const container = document.querySelector(`[data-control-id="${id}"]`);
       if (!container) return;
       const focusable = container.querySelector('input, textarea, select, button, vscode-textfield, vscode-text-area, vscode-single-select, [tabindex]:not([tabindex="-1"])');
-      (_b2 = (_a6 = focusable || container).focus) == null ? void 0 : _b2.call(_a6);
+      (_b2 = (_a7 = focusable || container).focus) == null ? void 0 : _b2.call(_a7);
     };
     const onSave = async () => {
       setSaveStatus("saving");
@@ -37911,7 +37943,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       setLastError(void 0);
     };
     const renderField = (meta) => {
-      var _a6;
+      var _a7, _b2;
       const state = form[meta.id];
       const err = state.error;
       const common = { placeholder: meta.placeholder || "", value: state.value, onInput: (e12) => updateValue(meta.id, e12.target.value) };
@@ -38017,13 +38049,22 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
                 setSelectedId(meta.id);
                 focusControl(meta.id);
               },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+              children: meta.id === "authenticationType" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                "vscode-single-select",
+                {
+                  value: state.value,
+                  onInput: (e12) => updateValue(meta.id, e12.target.value),
+                  onChange: (e12) => updateValue(meta.id, e12.target.value),
+                  children: (_a7 = meta.options) == null ? void 0 : _a7.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
+                }
+              ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
                 "vscode-single-select",
                 {
                   value: state.value,
                   "data-allow-custom": meta.allowCustom || void 0,
                   onInput: (e12) => updateValue(meta.id, e12.target.value),
-                  children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
+                  onChange: (e12) => updateValue(meta.id, e12.target.value),
+                  children: (_b2 = meta.options) == null ? void 0 : _b2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
                 }
               )
             },
@@ -38051,6 +38092,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           );
       }
     };
+    useSyncSelectValue("authenticationType", (_a6 = form["authenticationType"]) == null ? void 0 : _a6.value, (val) => updateValue("authenticationType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "env-editor-root", children: [
       /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h1", { className: "page-heading", children: "Add New Environment" }),
       /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "toolbar-row", children: [
@@ -38151,6 +38193,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           height:26px;
         }
         .select.setting-item { min-width:200px; }
+        /* (Removed native select override) */
     /* Settings-like */
     .settings-like-layout { display:flex; flex-direction:column; gap:24px; }
     .settings-section { display:flex; flex-direction:column; gap:8px; }
@@ -38174,13 +38217,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   };
 
   // src/webview/react/playground/PageThree.tsx
-  var import_react76 = __toESM(require_react());
+  var import_react77 = __toESM(require_react());
   var import_jsx_runtime3 = __toESM(require_jsx_runtime());
   var PageThree = () => {
-    const [checked, setChecked] = (0, import_react76.useState)(false);
-    const [text, setText] = (0, import_react76.useState)("");
-    const [area, setArea] = (0, import_react76.useState)("");
-    const [activeTab, setActiveTab] = (0, import_react76.useState)("tab-1");
+    const [checked, setChecked] = (0, import_react77.useState)(false);
+    const [text, setText] = (0, import_react77.useState)("");
+    const [area, setArea] = (0, import_react77.useState)("");
+    const [activeTab, setActiveTab] = (0, import_react77.useState)("tab-1");
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h2", { style: { marginTop: 0 }, children: "Playground \u2014 Page Three (vscode-elements demo)" }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
@@ -38256,14 +38299,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   var vscode = acquireVsCodeApi == null ? void 0 : acquireVsCodeApi();
   var Home = () => {
-    const [count, setCount] = (0, import_react77.useState)(0);
-    const [messages, setMessages] = (0, import_react77.useState)([]);
-    const [auth, setAuth] = (0, import_react77.useState)("");
-    const [loadingAuth, setLoadingAuth] = (0, import_react77.useState)(false);
-    const [verifying, setVerifying] = (0, import_react77.useState)(false);
-    const [verificationMessage, setVerificationMessage] = (0, import_react77.useState)("");
-    const requestResolvers = import_react77.default.useRef(/* @__PURE__ */ new Map());
-    const reqCounter = import_react77.default.useRef(0);
+    const [count, setCount] = (0, import_react78.useState)(0);
+    const [messages, setMessages] = (0, import_react78.useState)([]);
+    const [auth, setAuth] = (0, import_react78.useState)("");
+    const [loadingAuth, setLoadingAuth] = (0, import_react78.useState)(false);
+    const [verifying, setVerifying] = (0, import_react78.useState)(false);
+    const [verificationMessage, setVerificationMessage] = (0, import_react78.useState)("");
+    const requestResolvers = import_react78.default.useRef(/* @__PURE__ */ new Map());
+    const reqCounter = import_react78.default.useRef(0);
     const sendRequest = (type, payload, timeout = 1e4) => {
       const id = `${Date.now()}-${++reqCounter.current}`;
       return new Promise((resolve, reject) => {
@@ -38293,7 +38336,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         });
       });
     };
-    (0, import_react77.useEffect)(() => {
+    (0, import_react78.useEffect)(() => {
       const listener = (event) => {
         var _a6;
         const msg = event.data;

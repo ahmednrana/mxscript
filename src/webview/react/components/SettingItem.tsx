@@ -63,19 +63,21 @@ export const SettingItem: React.FC<SettingItemProps> = ({
     >
       <div className="setting-item-label">
         <div className="label-text">
-            {label}
-            {badges && badges.length > 0 && (
-              <span className="badges">
-                {badges.map((b: { text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }, idx: number) => (
-                  <VscodeBadge key={idx} variant={b.variant === 'counter' ? 'counter' : undefined} title={b.title}
-                    className={b.variant && b.variant !== 'counter' && b.variant !== 'default' ? `badge-${b.variant}` : undefined}
-                  >
-                    {b.text}
-                  </VscodeBadge>
-                ))}
-              </span>
-            )}
-          </div>
+          {label}
+          {badges && badges.length > 0 && (
+            <span className="badges">
+              {badges.map((b: { text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }, idx: number) => (
+                <VscodeBadge key={idx} variant={b.variant === 'counter' ? 'counter' : undefined} title={b.title}
+                  className={b.variant && b.variant !== 'counter' && b.variant !== 'default' ? `badge-${b.variant}` : undefined}
+                >
+                  {b.text}
+                </VscodeBadge>
+              ))}
+            </span>
+          )}
+        </div>
+        {helperText && <div className="label-help">{helperText}</div>}
+
       </div>
       <div className="setting-item-control" data-control-id={id}>
         {children}

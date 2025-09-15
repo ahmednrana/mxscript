@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { useSyncSelectValue } from '../hooks/useSyncSelectValue';
 import {
   VscodeButton,
   VscodeBadge,
@@ -65,10 +66,10 @@ const SETTINGS: SettingMeta[] = [
   { id: 'port', label: 'Port', group: 'connection', type: 'number', placeholder: '443', defaultValue: 443, description: 'Port to connect to the Maximo server (usually 443 for HTTPS).' },
   { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http','https'], description: 'Choose HTTPS for secure connections when supported.' },
   // Auth
-  { id: 'authenticationType', label: 'Authentication Type', group: 'auth', type: 'select', defaultValue: 'internal', options: ['apikey','internal','ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP).' },
-  { id: 'apiKey', label: 'API Key', group: 'auth', type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
-  { id: 'username', label: 'Username', group: 'auth', type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
-  { id: 'password', label: 'Password', group: 'auth', type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
+  { id: 'authenticationType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey','internal','ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
+  { id: 'apiKey', label: 'API Key', group: 'auth', order: 2, type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
+  { id: 'username', label: 'Username', group: 'auth', order: 3, type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
+  { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
   // Behavior
   { id: 'ignoreSslErrors', label: 'Ignore SSL Errors', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
   { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT','MXSCRIPT2','MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
@@ -121,7 +122,14 @@ export const EnvironmentEditor: React.FC = () => {
 
   const filteredSettings = useMemo(() => {
     const term = search.trim().toLowerCase();
+    const authType = form['authenticationType']?.value || 'internal';
+
     return SETTINGS.filter(s => {
+      // Conditional visibility based on authentication type
+      if (s.id === 'authenticationType') return true; // always show selector
+      if (s.id === 'apiKey' && authType !== 'apikey') return false;
+      if ((s.id === 'username' || s.id === 'password') && authType === 'apikey') return false;
+
       if (showOnlyInvalid && !validateField(s, form[s.id].value)) return false;
       if (!term) return true;
       return s.label.toLowerCase().includes(term) || s.id.toLowerCase().includes(term) || (s.description?.toLowerCase().includes(term));
@@ -294,14 +302,27 @@ export const EnvironmentEditor: React.FC = () => {
             error={invalid ? err : undefined}
             onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
           >
-            <vscode-single-select
-              value={state.value}
-              data-allow-custom={meta.allowCustom || undefined}
-              onInput={(e: any) => updateValue(meta.id, e.target.value)}>
-              {meta.options?.map(opt => (
-                <vscode-option key={opt} value={opt}>{opt}</vscode-option>
-              ))}
-            </vscode-single-select>
+            {meta.id === 'authenticationType' ? (
+              <vscode-single-select
+                value={state.value}
+                onInput={(e: any) => updateValue(meta.id, e.target.value)}
+                onChange={(e: any) => updateValue(meta.id, e.target.value)}
+              >
+                {meta.options?.map(opt => (
+                  <vscode-option key={opt} value={opt}>{opt}</vscode-option>
+                ))}
+              </vscode-single-select>
+            ) : (
+              <vscode-single-select
+                value={state.value}
+                data-allow-custom={meta.allowCustom || undefined}
+                onInput={(e: any) => updateValue(meta.id, e.target.value)}
+                onChange={(e: any) => updateValue(meta.id, e.target.value)}>
+                {meta.options?.map(opt => (
+                  <vscode-option key={opt} value={opt}>{opt}</vscode-option>
+                ))}
+              </vscode-single-select>
+            )}
           </SettingItem>
         );
       default:
@@ -323,6 +344,9 @@ export const EnvironmentEditor: React.FC = () => {
         );
     }
   };
+
+  // Sync custom select (authenticationType) with state reliably
+  useSyncSelectValue('authenticationType', form['authenticationType']?.value, (val) => updateValue('authenticationType', val));
 
   return (
     <div className="env-editor-root">
@@ -423,6 +447,7 @@ export const EnvironmentEditor: React.FC = () => {
           height:26px;
         }
         .select.setting-item { min-width:200px; }
+        /* (Removed native select override) */
     /* Settings-like */
     .settings-like-layout { display:flex; flex-direction:column; gap:24px; }
     .settings-section { display:flex; flex-direction:column; gap:8px; }
