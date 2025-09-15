@@ -4,15 +4,9 @@ import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { VscodeButton } from '@vscode-elements/react-elements';
 import { EnvironmentEditor } from './EnvironmentEditor';
 import PageThree from './PageThree';
-// import '@vscode-elements/elements/dist/elements.css';   // <-- remove or comment this line
+// import '@vscode-elements/elements/dist/elements.css'; // This import breaks the webview due to font bundling issues.
 
-// Load vscode-elements stylesheet at runtime from UNPKG (works for webview builds)
-// if (typeof document !== 'undefined') {
-//   const _vscStylesheet = document.createElement('link');
-//   _vscStylesheet.rel = 'stylesheet';
-//   _vscStylesheet.href = 'https://unpkg.com/@vscode-elements/elements@latest/dist/elements.css';
-//   document.head.appendChild(_vscStylesheet);
-// }
+// The stylesheet is now injected by the extension's HTML, so this is no longer needed.
 
 // Acquire VS Code API
 declare global { function acquireVsCodeApi(): any; }

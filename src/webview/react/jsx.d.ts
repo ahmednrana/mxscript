@@ -10,6 +10,7 @@ declare global {
       'vscode-checkbox': any;
       'vscode-dropdown': any;
       'vscode-option': any;
+      'vscode-single-select': any;
     }
   }
 }
