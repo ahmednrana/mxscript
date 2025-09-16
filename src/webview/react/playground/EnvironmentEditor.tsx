@@ -11,41 +11,8 @@ import {
   VscodeTree
 } from '@vscode-elements/react-elements';
 import SettingItem from '../components/SettingItem';
-
-type SettingType = 'string' | 'number' | 'password' | 'boolean' | 'multiline' | 'select';
-
-interface SettingMetaBase {
-  id: string;
-  label: string;
-  description?: string;
-  badges?: Array<{ text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }>;
-  required?: boolean;
-  placeholder?: string;
-  group: string; // group id
-  order?: number;
-  type: SettingType;
-  defaultValue?: any;
-  validate?: (value: any) => string | undefined;
-  // select-specific optional metadata
-  options?: string[]; // fixed list
-  allowCustom?: boolean; // allow user typed custom value (for single-select component)
-}
-
-interface BooleanSettingMeta extends SettingMetaBase { type: 'boolean'; }
-interface PasswordSettingMeta extends SettingMetaBase { type: 'password'; }
-interface StringSettingMeta extends SettingMetaBase { type: 'string' | 'multiline'; }
-interface NumberSettingMeta extends SettingMetaBase { type: 'number'; }
-interface SelectSettingMeta extends SettingMetaBase { type: 'select'; options: string[]; allowCustom?: boolean; }
-
-type SettingMeta = BooleanSettingMeta | PasswordSettingMeta | StringSettingMeta | NumberSettingMeta | SelectSettingMeta;
-
-interface GroupMeta {
-  id: string;
-  title: string;
-  icon?: string;
-  description?: string;
-  order?: number;
-}
+import MXSettingItem from './MXSettingItem';
+import { SettingMeta, GroupMeta, FormState } from './settingTypes';
 
 // Architectural model: metadata drives layout & validation
 const GROUPS: GroupMeta[] = [
@@ -87,13 +54,7 @@ const sortByOrder = <T extends { order?: number; id: string }>(arr: T[]) =>
     a.id.localeCompare(b.id)
   );
 
-interface FieldState {
-  value: any;
-  error?: string;
-  touched?: boolean;
-}
-
-type FormState = Record<string, FieldState>;
+// FieldState & FormState imported from shared types
 
 const buildInitialState = (): FormState => {
   const state: FormState = {};
@@ -213,156 +174,19 @@ export const EnvironmentEditor: React.FC = () => {
     setLastError(undefined);
   };
 
-  const renderField = (meta: SettingMeta) => {
-    const state = form[meta.id];
-    const err = state.error;
-    const common = { placeholder: meta.placeholder || '', value: state.value, onInput: (e: any) => updateValue(meta.id, e.target.value) };
-    const labelSuffix = meta.required ? ' *' : '';
-    const invalid = !!err && state.touched;
-    const description = meta.description;
-
-  const helper = description ? <div className="form-helper">{description}</div> : null;
-  const badges = (meta as any).badges as Array<{ text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }> | undefined;
-
-    switch (meta.type) {
-      case 'boolean':
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            <VscodeCheckbox checked={!!state.value} onInput={(e: any) => updateValue(meta.id, e.target.checked)}></VscodeCheckbox>
-          </SettingItem>
-        );
-      case 'multiline':
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            <VscodeTextarea rows={4} {...common as any}></VscodeTextarea>
-          </SettingItem>
-        );
-      case 'password':
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            <VscodeTextfield
-              type={reveal[meta.id] ? 'text' : 'password'}
-              {...common as any}
-            >
-              <VscodeIcon
-                slot="content-after"
-                name={reveal[meta.id] ? 'eye-closed' : 'eye'}
-                action-icon
-                title={reveal[meta.id] ? 'Hide value' : 'Show value'}
-                onClick={(e: any) => {
-                  e.stopPropagation();
-                  setReveal(r => ({ ...r, [meta.id]: !r[meta.id] }));
-                }}
-              ></VscodeIcon>
-            </VscodeTextfield>
-          </SettingItem>
-        );
-      case 'number':
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            <VscodeTextfield type="number" {...common as any}></VscodeTextfield>
-          </SettingItem>
-        );
-      case 'select':
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            {meta.id === 'authenticationType' ? (
-              <vscode-single-select
-                value={state.value}
-                onInput={(e: any) => updateValue(meta.id, e.target.value)}
-                onChange={(e: any) => updateValue(meta.id, e.target.value)}
-              >
-                {meta.options?.map(opt => (
-                  <vscode-option key={opt} value={opt}>{opt}</vscode-option>
-                ))}
-              </vscode-single-select>
-            ) : (
-              <vscode-single-select
-                value={state.value}
-                data-allow-custom={meta.allowCustom || undefined}
-                onInput={(e: any) => updateValue(meta.id, e.target.value)}
-                onChange={(e: any) => updateValue(meta.id, e.target.value)}>
-                {meta.options?.map(opt => (
-                  <vscode-option key={opt} value={opt}>{opt}</vscode-option>
-                ))}
-              </vscode-single-select>
-            )}
-          </SettingItem>
-        );
-      default:
-        return (
-          <SettingItem
-            key={meta.id}
-            id={meta.id}
-            label={`${meta.label}${labelSuffix}`}
-            helperText={!invalid ? description : undefined}
-            badges={badges}
-            selected={selectedId === meta.id}
-            hoverColor={'var(--vscode-list-hoverBackground)'}
-            selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
-            error={invalid ? err : undefined}
-            onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
-          >
-            <VscodeTextfield {...common as any}></VscodeTextfield>
-          </SettingItem>
-        );
-    }
-  };
+  const renderField = (meta: SettingMeta) => (
+    <MXSettingItem
+      key={meta.id}
+      meta={meta}
+      form={form}
+      selectedId={selectedId}
+      reveal={reveal}
+      onSelect={(id) => setSelectedId(id)}
+      updateValue={updateValue}
+      focusControl={focusControl}
+      setReveal={setReveal}
+    />
+  );
 
   // Sync custom select (authenticationType) with state reliably
   useSyncSelectValue('authenticationType', form['authenticationType']?.value, (val) => updateValue('authenticationType', val));

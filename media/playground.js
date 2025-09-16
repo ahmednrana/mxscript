@@ -24465,10 +24465,10 @@
               return jsxWithValidation(type, props, key, false);
             }
           }
-          var jsx5 = jsxWithValidationDynamic;
+          var jsx6 = jsxWithValidationDynamic;
           var jsxs5 = jsxWithValidationStatic;
           exports.Fragment = REACT_FRAGMENT_TYPE;
-          exports.jsx = jsx5;
+          exports.jsx = jsx6;
           exports.jsxs = jsxs5;
         })();
       }
@@ -37802,8 +37802,186 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   };
   var SettingItem_default = SettingItem;
 
-  // src/webview/react/playground/EnvironmentEditor.tsx
+  // src/webview/react/playground/MXSettingItem.tsx
   var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+  var MXSettingItem = ({
+    meta,
+    form,
+    selectedId,
+    reveal,
+    onSelect,
+    updateValue,
+    focusControl,
+    setReveal
+  }) => {
+    var _a6;
+    const state = form[meta.id];
+    const err = state == null ? void 0 : state.error;
+    const invalid = !!err && (state == null ? void 0 : state.touched);
+    const labelSuffix = meta.required ? " *" : "";
+    const description = meta.description;
+    const badges = meta.badges;
+    const common = {
+      placeholder: meta.placeholder || "",
+      value: state == null ? void 0 : state.value,
+      onInput: (e12) => updateValue(meta.id, e12.target.value)
+    };
+    const selectElement = /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+      "vscode-single-select",
+      {
+        value: state == null ? void 0 : state.value,
+        "data-allow-custom": meta.allowCustom || void 0,
+        onInput: (e12) => updateValue(meta.id, e12.target.value),
+        onChange: (e12) => updateValue(meta.id, e12.target.value),
+        children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
+      }
+    );
+    switch (meta.type) {
+      case "boolean":
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeCheckbox_default, { checked: !!(state == null ? void 0 : state.value), onInput: (e12) => updateValue(meta.id, e12.target.checked) })
+          },
+          meta.id
+        );
+      case "multiline":
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextarea_default, { rows: 4, ...common })
+          },
+          meta.id
+        );
+      case "password":
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+              VscodeTextfield_default,
+              {
+                type: reveal[meta.id] ? "text" : "password",
+                ...common,
+                children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                  VscodeIcon_default,
+                  {
+                    slot: "content-after",
+                    name: reveal[meta.id] ? "eye-closed" : "eye",
+                    "action-icon": true,
+                    title: reveal[meta.id] ? "Hide value" : "Show value",
+                    onClick: (e12) => {
+                      e12.stopPropagation();
+                      setReveal((r8) => ({ ...r8, [meta.id]: !r8[meta.id] }));
+                    }
+                  }
+                )
+              }
+            )
+          },
+          meta.id
+        );
+      case "number":
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextfield_default, { type: "number", ...common })
+          },
+          meta.id
+        );
+      case "select":
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: selectElement
+          },
+          meta.id
+        );
+      default:
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+          SettingItem_default,
+          {
+            id: meta.id,
+            label: `${meta.label}${labelSuffix}`,
+            helperText: !invalid ? description : void 0,
+            badges,
+            selected: selectedId === meta.id,
+            hoverColor: "var(--vscode-list-hoverBackground)",
+            selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
+            error: invalid ? err : void 0,
+            onSelect: () => {
+              onSelect(meta.id);
+              focusControl(meta.id);
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextfield_default, { ...common })
+          },
+          meta.id
+        );
+    }
+  };
+  var MXSettingItem_default = MXSettingItem;
+
+  // src/webview/react/playground/EnvironmentEditor.tsx
+  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
   var GROUPS = [
     { id: "connection", title: "Connection", icon: "plug", description: "Base connection details", order: 1 },
     { id: "auth", title: "Authentication", icon: "lock", description: "Credentials & authentication mode", order: 2 },
@@ -37944,216 +38122,61 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       setSaveStatus("idle");
       setLastError(void 0);
     };
-    const renderField = (meta) => {
-      var _a7, _b2;
-      const state = form[meta.id];
-      const err = state.error;
-      const common = { placeholder: meta.placeholder || "", value: state.value, onInput: (e12) => updateValue(meta.id, e12.target.value) };
-      const labelSuffix = meta.required ? " *" : "";
-      const invalid = !!err && state.touched;
-      const description = meta.description;
-      const helper = description ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "form-helper", children: description }) : null;
-      const badges = meta.badges;
-      switch (meta.type) {
-        case "boolean":
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeCheckbox_default, { checked: !!state.value, onInput: (e12) => updateValue(meta.id, e12.target.checked) })
-            },
-            meta.id
-          );
-        case "multiline":
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextarea_default, { rows: 4, ...common })
-            },
-            meta.id
-          );
-        case "password":
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-                VscodeTextfield_default,
-                {
-                  type: reveal[meta.id] ? "text" : "password",
-                  ...common,
-                  children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-                    VscodeIcon_default,
-                    {
-                      slot: "content-after",
-                      name: reveal[meta.id] ? "eye-closed" : "eye",
-                      "action-icon": true,
-                      title: reveal[meta.id] ? "Hide value" : "Show value",
-                      onClick: (e12) => {
-                        e12.stopPropagation();
-                        setReveal((r8) => ({ ...r8, [meta.id]: !r8[meta.id] }));
-                      }
-                    }
-                  )
-                }
-              )
-            },
-            meta.id
-          );
-        case "number":
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextfield_default, { type: "number", ...common })
-            },
-            meta.id
-          );
-        case "select":
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: meta.id === "authenticationType" ? /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-                "vscode-single-select",
-                {
-                  value: state.value,
-                  onInput: (e12) => updateValue(meta.id, e12.target.value),
-                  onChange: (e12) => updateValue(meta.id, e12.target.value),
-                  children: (_a7 = meta.options) == null ? void 0 : _a7.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
-                }
-              ) : /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-                "vscode-single-select",
-                {
-                  value: state.value,
-                  "data-allow-custom": meta.allowCustom || void 0,
-                  onInput: (e12) => updateValue(meta.id, e12.target.value),
-                  onChange: (e12) => updateValue(meta.id, e12.target.value),
-                  children: (_b2 = meta.options) == null ? void 0 : _b2.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
-                }
-              )
-            },
-            meta.id
-          );
-        default:
-          return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
-            SettingItem_default,
-            {
-              id: meta.id,
-              label: `${meta.label}${labelSuffix}`,
-              helperText: !invalid ? description : void 0,
-              badges,
-              selected: selectedId === meta.id,
-              hoverColor: "var(--vscode-list-hoverBackground)",
-              selectedColor: "var(--vscode-list-inactiveSelectionBackground)",
-              error: invalid ? err : void 0,
-              onSelect: () => {
-                setSelectedId(meta.id);
-                focusControl(meta.id);
-              },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextfield_default, { ...common })
-            },
-            meta.id
-          );
-      }
-    };
+    const renderField = (meta) => /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+      MXSettingItem_default,
+      {
+        meta,
+        form,
+        selectedId,
+        reveal,
+        onSelect: (id) => setSelectedId(id),
+        updateValue,
+        focusControl,
+        setReveal
+      },
+      meta.id
+    );
     useSyncSelectValue("authenticationType", (_a6 = form["authenticationType"]) == null ? void 0 : _a6.value, (val) => updateValue("authenticationType", val));
-    return /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "env-editor-root", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("h1", { className: "page-heading", children: "Add New Environment" }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "toolbar-row", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "left", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(VscodeTextfield_default, { placeholder: "Search settings", value: search, onInput: (e12) => setSearch(e12.target.value), children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { slot: "content-before", name: "search" }),
-            !!search && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { slot: "content-after", name: "close", "action-icon": true, onClick: () => setSearch("") }),
-            search && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeBadge_default, { slot: "content-after", variant: "counter", children: filteredSettings.length })
+    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "env-editor-root", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h1", { className: "page-heading", children: "Add New Environment" }),
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "toolbar-row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "left", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTextfield_default, { placeholder: "Search settings", value: search, onInput: (e12) => setSearch(e12.target.value), children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { slot: "content-before", name: "search" }),
+            !!search && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { slot: "content-after", name: "close", "action-icon": true, onClick: () => setSearch("") }),
+            search && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeBadge_default, { slot: "content-after", variant: "counter", children: filteredSettings.length })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeCheckbox_default, { checked: showOnlyInvalid, onInput: (e12) => setShowOnlyInvalid(e12.target.checked), children: "Only invalid" })
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeCheckbox_default, { checked: showOnlyInvalid, onInput: (e12) => setShowOnlyInvalid(e12.target.checked), children: "Only invalid" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "right actions", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(VscodeButton_default, { onClick: reset, children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { name: "discard", slot: "content-before" }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "right actions", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: reset, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: "discard", slot: "content-before" }),
             "Reset"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(VscodeButton_default, { onClick: onSave, disabled: saveStatus === "saving", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { name: saveStatus === "saving" ? "loading~spin" : saveStatus === "saved" ? "pass-filled" : "save", slot: "content-before" }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: onSave, disabled: saveStatus === "saving", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: saveStatus === "saving" ? "loading~spin" : saveStatus === "saved" ? "pass-filled" : "save", slot: "content-before" }),
             saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved" : "Save"
           ] })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("div", { className: "summary-row", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)(VscodeBadge_default, { variant: invalidCount ? "counter" : "default", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "summary-row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeBadge_default, { variant: invalidCount ? "counter" : "default", children: [
           invalidCount,
           " Invalid"
         ] }),
-        lastError && /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("span", { className: "status-error", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { name: "error" }),
+        lastError && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("span", { className: "status-error", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: "error" }),
           " ",
           lastError
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "settings-like-layout", children: groupsOrdered.filter((g2) => (grouped[g2.id] || []).length).map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("section", { className: "settings-section", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsxs)("h2", { className: "settings-subheading", children: [
-          group.icon && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeIcon_default, { name: group.icon }),
-          /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("span", { children: group.title })
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "settings-like-layout", children: groupsOrdered.filter((g2) => (grouped[g2.id] || []).length).map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { className: "settings-section", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("h2", { className: "settings-subheading", children: [
+          group.icon && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: group.icon }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { children: group.title })
         ] }),
-        group.description && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "section-description", children: group.description }),
-        /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+        group.description && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "section-description", children: group.description }),
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
           "div",
           {
             className: "settings-list",
@@ -38180,9 +38203,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             children: (grouped[group.id] || []).map((m3) => renderField(m3))
           }
         ),
-        idx < groupsOrdered.length - 1 && /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeDivider_default, {})
+        idx < groupsOrdered.length - 1 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeDivider_default, {})
       ] }, group.id)) }),
-      /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("style", { children: `
+      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("style", { children: `
         .env-editor-root { display:flex; flex-direction:column; gap:12px; font-size:13px; }
         .page-heading { font-size:18px; font-weight:600; margin:6px 0 2px; }
         .toolbar-row { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
@@ -38241,85 +38264,85 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
 
   // src/webview/react/playground/PageThree.tsx
   var import_react77 = __toESM(require_react());
-  var import_jsx_runtime3 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
   var PageThree = () => {
     const [checked, setChecked] = (0, import_react77.useState)(false);
     const [text, setText] = (0, import_react77.useState)("");
     const [area, setArea] = (0, import_react77.useState)("");
     const [activeTab, setActiveTab] = (0, import_react77.useState)("tab-1");
-    return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h2", { style: { marginTop: 0 }, children: "Playground \u2014 Page Three (vscode-elements demo)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("p", { children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { style: { marginTop: 0 }, children: "Playground \u2014 Page Three (vscode-elements demo)" }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { children: [
         "This page demos a selection of components from ",
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("code", { children: "@vscode-elements/react-elements" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("code", { children: "@vscode-elements/react-elements" }),
         "."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { style: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeButton_default, { onClick: () => alert("Primary clicked"), children: "Primary Button" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeButton_default, { onClick: () => alert("Secondary clicked"), secondary: true, children: "Secondary" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeBadge_default, { variant: "counter", children: "42" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: "debug-start", size: 18 })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => alert("Primary clicked"), children: "Primary Button" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => alert("Secondary clicked"), secondary: true, children: "Secondary" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeBadge_default, { variant: "counter", children: "42" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeIcon_default, { name: "debug-start", size: 18 })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h3", { children: "Form controls" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeCheckbox_default, { checked, onChange: (e12) => {
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Form controls" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeCheckbox_default, { checked, onChange: (e12) => {
             var _a6, _b2;
             return setChecked((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.checked) != null ? _b2 : !checked);
           }, children: "Enable option" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTextfield_default, { value: text, placeholder: "Type something", onInput: (e12) => {
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTextfield_default, { value: text, placeholder: "Type something", onInput: (e12) => {
             var _a6, _b2;
             return setText((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.value) != null ? _b2 : "");
           } })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTextarea_default, { value: area, placeholder: "Multiline", onInput: (e12) => {
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTextarea_default, { value: area, placeholder: "Multiline", onInput: (e12) => {
           var _a6, _b2;
           return setArea((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.value) != null ? _b2 : "");
         }, rows: 4 }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h3", { children: "Tabs" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTabs_default, { ...{ "selected-index": 0 }, onVscTabsSelect: (e12) => {
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Tabs" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTabs_default, { ...{ "selected-index": 0 }, onVscTabsSelect: (e12) => {
           var _a6, _b2;
           return setActiveTab(String((_b2 = (_a6 = e12.detail) == null ? void 0 : _a6.selectedIndex) != null ? _b2 : 0));
         }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTabHeader_default, { children: "First" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTabHeader_default, { children: "Second" }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { padding: 8 }, children: "Content for first tab" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { padding: 8 }, children: "Content for second tab" }) })
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabHeader_default, { children: "First" }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabHeader_default, { children: "Second" }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "Content for first tab" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "Content for second tab" }) })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h3", { style: { marginTop: 12 }, children: "Table" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { height: 200, border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTable_default, { ...{ columns: ["1fr", "2fr", "1fr"], zebra: true }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTableHeader_default, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableHeaderCell_default, { children: "ID" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableHeaderCell_default, { children: "Name" }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableHeaderCell_default, { children: "State" })
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { style: { marginTop: 12 }, children: "Table" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { height: 200, border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTable_default, { ...{ columns: ["1fr", "2fr", "1fr"], zebra: true }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableHeader_default, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "ID" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "Name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "State" })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTableBody_default, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTableRow_default, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "1" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "Alpha" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "Online" })
+          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableBody_default, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableRow_default, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "1" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Alpha" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Online" })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeTableRow_default, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "2" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "Bravo" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeTableCell_default, { children: "Offline" })
+            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableRow_default, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "2" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Bravo" }),
+              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Offline" })
             ] })
           ] })
         ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { marginTop: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeCollapsible_default, { ...{ open: true }, children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { style: { padding: 8 }, children: "This is an example of a collapsible section. Use it to hide optional details." }) }) })
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { marginTop: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeCollapsible_default, { ...{ open: true }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "This is an example of a collapsible section. Use it to hide optional details." }) }) })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h3", { children: "Current values" }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("pre", { style: { background: "var(--vscode-editorBackground)", padding: 8, color: "var(--vscode-editor-foreground)" }, children: JSON.stringify({ checked, text, area, activeTab }, null, 2) })
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Current values" }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("pre", { style: { background: "var(--vscode-editorBackground)", padding: 8, color: "var(--vscode-editor-foreground)" }, children: JSON.stringify({ checked, text, area, activeTab }, null, 2) })
       ] })
     ] });
   };
   var PageThree_default = PageThree;
 
   // src/webview/react/playground/index.tsx
-  var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime5 = __toESM(require_jsx_runtime());
   var vscode = acquireVsCodeApi == null ? void 0 : acquireVsCodeApi();
   var Home = () => {
     const [count, setCount] = (0, import_react78.useState)(0);
@@ -38427,57 +38450,57 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
       setVerifying(false);
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { style: { marginTop: 0 }, children: "VSCode Elements Playground" }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { style: { color: "var(--vscode-editor-foreground)" }, children: "Hello World" }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { style: { marginTop: 0 }, children: "VSCode Elements Playground" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { style: { color: "var(--vscode-editor-foreground)" }, children: "Hello World" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { children: [
         "Minimal React test view using ",
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("code", { children: "vscode-elements" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("code", { children: "vscode-elements" }),
         ". Increment the counter and post a message back to the extension."
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { display: "flex", gap: 8, alignItems: "center" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeButton_default, { onClick: () => setCount((c6) => c6 + 1), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", gap: 8, alignItems: "center" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeButton_default, { onClick: () => setCount((c6) => c6 + 1), children: [
           "Count: ",
           count
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => vscode == null ? void 0 : vscode.postMessage({ type: "ping", count }), disabled: loadingAuth || verifying, children: "Send Ping" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => handleSendAuth(), disabled: loadingAuth || verifying, children: loadingAuth ? "Authing..." : `Send Authet: ${auth || "start"}` }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => handleVerifySettings(), disabled: loadingAuth || verifying, children: verifying ? "Verifying..." : "Verify Settings" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => window.location.hash = "#/page-two", children: "Open Page Two" })
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => vscode == null ? void 0 : vscode.postMessage({ type: "ping", count }), disabled: loadingAuth || verifying, children: "Send Ping" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => handleSendAuth(), disabled: loadingAuth || verifying, children: loadingAuth ? "Authing..." : `Send Authet: ${auth || "start"}` }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => handleVerifySettings(), disabled: loadingAuth || verifying, children: verifying ? "Verifying..." : "Verify Settings" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => window.location.hash = "#/page-two", children: "Open Page Two" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Incoming Messages" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { marginBottom: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("strong", { children: "Verification:" }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("section", { style: { marginTop: 16 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "Incoming Messages" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { marginBottom: 8 }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("strong", { children: "Verification:" }),
           " ",
           verificationMessage
         ] }),
-        messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("i", { children: "No messages yet." }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("ul", { style: { fontSize: 12, maxHeight: 120, overflow: "auto", border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: messages.map((m3, i7) => /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("li", { style: { marginBottom: 4 }, children: m3 }, i7)) })
+        messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("i", { children: "No messages yet." }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("ul", { style: { fontSize: 12, maxHeight: 120, overflow: "auto", border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: messages.map((m3, i7) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("li", { style: { marginBottom: 4 }, children: m3 }, i7)) })
       ] })
     ] });
   };
   var App = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(HashRouter, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("nav", { style: { padding: 8, borderBottom: "1px solid var(--vscode-panel-border)" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Link, { to: "/", children: "Home" }),
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(HashRouter, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("nav", { style: { padding: 8, borderBottom: "1px solid var(--vscode-panel-border)" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/", children: "Home" }),
         " ",
         " | ",
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Link, { to: "/environment-editor", children: "Environment Editor" }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/environment-editor", children: "Environment Editor" }),
         " ",
         " | ",
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Link, { to: "/page-three", children: "Page Three" })
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/page-three", children: "Page Three" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Routes, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Route, { path: "/", element: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Home, {}) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Route, { path: "/environment-editor", element: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(EnvironmentEditor, {}) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Route, { path: "/page-three", element: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(PageThree_default, {}) })
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Routes, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Home, {}) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/environment-editor", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(EnvironmentEditor, {}) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/page-three", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PageThree_default, {}) })
       ] })
     ] });
   };
   var rootEl = document.getElementById("root");
   if (rootEl) {
-    (0, import_client.createRoot)(rootEl).render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(App, {}));
+    (0, import_client.createRoot)(rootEl).render(/* @__PURE__ */ (0, import_jsx_runtime5.jsx)(App, {}));
   }
 })();
 /*! Bundled license information:
