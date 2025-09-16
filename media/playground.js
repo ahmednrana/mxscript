@@ -20135,24 +20135,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       {
         value: state == null ? void 0 : state.value,
         "data-allow-custom": meta.allowCustom || void 0,
-        onInput: (e12) => {
-          console.log("DEBUG: Select onInput fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
-        onChange: (e12) => {
-          console.log("DEBUG: Select onChange fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
-        onSelect: (e12) => {
-          console.log("DEBUG: Select onSelect fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
+        onInput: (e12) => updateValue(meta.id, e12.target.value),
+        onChange: (e12) => updateValue(meta.id, e12.target.value),
+        onSelect: (e12) => updateValue(meta.id, e12.target.value),
         ref: (el) => {
           if (el) {
-            const handleChange = (e12) => {
-              console.log("DEBUG: Select addEventListener change for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-              updateValue(meta.id, e12.target.value);
-            };
+            const handleChange = (e12) => updateValue(meta.id, e12.target.value);
             el.addEventListener("change", handleChange);
             el.addEventListener("vsc-change", handleChange);
             return () => {
@@ -20483,7 +20471,6 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       for (const s8 of SETTINGS) {
         result[s8.id] = (_a7 = form[s8.id]) == null ? void 0 : _a7.value;
       }
-      console.log("DEBUG: collectValues() returning:", result);
       return result;
     };
     const onSave = async () => {

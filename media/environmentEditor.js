@@ -7335,8 +7335,8 @@
         for (const [e13, n10] of i7.current) t(d3.current, e13, void 0, n10, a3);
         i7.current = e12;
       })), n9.useLayoutEffect((() => {
-        var _a7;
-        (_a7 = d3.current) == null ? void 0 : _a7.removeAttribute("defer-hydration");
+        var _a6;
+        (_a6 = d3.current) == null ? void 0 : _a6.removeAttribute("defer-hydration");
       }), []), f3.suppressHydrationWarning = true, n9.createElement(o9, { ...f3, ref: n9.useCallback(((e12) => {
         d3.current = e12, "function" == typeof r9 ? r9(e12) : null !== r9 && (r9.current = e12);
       }), [r9]) });
@@ -7431,8 +7431,8 @@
   (_a = Symbol.metadata) != null ? _a : Symbol.metadata = Symbol("metadata"), (_b = a.litPropertyMetadata) != null ? _b : a.litPropertyMetadata = /* @__PURE__ */ new WeakMap();
   var y = class extends HTMLElement {
     static addInitializer(t7) {
-      var _a7;
-      this._$Ei(), ((_a7 = this.l) != null ? _a7 : this.l = []).push(t7);
+      var _a6;
+      this._$Ei(), ((_a6 = this.l) != null ? _a6 : this.l = []).push(t7);
     }
     static get observedAttributes() {
       return this.finalize(), this._$Eh && [...this._$Eh.keys()];
@@ -7444,8 +7444,8 @@
       }
     }
     static getPropertyDescriptor(t7, s8, i7) {
-      var _a7;
-      const { get: e12, set: r8 } = (_a7 = h(this.prototype, t7)) != null ? _a7 : { get() {
+      var _a6;
+      const { get: e12, set: r8 } = (_a6 = h(this.prototype, t7)) != null ? _a6 : { get() {
         return this[s8];
       }, set(t8) {
         this[s8] = t8;
@@ -7456,8 +7456,8 @@
       }, configurable: true, enumerable: true };
     }
     static getPropertyOptions(t7) {
-      var _a7;
-      return (_a7 = this.elementProperties.get(t7)) != null ? _a7 : b;
+      var _a6;
+      return (_a6 = this.elementProperties.get(t7)) != null ? _a6 : b;
     }
     static _$Ei() {
       if (this.hasOwnProperty(d("elementProperties"))) return;
@@ -7498,16 +7498,16 @@
       super(), this._$Ep = void 0, this.isUpdatePending = false, this.hasUpdated = false, this._$Em = null, this._$Ev();
     }
     _$Ev() {
-      var _a7;
-      this._$ES = new Promise(((t7) => this.enableUpdating = t7)), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), (_a7 = this.constructor.l) == null ? void 0 : _a7.forEach(((t7) => t7(this)));
+      var _a6;
+      this._$ES = new Promise(((t7) => this.enableUpdating = t7)), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), (_a6 = this.constructor.l) == null ? void 0 : _a6.forEach(((t7) => t7(this)));
     }
     addController(t7) {
-      var _a7, _b2;
-      ((_a7 = this._$EO) != null ? _a7 : this._$EO = /* @__PURE__ */ new Set()).add(t7), void 0 !== this.renderRoot && this.isConnected && ((_b2 = t7.hostConnected) == null ? void 0 : _b2.call(t7));
+      var _a6, _b2;
+      ((_a6 = this._$EO) != null ? _a6 : this._$EO = /* @__PURE__ */ new Set()).add(t7), void 0 !== this.renderRoot && this.isConnected && ((_b2 = t7.hostConnected) == null ? void 0 : _b2.call(t7));
     }
     removeController(t7) {
-      var _a7;
-      (_a7 = this._$EO) == null ? void 0 : _a7.delete(t7);
+      var _a6;
+      (_a6 = this._$EO) == null ? void 0 : _a6.delete(t7);
     }
     _$E_() {
       const t7 = /* @__PURE__ */ new Map(), s8 = this.constructor.elementProperties;
@@ -7515,59 +7515,59 @@
       t7.size > 0 && (this._$Ep = t7);
     }
     createRenderRoot() {
-      var _a7;
-      const t7 = (_a7 = this.shadowRoot) != null ? _a7 : this.attachShadow(this.constructor.shadowRootOptions);
+      var _a6;
+      const t7 = (_a6 = this.shadowRoot) != null ? _a6 : this.attachShadow(this.constructor.shadowRootOptions);
       return S(t7, this.constructor.elementStyles), t7;
     }
     connectedCallback() {
-      var _a7, _b2;
-      (_a7 = this.renderRoot) != null ? _a7 : this.renderRoot = this.createRenderRoot(), this.enableUpdating(true), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t7) => {
-        var _a8;
-        return (_a8 = t7.hostConnected) == null ? void 0 : _a8.call(t7);
+      var _a6, _b2;
+      (_a6 = this.renderRoot) != null ? _a6 : this.renderRoot = this.createRenderRoot(), this.enableUpdating(true), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t7) => {
+        var _a7;
+        return (_a7 = t7.hostConnected) == null ? void 0 : _a7.call(t7);
       }));
     }
     enableUpdating(t7) {
     }
     disconnectedCallback() {
-      var _a7;
-      (_a7 = this._$EO) == null ? void 0 : _a7.forEach(((t7) => {
-        var _a8;
-        return (_a8 = t7.hostDisconnected) == null ? void 0 : _a8.call(t7);
+      var _a6;
+      (_a6 = this._$EO) == null ? void 0 : _a6.forEach(((t7) => {
+        var _a7;
+        return (_a7 = t7.hostDisconnected) == null ? void 0 : _a7.call(t7);
       }));
     }
     attributeChangedCallback(t7, s8, i7) {
       this._$AK(t7, i7);
     }
     _$ET(t7, s8) {
-      var _a7;
+      var _a6;
       const i7 = this.constructor.elementProperties.get(t7), e12 = this.constructor._$Eu(t7, i7);
       if (void 0 !== e12 && true === i7.reflect) {
-        const h3 = (void 0 !== ((_a7 = i7.converter) == null ? void 0 : _a7.toAttribute) ? i7.converter : u).toAttribute(s8, i7.type);
+        const h3 = (void 0 !== ((_a6 = i7.converter) == null ? void 0 : _a6.toAttribute) ? i7.converter : u).toAttribute(s8, i7.type);
         this._$Em = t7, null == h3 ? this.removeAttribute(e12) : this.setAttribute(e12, h3), this._$Em = null;
       }
     }
     _$AK(t7, s8) {
-      var _a7, _b2, _c;
+      var _a6, _b2, _c;
       const i7 = this.constructor, e12 = i7._$Eh.get(t7);
       if (void 0 !== e12 && this._$Em !== e12) {
-        const t8 = i7.getPropertyOptions(e12), h3 = "function" == typeof t8.converter ? { fromAttribute: t8.converter } : void 0 !== ((_a7 = t8.converter) == null ? void 0 : _a7.fromAttribute) ? t8.converter : u;
+        const t8 = i7.getPropertyOptions(e12), h3 = "function" == typeof t8.converter ? { fromAttribute: t8.converter } : void 0 !== ((_a6 = t8.converter) == null ? void 0 : _a6.fromAttribute) ? t8.converter : u;
         this._$Em = e12;
         const r8 = h3.fromAttribute(s8, t8.type);
         this[e12] = (_c = r8 != null ? r8 : (_b2 = this._$Ej) == null ? void 0 : _b2.get(e12)) != null ? _c : r8, this._$Em = null;
       }
     }
     requestUpdate(t7, s8, i7) {
-      var _a7, _b2;
+      var _a6, _b2;
       if (void 0 !== t7) {
         const e12 = this.constructor, h3 = this[t7];
-        if (i7 != null ? i7 : i7 = e12.getPropertyOptions(t7), !(((_a7 = i7.hasChanged) != null ? _a7 : f)(h3, s8) || i7.useDefault && i7.reflect && h3 === ((_b2 = this._$Ej) == null ? void 0 : _b2.get(t7)) && !this.hasAttribute(e12._$Eu(t7, i7)))) return;
+        if (i7 != null ? i7 : i7 = e12.getPropertyOptions(t7), !(((_a6 = i7.hasChanged) != null ? _a6 : f)(h3, s8) || i7.useDefault && i7.reflect && h3 === ((_b2 = this._$Ej) == null ? void 0 : _b2.get(t7)) && !this.hasAttribute(e12._$Eu(t7, i7)))) return;
         this.C(t7, s8, i7);
       }
       false === this.isUpdatePending && (this._$ES = this._$EP());
     }
     C(t7, s8, { useDefault: i7, reflect: e12, wrapped: h3 }, r8) {
-      var _a7, _b2, _c;
-      i7 && !((_a7 = this._$Ej) != null ? _a7 : this._$Ej = /* @__PURE__ */ new Map()).has(t7) && (this._$Ej.set(t7, (_b2 = r8 != null ? r8 : s8) != null ? _b2 : this[t7]), true !== h3 || void 0 !== r8) || (this._$AL.has(t7) || (this.hasUpdated || i7 || (s8 = void 0), this._$AL.set(t7, s8)), true === e12 && this._$Em !== t7 && ((_c = this._$Eq) != null ? _c : this._$Eq = /* @__PURE__ */ new Set()).add(t7));
+      var _a6, _b2, _c;
+      i7 && !((_a6 = this._$Ej) != null ? _a6 : this._$Ej = /* @__PURE__ */ new Map()).has(t7) && (this._$Ej.set(t7, (_b2 = r8 != null ? r8 : s8) != null ? _b2 : this[t7]), true !== h3 || void 0 !== r8) || (this._$AL.has(t7) || (this.hasUpdated || i7 || (s8 = void 0), this._$AL.set(t7, s8)), true === e12 && this._$Em !== t7 && ((_c = this._$Eq) != null ? _c : this._$Eq = /* @__PURE__ */ new Set()).add(t7));
     }
     async _$EP() {
       this.isUpdatePending = true;
@@ -7583,10 +7583,10 @@
       return this.performUpdate();
     }
     performUpdate() {
-      var _a7, _b2;
+      var _a6, _b2;
       if (!this.isUpdatePending) return;
       if (!this.hasUpdated) {
-        if ((_a7 = this.renderRoot) != null ? _a7 : this.renderRoot = this.createRenderRoot(), this._$Ep) {
+        if ((_a6 = this.renderRoot) != null ? _a6 : this.renderRoot = this.createRenderRoot(), this._$Ep) {
           for (const [t9, s9] of this._$Ep) this[t9] = s9;
           this._$Ep = void 0;
         }
@@ -7600,8 +7600,8 @@
       const s8 = this._$AL;
       try {
         t7 = this.shouldUpdate(s8), t7 ? (this.willUpdate(s8), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t8) => {
-          var _a8;
-          return (_a8 = t8.hostUpdate) == null ? void 0 : _a8.call(t8);
+          var _a7;
+          return (_a7 = t8.hostUpdate) == null ? void 0 : _a7.call(t8);
         })), this.update(s8)) : this._$EM();
       } catch (s9) {
         throw t7 = false, this._$EM(), s9;
@@ -7611,10 +7611,10 @@
     willUpdate(t7) {
     }
     _$AE(t7) {
-      var _a7;
-      (_a7 = this._$EO) == null ? void 0 : _a7.forEach(((t8) => {
-        var _a8;
-        return (_a8 = t8.hostUpdated) == null ? void 0 : _a8.call(t8);
+      var _a6;
+      (_a6 = this._$EO) == null ? void 0 : _a6.forEach(((t8) => {
+        var _a7;
+        return (_a7 = t8.hostUpdated) == null ? void 0 : _a7.call(t8);
       })), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t7)), this.updated(t7);
     }
     _$EM() {
@@ -7724,9 +7724,9 @@
     }
   };
   function S2(t7, i7, s8 = t7, e12) {
-    var _a7, _b2, _c;
+    var _a6, _b2, _c;
     if (i7 === T) return i7;
-    let h3 = void 0 !== e12 ? (_a7 = s8._$Co) == null ? void 0 : _a7[e12] : s8._$Cl;
+    let h3 = void 0 !== e12 ? (_a6 = s8._$Co) == null ? void 0 : _a6[e12] : s8._$Cl;
     const o9 = c3(i7) ? void 0 : i7._$litDirective$;
     return (h3 == null ? void 0 : h3.constructor) !== o9 && ((_b2 = h3 == null ? void 0 : h3._$AO) == null ? void 0 : _b2.call(h3, false), void 0 === o9 ? h3 = void 0 : (h3 = new o9(t7), h3._$AT(t7, s8, e12)), void 0 !== e12 ? ((_c = s8._$Co) != null ? _c : s8._$Co = [])[e12] = h3 : s8._$Cl = h3), void 0 !== h3 && (i7 = S2(t7, h3._$AS(t7, i7.values), h3, e12)), i7;
   }
@@ -7741,8 +7741,8 @@
       return this._$AM._$AU;
     }
     u(t7) {
-      var _a7;
-      const { el: { content: i7 }, parts: s8 } = this._$AD, e12 = ((_a7 = t7 == null ? void 0 : t7.creationScope) != null ? _a7 : r3).importNode(i7, true);
+      var _a6;
+      const { el: { content: i7 }, parts: s8 } = this._$AD, e12 = ((_a6 = t7 == null ? void 0 : t7.creationScope) != null ? _a6 : r3).importNode(i7, true);
       C.currentNode = e12;
       let h3 = C.nextNode(), o9 = 0, n9 = 0, l3 = s8[0];
       for (; void 0 !== l3; ) {
@@ -7761,12 +7761,12 @@
   };
   var R = class _R {
     get _$AU() {
-      var _a7, _b2;
-      return (_b2 = (_a7 = this._$AM) == null ? void 0 : _a7._$AU) != null ? _b2 : this._$Cv;
+      var _a6, _b2;
+      return (_b2 = (_a6 = this._$AM) == null ? void 0 : _a6._$AU) != null ? _b2 : this._$Cv;
     }
     constructor(t7, i7, s8, e12) {
-      var _a7;
-      this.type = 2, this._$AH = E, this._$AN = void 0, this._$AA = t7, this._$AB = i7, this._$AM = s8, this.options = e12, this._$Cv = (_a7 = e12 == null ? void 0 : e12.isConnected) != null ? _a7 : true;
+      var _a6;
+      this.type = 2, this._$AH = E, this._$AN = void 0, this._$AA = t7, this._$AB = i7, this._$AM = s8, this.options = e12, this._$Cv = (_a6 = e12 == null ? void 0 : e12.isConnected) != null ? _a6 : true;
     }
     get parentNode() {
       let t7 = this._$AA.parentNode;
@@ -7792,9 +7792,9 @@
       this._$AH !== E && c3(this._$AH) ? this._$AA.nextSibling.data = t7 : this.T(r3.createTextNode(t7)), this._$AH = t7;
     }
     $(t7) {
-      var _a7;
+      var _a6;
       const { values: i7, _$litType$: s8 } = t7, e12 = "number" == typeof s8 ? this._$AC(t7) : (void 0 === s8.el && (s8.el = N.createElement(P(s8.h, s8.h[0]), this.options)), s8);
-      if (((_a7 = this._$AH) == null ? void 0 : _a7._$AD) === e12) this._$AH.p(i7);
+      if (((_a6 = this._$AH) == null ? void 0 : _a6._$AD) === e12) this._$AH.p(i7);
       else {
         const t8 = new M(e12, this), s9 = t8.u(this.options);
         t8.p(i7), this.T(s9), this._$AH = t8;
@@ -7812,15 +7812,15 @@
       e12 < i7.length && (this._$AR(s8 && s8._$AB.nextSibling, e12), i7.length = e12);
     }
     _$AR(t7 = this._$AA.nextSibling, i7) {
-      var _a7;
-      for ((_a7 = this._$AP) == null ? void 0 : _a7.call(this, false, true, i7); t7 !== this._$AB; ) {
+      var _a6;
+      for ((_a6 = this._$AP) == null ? void 0 : _a6.call(this, false, true, i7); t7 !== this._$AB; ) {
         const i8 = t7.nextSibling;
         t7.remove(), t7 = i8;
       }
     }
     setConnected(t7) {
-      var _a7;
-      void 0 === this._$AM && (this._$Cv = t7, (_a7 = this._$AP) == null ? void 0 : _a7.call(this, t7));
+      var _a6;
+      void 0 === this._$AM && (this._$Cv = t7, (_a6 = this._$AP) == null ? void 0 : _a6.call(this, t7));
     }
   };
   var k = class {
@@ -7869,14 +7869,14 @@
       super(t7, i7, s8, e12, h3), this.type = 5;
     }
     _$AI(t7, i7 = this) {
-      var _a7;
-      if ((t7 = (_a7 = S2(this, t7, i7, 0)) != null ? _a7 : E) === T) return;
+      var _a6;
+      if ((t7 = (_a6 = S2(this, t7, i7, 0)) != null ? _a6 : E) === T) return;
       const s8 = this._$AH, e12 = t7 === E && s8 !== E || t7.capture !== s8.capture || t7.once !== s8.once || t7.passive !== s8.passive, h3 = t7 !== E && (s8 === E || e12);
       e12 && this.element.removeEventListener(this.name, this, s8), h3 && this.element.addEventListener(this.name, this, t7), this._$AH = t7;
     }
     handleEvent(t7) {
-      var _a7, _b2;
-      "function" == typeof this._$AH ? this._$AH.call((_b2 = (_a7 = this.options) == null ? void 0 : _a7.host) != null ? _b2 : this.element, t7) : this._$AH.handleEvent(t7);
+      var _a6, _b2;
+      "function" == typeof this._$AH ? this._$AH.call((_b2 = (_a6 = this.options) == null ? void 0 : _a6.host) != null ? _b2 : this.element, t7) : this._$AH.handleEvent(t7);
     }
   };
   var z = class {
@@ -7895,8 +7895,8 @@
   var _a3;
   j == null ? void 0 : j(N, R), ((_a3 = t3.litHtmlVersions) != null ? _a3 : t3.litHtmlVersions = []).push("3.3.1");
   var B = (t7, i7, s8) => {
-    var _a7, _b2;
-    const e12 = (_a7 = s8 == null ? void 0 : s8.renderBefore) != null ? _a7 : i7;
+    var _a6, _b2;
+    const e12 = (_a6 = s8 == null ? void 0 : s8.renderBefore) != null ? _a6 : i7;
     let h3 = e12._$litPart$;
     if (void 0 === h3) {
       const t8 = (_b2 = s8 == null ? void 0 : s8.renderBefore) != null ? _b2 : null;
@@ -7912,21 +7912,21 @@
       super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
     }
     createRenderRoot() {
-      var _a7, _b2;
+      var _a6, _b2;
       const t7 = super.createRenderRoot();
-      return (_b2 = (_a7 = this.renderOptions).renderBefore) != null ? _b2 : _a7.renderBefore = t7.firstChild, t7;
+      return (_b2 = (_a6 = this.renderOptions).renderBefore) != null ? _b2 : _a6.renderBefore = t7.firstChild, t7;
     }
     update(t7) {
       const r8 = this.render();
       this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t7), this._$Do = B(r8, this.renderRoot, this.renderOptions);
     }
     connectedCallback() {
-      var _a7;
-      super.connectedCallback(), (_a7 = this._$Do) == null ? void 0 : _a7.setConnected(true);
+      var _a6;
+      super.connectedCallback(), (_a6 = this._$Do) == null ? void 0 : _a6.setConnected(true);
     }
     disconnectedCallback() {
-      var _a7;
-      super.disconnectedCallback(), (_a7 = this._$Do) == null ? void 0 : _a7.setConnected(false);
+      var _a6;
+      super.disconnectedCallback(), (_a6 = this._$Do) == null ? void 0 : _a6.setConnected(false);
     }
     render() {
       return T;
@@ -7981,8 +7981,8 @@
   function e6(e12, r8) {
     return (n9, s8, i7) => {
       const o9 = (t7) => {
-        var _a7, _b2;
-        return (_b2 = (_a7 = t7.renderRoot) == null ? void 0 : _a7.querySelector(e12)) != null ? _b2 : null;
+        var _a6, _b2;
+        return (_b2 = (_a6 = t7.renderRoot) == null ? void 0 : _a6.querySelector(e12)) != null ? _b2 : null;
       };
       if (r8) {
         const { get: e13, set: r9 } = "object" == typeof s8 ? n9 : i7 != null ? i7 : (() => {
@@ -8008,8 +8008,8 @@
   var e7;
   function r6(r8) {
     return (n9, o9) => e5(n9, o9, { get() {
-      var _a7;
-      return ((_a7 = this.renderRoot) != null ? _a7 : e7 != null ? e7 : e7 = document.createDocumentFragment()).querySelectorAll(r8);
+      var _a6;
+      return ((_a6 = this.renderRoot) != null ? _a6 : e7 != null ? e7 : e7 = document.createDocumentFragment()).querySelectorAll(r8);
     } });
   }
 
@@ -8018,8 +8018,8 @@
     return (e12, n9) => {
       const { slot: r8, selector: s8 } = o9 != null ? o9 : {}, c6 = "slot" + (r8 ? `[name=${r8}]` : ":not([name])");
       return e5(e12, n9, { get() {
-        var _a7, _b2;
-        const t7 = (_a7 = this.renderRoot) == null ? void 0 : _a7.querySelector(c6), e13 = (_b2 = t7 == null ? void 0 : t7.assignedElements(o9)) != null ? _b2 : [];
+        var _a6, _b2;
+        const t7 = (_a6 = this.renderRoot) == null ? void 0 : _a6.querySelector(c6), e13 = (_b2 = t7 == null ? void 0 : t7.assignedElements(o9)) != null ? _b2 : [];
         return void 0 === s8 ? e13 : e13.filter(((t8) => t8.matches(s8)));
       } });
     };
@@ -8030,8 +8030,8 @@
     return (o9, r8) => {
       const { slot: e12 } = n9 != null ? n9 : {}, s8 = "slot" + (e12 ? `[name=${e12}]` : ":not([name])");
       return e5(o9, r8, { get() {
-        var _a7, _b2;
-        const t7 = (_a7 = this.renderRoot) == null ? void 0 : _a7.querySelector(s8);
+        var _a6, _b2;
+        const t7 = (_a6 = this.renderRoot) == null ? void 0 : _a6.querySelector(s8);
         return (_b2 = t7 == null ? void 0 : t7.assignedNodes(n9)) != null ? _b2 : [];
       } });
     };
@@ -8218,17 +8218,17 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   // node_modules/lit-html/directives/class-map.js
   var e9 = e8(class extends i5 {
     constructor(t7) {
-      var _a7;
-      if (super(t7), t7.type !== t4.ATTRIBUTE || "class" !== t7.name || ((_a7 = t7.strings) == null ? void 0 : _a7.length) > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
+      var _a6;
+      if (super(t7), t7.type !== t4.ATTRIBUTE || "class" !== t7.name || ((_a6 = t7.strings) == null ? void 0 : _a6.length) > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
     }
     render(t7) {
       return " " + Object.keys(t7).filter(((s8) => t7[s8])).join(" ") + " ";
     }
     update(s8, [i7]) {
-      var _a7, _b2;
+      var _a6, _b2;
       if (void 0 === this.st) {
         this.st = /* @__PURE__ */ new Set(), void 0 !== s8.strings && (this.nt = new Set(s8.strings.join(" ").split(/\s/).filter(((t7) => "" !== t7))));
-        for (const t7 in i7) i7[t7] && !((_a7 = this.nt) == null ? void 0 : _a7.has(t7)) && this.st.add(t7);
+        for (const t7 in i7) i7[t7] && !((_a6 = this.nt) == null ? void 0 : _a6.has(t7)) && this.st.add(t7);
         return this.render(i7);
       }
       const r8 = s8.element.classList;
@@ -9196,14 +9196,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         this._toggleState();
       };
       this._handleKeyDown = (ev) => {
-        var _a7;
+        var _a6;
         if (!this.disabled && (ev.key === "Enter" || ev.key === " ")) {
           ev.preventDefault();
           if (ev.key === " ") {
             this._toggleState();
           }
           if (ev.key === "Enter") {
-            (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
+            (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
           }
         }
       };
@@ -9252,11 +9252,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.dispatchEvent(new Event("change", { bubbles: true }));
     }
     _manageRequired() {
-      var _a7;
+      var _a6;
       if (!this.checked && this.required) {
         this._internals.setValidity({
           valueMissing: true
-        }, "Please check this box if you want to proceed.", (_a7 = this._inputEl) != null ? _a7 : void 0);
+        }, "Please check this box if you want to proceed.", (_a6 = this._inputEl) != null ? _a6 : void 0);
       } else {
         this._internals.setValidity({});
       }
@@ -10187,8 +10187,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._resizeObserver.observe(this._wrapperElement);
     }
     _deactivateResizeObserver() {
-      var _a7;
-      (_a7 = this._resizeObserver) == null ? void 0 : _a7.disconnect();
+      var _a6;
+      (_a6 = this._resizeObserver) == null ? void 0 : _a6.disconnect();
       this._resizeObserver = null;
     }
     firstUpdated() {
@@ -10539,10 +10539,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return target;
     }
     async _connectWithTarget() {
-      var _a7, _b2;
+      var _a6, _b2;
       await this.updateComplete;
       const target = this._getTarget();
-      if (["vscode-radio-group", "vscode-checkbox-group"].includes((_a7 = target == null ? void 0 : target.tagName.toLowerCase()) != null ? _a7 : "")) {
+      if (["vscode-radio-group", "vscode-checkbox-group"].includes((_a6 = target == null ? void 0 : target.tagName.toLowerCase()) != null ? _a6 : "")) {
         target.setAttribute("aria-labelledby", this._id);
       }
       let label = "";
@@ -10635,7 +10635,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var { I: t5 } = Z;
   var r7 = () => document.createComment("");
   var s4 = (o9, i7, n9) => {
-    var _a7;
+    var _a6;
     const e12 = o9._$AA.parentNode, l3 = void 0 === i7 ? o9._$AB : i7._$AA;
     if (void 0 === n9) {
       const i8 = e12.insertBefore(r7(), l3), d3 = e12.insertBefore(r7(), l3);
@@ -10644,7 +10644,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const t7 = n9._$AB.nextSibling, i8 = n9._$AM, d3 = i8 !== o9;
       if (d3) {
         let t8;
-        (_a7 = n9._$AQ) == null ? void 0 : _a7.call(n9, o9), n9._$AM = o9, void 0 !== n9._$AP && (t8 = o9._$AU) !== i8._$AU && n9._$AP(t8);
+        (_a6 = n9._$AQ) == null ? void 0 : _a6.call(n9, o9), n9._$AM = o9, void 0 !== n9._$AP && (t8 = o9._$AU) !== i8._$AU && n9._$AP(t8);
       }
       if (t7 !== l3 || d3) {
         let o10 = n9._$AA;
@@ -10686,10 +10686,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this.dt(e12, s8, t7).values;
     }
     update(s8, [t7, r8, c6]) {
-      var _a7;
+      var _a6;
       const d3 = p3(s8), { values: p4, keys: a3 } = this.dt(t7, r8, c6);
       if (!Array.isArray(d3)) return this.ut = a3, p4;
-      const h3 = (_a7 = this.ut) != null ? _a7 : this.ut = [], v3 = [];
+      const h3 = (_a6 = this.ut) != null ? _a6 : this.ut = [], v3 = [];
       let m3, y3, x2 = 0, j2 = d3.length - 1, k2 = 0, w2 = p4.length - 1;
       for (; x2 <= j2 && k2 <= w2; ) if (null === d3[x2]) x2++;
       else if (null === d3[j2]) j2--;
@@ -10942,8 +10942,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     get relativeActiveIndex() {
-      var _a7, _b2;
-      return (_b2 = (_a7 = this._options[this._activeIndex]) == null ? void 0 : _a7.filteredIndex) != null ? _b2 : -1;
+      var _a6, _b2;
+      return (_b2 = (_a6 = this._options[this._activeIndex]) == null ? void 0 : _a6.filteredIndex) != null ? _b2 : -1;
     }
     set comboboxMode(enabled) {
       this._combobox = enabled;
@@ -10965,9 +10965,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._selectedIndex;
     }
     set selectedIndex(index) {
-      var _a7, _b2;
+      var _a6, _b2;
       if (this._selectedIndex !== -1) {
-        (_b2 = (_a7 = this._options[this._selectedIndex]).selected) != null ? _b2 : _a7.selected = false;
+        (_b2 = (_a6 = this._options[this._selectedIndex]).selected) != null ? _b2 : _a6.selected = false;
       }
       const op = this.getOptionByIndex(index);
       this._selectedIndex = op ? index : -1;
@@ -10989,12 +10989,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     set value(newValue) {
-      var _a7;
+      var _a6;
       if (this._multiSelect) {
         const valueList = newValue.map((v3) => this._indexByValue.get(v3)).filter((v3) => v3 !== void 0);
         this._selectedIndexes = new Set(valueList);
       } else {
-        this._selectedIndex = (_a7 = this._indexByValue.get(newValue)) != null ? _a7 : -1;
+        this._selectedIndex = (_a6 = this._indexByValue.get(newValue)) != null ? _a6 : -1;
       }
       this._host.requestUpdate();
     }
@@ -11045,8 +11045,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._indexByValue.clear();
       this._indexByLabel.clear();
       this._options = options.map((op, index) => {
-        var _a7, _b2, _c, _d, _e, _f, _g;
-        this._indexByValue.set((_a7 = op.value) != null ? _a7 : "", index);
+        var _a6, _b2, _c, _d, _e, _f, _g;
+        this._indexByValue.set((_a6 = op.value) != null ? _a6 : "", index);
         this._indexByLabel.set((_b2 = op.label) != null ? _b2 : "", index);
         return {
           description: (_c = op.description) != null ? _c : "",
@@ -11109,8 +11109,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }
     expandMultiSelection(values) {
       values.forEach((v3) => {
-        var _a7;
-        const foundIndex = (_a7 = this._indexByValue.get(v3)) != null ? _a7 : -1;
+        var _a6;
+        const foundIndex = (_a6 = this._indexByValue.get(v3)) != null ? _a6 : -1;
         if (foundIndex !== -1) {
           this._selectedIndexes.add(foundIndex);
         }
@@ -11118,8 +11118,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     toggleActiveMultiselectOption() {
-      var _a7;
-      const activeOption = (_a7 = this._options[this._activeIndex]) != null ? _a7 : null;
+      var _a6;
+      const activeOption = (_a6 = this._options[this._activeIndex]) != null ? _a6 : null;
       if (!activeOption) {
         return;
       }
@@ -11142,24 +11142,24 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     getActiveOption() {
-      var _a7;
-      return (_a7 = this._options[this._activeIndex]) != null ? _a7 : null;
+      var _a6;
+      return (_a6 = this._options[this._activeIndex]) != null ? _a6 : null;
     }
     getSelectedOption() {
-      var _a7;
-      return (_a7 = this._options[this._selectedIndex]) != null ? _a7 : null;
+      var _a6;
+      return (_a6 = this._options[this._selectedIndex]) != null ? _a6 : null;
     }
     getOptionByIndex(index) {
-      var _a7;
-      return (_a7 = this._options[index]) != null ? _a7 : null;
+      var _a6;
+      return (_a6 = this._options[index]) != null ? _a6 : null;
     }
     findOptionIndex(value) {
-      var _a7;
-      return (_a7 = this._indexByValue.get(value)) != null ? _a7 : -1;
+      var _a6;
+      return (_a6 = this._indexByValue.get(value)) != null ? _a6 : -1;
     }
     getOptionByValue(value, includeHiddenOptions = false) {
-      var _a7;
-      const index = (_a7 = this._indexByValue.get(value)) != null ? _a7 : -1;
+      var _a6;
+      const index = (_a6 = this._indexByValue.get(value)) != null ? _a6 : -1;
       if (index === -1) {
         return null;
       }
@@ -11169,8 +11169,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._options[index];
     }
     getOptionByLabel(label) {
-      var _a7;
-      const index = (_a7 = this._indexByLabel.get(label)) != null ? _a7 : -1;
+      var _a6;
+      const index = (_a6 = this._indexByLabel.get(label)) != null ? _a6 : -1;
       if (index === -1) {
         return null;
       }
@@ -11515,15 +11515,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._updateThumbPosition();
     }
     _calcThumbHeight() {
-      var _a7, _b2;
+      var _a6, _b2;
       const componentHeight = this.offsetHeight;
-      const contentHeight = (_b2 = (_a7 = this._contentElement) == null ? void 0 : _a7.offsetHeight) != null ? _b2 : 0;
+      const contentHeight = (_b2 = (_a6 = this._contentElement) == null ? void 0 : _a6.offsetHeight) != null ? _b2 : 0;
       const proposedSize = componentHeight * (componentHeight / contentHeight);
       return Math.max(this.minThumbSize, proposedSize);
     }
     _updateScrollbar() {
-      var _a7, _b2;
-      const contentHeight = (_b2 = (_a7 = this._contentElement) == null ? void 0 : _a7.offsetHeight) != null ? _b2 : 0;
+      var _a6, _b2;
+      const contentHeight = (_b2 = (_a6 = this._contentElement) == null ? void 0 : _a6.offsetHeight) != null ? _b2 : 0;
       const componentHeight = this.offsetHeight;
       if (componentHeight >= contentHeight) {
         this._scrollbarVisible = false;
@@ -11729,14 +11729,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
      * The element cannot be used and is not focusable.
      */
     set disabled(newState) {
-      var _a7;
+      var _a6;
       this._disabled = newState;
       this.ariaDisabled = newState ? "true" : "false";
       if (newState === true) {
         this._originalTabIndex = this.tabIndex;
         this.tabIndex = -1;
       } else {
-        this.tabIndex = (_a7 = this._originalTabIndex) != null ? _a7 : 0;
+        this.tabIndex = (_a6 = this._originalTabIndex) != null ? _a6 : 0;
         this._originalTabIndex = void 0;
       }
       this.requestUpdate();
@@ -11902,13 +11902,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         if (this.combobox) {
           this.updateComplete.then(() => {
-            var _a7;
-            (_a7 = this.shadowRoot) == null ? void 0 : _a7.querySelector(".combobox-input").focus();
+            var _a6;
+            (_a6 = this.shadowRoot) == null ? void 0 : _a6.querySelector(".combobox-input").focus();
           });
         } else {
           this.updateComplete.then(() => {
-            var _a7;
-            (_a7 = this.shadowRoot) == null ? void 0 : _a7.querySelector(".select-face").focus();
+            var _a6;
+            (_a6 = this.shadowRoot) == null ? void 0 : _a6.querySelector(".select-face").focus();
           });
         }
       }
@@ -11924,14 +11924,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     _manageRequired() {
     }
     _setStateFromSlottedElements() {
-      var _a7;
-      const optionElements = (_a7 = this._assignedOptions) != null ? _a7 : [];
+      var _a6;
+      const optionElements = (_a6 = this._assignedOptions) != null ? _a6 : [];
       this._opts.clear();
       optionElements.forEach((el) => {
-        var _a8;
+        var _a7;
         const { innerText, description, disabled } = el;
         const value = typeof el.value === "string" ? el.value : innerText.trim();
-        const selected = (_a8 = el.selected) != null ? _a8 : false;
+        const selected = (_a7 = el.selected) != null ? _a7 : false;
         const op = {
           label: innerText.trim(),
           value,
@@ -12039,7 +12039,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _onArrowUpKeyDown() {
-      var _a7, _b2;
+      var _a6, _b2;
       if (this.open) {
         if (this._opts.activeIndex <= 0 && !(this.combobox && this.creatable)) {
           return;
@@ -12051,7 +12051,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         } else {
           const prevOp = this._opts.prev();
           if (prevOp !== null) {
-            this._opts.activeIndex = (_a7 = prevOp == null ? void 0 : prevOp.index) != null ? _a7 : -1;
+            this._opts.activeIndex = (_a6 = prevOp == null ? void 0 : prevOp.index) != null ? _a6 : -1;
             const prevSelectableIndex = (_b2 = prevOp == null ? void 0 : prevOp.filteredIndex) != null ? _b2 : -1;
             if (prevSelectableIndex > -1) {
               this._adjustOptionListScrollPos("up", prevSelectableIndex);
@@ -12064,7 +12064,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _onArrowDownKeyDown() {
-      var _a7, _b2;
+      var _a6, _b2;
       let numOpts = this._opts.numOfVisibleOptions;
       const suggestedOptionVisible = this._isSuggestedOptionVisible;
       if (suggestedOptionVisible) {
@@ -12080,7 +12080,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           this._adjustOptionListScrollPos("down", numOpts - 1);
           this._opts.activeIndex = -1;
         } else if (nextOp !== null) {
-          const nextSelectableIndex = (_a7 = nextOp == null ? void 0 : nextOp.filteredIndex) != null ? _a7 : -1;
+          const nextSelectableIndex = (_a6 = nextOp == null ? void 0 : nextOp.filteredIndex) != null ? _a6 : -1;
           this._opts.activeIndex = (_b2 = nextOp == null ? void 0 : nextOp.index) != null ? _b2 : -1;
           if (nextSelectableIndex > -1) {
             this._adjustOptionListScrollPos("down", nextSelectableIndex);
@@ -12136,11 +12136,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       ><span class="option-label">${label}</span>`;
     }
     _renderOptions() {
-      var _a7;
+      var _a6;
       const list = this._opts.options;
       return x`
       <ul
-        aria-label=${o8((_a7 = this.label) != null ? _a7 : void 0)}
+        aria-label=${o8((_a6 = this.label) != null ? _a6 : void 0)}
         aria-multiselectable=${o8(this._opts.multiSelect ? "true" : void 0)}
         class="options"
         id="select-listbox"
@@ -12150,7 +12150,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         @mouseover=${this._onOptionMouseOver}
       >
         ${c4(list, (op) => op.index, (op, index) => {
-        var _a8, _b2, _c;
+        var _a7, _b2, _c;
         if (!op.visible) {
           return E;
         }
@@ -12164,7 +12164,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           "multi-select": this._opts.multiSelect,
           selected
         };
-        const labelText = ((_b2 = (_a8 = op.ranges) == null ? void 0 : _a8.length) != null ? _b2 : 0 > 0) ? highlightRanges(op.label, (_c = op.ranges) != null ? _c : []) : op.label;
+        const labelText = ((_b2 = (_a7 = op.ranges) == null ? void 0 : _a7.length) != null ? _b2 : 0 > 0) ? highlightRanges(op.label, (_c = op.ranges) != null ? _c : []) : op.label;
         return x`
               <li
                 aria-selected=${selected ? "true" : "false"}
@@ -12891,19 +12891,19 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     _setFormValue() {
       const fd = new FormData();
       this._values.forEach((v3) => {
-        var _a7;
-        fd.append((_a7 = this.name) != null ? _a7 : "", v3);
+        var _a6;
+        fd.append((_a6 = this.name) != null ? _a6 : "", v3);
       });
       this._internals.setFormValue(fd);
     }
     async _createAndSelectSuggestedOption() {
-      var _a7, _b2;
+      var _a6, _b2;
       super._createAndSelectSuggestedOption();
       const nextIndex = this._createSuggestedOption();
       await this.updateComplete;
       this.selectedIndexes = [...this.selectedIndexes, nextIndex];
       this._dispatchChangeEvent();
-      const opCreateEvent = new CustomEvent("vsc-multi-select-create-option", { detail: { value: (_b2 = (_a7 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a7.value) != null ? _b2 : "" } });
+      const opCreateEvent = new CustomEvent("vsc-multi-select-create-option", { detail: { value: (_b2 = (_a6 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a6.value) != null ? _b2 : "" } });
       this.dispatchEvent(opCreateEvent);
       this.open = false;
       this._isPlaceholderOptionActive = false;
@@ -12967,13 +12967,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _renderComboboxFace() {
-      var _a7;
+      var _a6;
       let inputVal = "";
       if (this._isBeingFiltered) {
         inputVal = this._opts.filterPattern;
       } else {
         const op = this._opts.getSelectedOption();
-        inputVal = (_a7 = op == null ? void 0 : op.label) != null ? _a7 : "";
+        inputVal = (_a6 = op == null ? void 0 : op.label) != null ? _a6 : "";
       }
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
@@ -13013,7 +13013,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     `;
     }
     _renderSelectFace() {
-      var _a7;
+      var _a6;
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
       return x`
@@ -13022,7 +13022,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         aria-controls="select-listbox"
         aria-expanded=${o8(this._opts.multiSelect ? void 0 : expanded)}
         aria-haspopup="listbox"
-        aria-label=${o8((_a7 = this.label) != null ? _a7 : void 0)}
+        aria-label=${o8((_a6 = this.label) != null ? _a6 : void 0)}
         class="select-face face multiselect"
         @click=${this._onFaceClick}
         .tabIndex=${this.disabled ? -1 : 0}
@@ -13235,9 +13235,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._maybeStartLongRunningTimer();
     }
     render() {
-      var _a7;
+      var _a6;
       const max = this.max > 0 ? this.max : 100;
-      const clamped = this._isDeterminate ? Math.min(Math.max((_a7 = this.value) != null ? _a7 : 0, 0), max) : 0;
+      const clamped = this._isDeterminate ? Math.min(Math.max((_a6 = this.value) != null ? _a6 : 0, 0), max) : 0;
       const percent = this._isDeterminate ? clamped / max * 100 : 0;
       const containerClasses = {
         container: true,
@@ -13501,7 +13501,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
       };
       this._handleKeyDown = (ev) => {
-        var _a7;
+        var _a6;
         if (!this.disabled && (ev.key === "Enter" || ev.key === " ")) {
           ev.preventDefault();
           if (ev.key === " " && !this.checked) {
@@ -13510,7 +13510,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             this.dispatchEvent(new Event("change", { bubbles: true }));
           }
           if (ev.key === "Enter") {
-            (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
+            (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
           }
         }
       };
@@ -13990,14 +13990,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._internals.reportValidity();
     }
     updateInputValue() {
-      var _a7;
+      var _a6;
       if (!this.combobox) {
         return;
       }
       const input = this.renderRoot.querySelector(".combobox-input");
       if (input) {
         const selectedOption = this._opts.getSelectedOption();
-        input.value = (_a7 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a7 : "";
+        input.value = (_a6 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a6 : "";
       }
     }
     constructor() {
@@ -14033,12 +14033,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._internals.form;
     }
     async _createAndSelectSuggestedOption() {
-      var _a7, _b2;
+      var _a6, _b2;
       const nextIndex = this._createSuggestedOption();
       await this.updateComplete;
       this._opts.selectedIndex = nextIndex;
       this._dispatchChangeEvent();
-      const opCreateEvent = new CustomEvent("vsc-single-select-create-option", { detail: { value: (_b2 = (_a7 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a7.value) != null ? _b2 : "" } });
+      const opCreateEvent = new CustomEvent("vsc-single-select-create-option", { detail: { value: (_b2 = (_a6 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a6.value) != null ? _b2 : "" } });
       this.dispatchEvent(opCreateEvent);
       this.open = false;
       this._isPlaceholderOptionActive = false;
@@ -14137,9 +14137,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }
     //#region render functions
     _renderSelectFace() {
-      var _a7;
+      var _a6;
       const selectedOption = this._opts.getSelectedOption();
-      const label = (_a7 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a7 : "";
+      const label = (_a6 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a6 : "";
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       return x`
       <div
@@ -14158,13 +14158,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     `;
     }
     _renderComboboxFace() {
-      var _a7;
+      var _a6;
       let inputVal = "";
       if (this._isBeingFiltered) {
         inputVal = this._opts.filterPattern;
       } else {
         const op = this._opts.getSelectedOption();
-        inputVal = (_a7 = op == null ? void 0 : op.label) != null ? _a7 : "";
+        inputVal = (_a6 = op == null ? void 0 : op.label) != null ? _a6 : "";
       }
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
@@ -14507,14 +14507,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
      * Sets the handle position to the value specified in the `initialHandlePosition` property.
      */
     resetHandlePosition() {
-      var _a7;
+      var _a6;
       if (!this._wrapperEl) {
         this._handlePosition = 0;
         return;
       }
       const { width, height } = this._wrapperEl.getBoundingClientRect();
       const max = this.split === "vertical" ? width : height;
-      const { value, unit } = parseValue((_a7 = this.initialHandlePosition) != null ? _a7 : DEFAULT_INITIAL_POSITION);
+      const { value, unit } = parseValue((_a6 = this.initialHandlePosition) != null ? _a6 : DEFAULT_INITIAL_POSITION);
       if (unit === "percent") {
         this._handlePosition = percentToPx(value, max);
       } else {
@@ -14614,7 +14614,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       });
     }
     render() {
-      var _a7;
+      var _a6;
       const { width, height } = this._boundRect;
       const maxPos = this.split === "vertical" ? width : height;
       const handlePosCss = this.fixedPane !== "none" ? `${this._handlePosition}px` : `${pxToPercent(this._handlePosition, maxPos)}%`;
@@ -14634,7 +14634,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         left: this.split === "vertical" ? handlePosCss : "0",
         top: this.split === "vertical" ? "0" : handlePosCss
       };
-      const handleSize = (_a7 = this.handleSize) != null ? _a7 : DEFAULT_HANDLE_SIZE;
+      const handleSize = (_a6 = this.handleSize) != null ? _a6 : DEFAULT_HANDLE_SIZE;
       if (this.split === "vertical") {
         handleStylesPropObj.marginLeft = `${0 - handleSize / 2}px`;
         handleStylesPropObj.width = `${handleSize}px`;
@@ -15179,9 +15179,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._initDefaultColumnSizes();
     }
     disconnectedCallback() {
-      var _a7, _b2, _c;
+      var _a6, _b2, _c;
       super.disconnectedCallback();
-      (_a7 = this._componentResizeObserver) == null ? void 0 : _a7.unobserve(this);
+      (_a6 = this._componentResizeObserver) == null ? void 0 : _a6.unobserve(this);
       (_b2 = this._componentResizeObserver) == null ? void 0 : _b2.disconnect();
       (_c = this._bodyResizeObserver) == null ? void 0 : _c.disconnect();
     }
@@ -15361,12 +15361,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._headerCells = this._queryHeaderCells();
     }
     _onBodySlotChange() {
-      var _a7;
+      var _a6;
       this._initDefaultColumnSizes();
       this._initResizeObserver();
       this._updateResizeHandlersSize();
       if (!this._bodyResizeObserver) {
-        const tbody = (_a7 = this._assignedBodyElements[0]) != null ? _a7 : null;
+        const tbody = (_a6 = this._assignedBodyElements[0]) != null ? _a6 : null;
         if (tbody) {
           this._bodyResizeObserver = new ResizeObserver(this._bodyResizeObserverCallback);
           this._bodyResizeObserver.observe(tbody);
@@ -16933,9 +16933,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.focused = false;
     }
     _onKeyDown(ev) {
-      var _a7;
+      var _a6;
       if (ev.key === "Enter" && this._internals.form) {
-        (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
+        (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
       }
     }
     render() {
@@ -17161,8 +17161,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._isSlotEmpty = true;
     }
     _handleSlotChange() {
-      var _a7, _b2;
-      this._isSlotEmpty = !(((_b2 = (_a7 = this._assignedNodes) == null ? void 0 : _a7.length) != null ? _b2 : 0) > 0);
+      var _a6, _b2;
+      this._isSlotEmpty = !(((_b2 = (_a6 = this._assignedNodes) == null ? void 0 : _a6.length) != null ? _b2 : 0) > 0);
     }
     _handleButtonClick() {
       if (!this.toggleable) {
@@ -17288,12 +17288,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   // node_modules/@lit/context/lib/controllers/context-consumer.js
   var s6 = class {
     constructor(t7, s8, i7, h3) {
-      var _a7;
+      var _a6;
       if (this.subscribe = false, this.provided = false, this.value = void 0, this.t = (t8, s9) => {
         this.unsubscribe && (this.unsubscribe !== s9 && (this.provided = false, this.unsubscribe()), this.subscribe || this.unsubscribe()), this.value = t8, this.host.requestUpdate(), this.provided && !this.subscribe || (this.provided = true, this.callback && this.callback(t8, s9)), this.unsubscribe = s9;
       }, this.host = t7, void 0 !== s8.context) {
         const t8 = s8;
-        this.context = t8.context, this.callback = t8.callback, this.subscribe = (_a7 = t8.subscribe) != null ? _a7 : false;
+        this.context = t8.context, this.callback = t8.callback, this.subscribe = (_a6 = t8.subscribe) != null ? _a6 : false;
       } else this.context = s8, this.callback = i7, this.subscribe = h3 != null ? h3 : false;
       this.host.addController(this);
     }
@@ -17346,20 +17346,20 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   };
   var i6 = class extends s7 {
     constructor(s8, e12, i7) {
-      var _a7, _b2;
+      var _a6, _b2;
       super(void 0 !== e12.context ? e12.initialValue : i7), this.onContextRequest = (t7) => {
-        var _a8;
+        var _a7;
         if (t7.context !== this.context) return;
-        const s9 = (_a8 = t7.contextTarget) != null ? _a8 : t7.composedPath()[0];
+        const s9 = (_a7 = t7.contextTarget) != null ? _a7 : t7.composedPath()[0];
         s9 !== this.host && (t7.stopPropagation(), this.addCallback(t7.callback, s9, t7.subscribe));
       }, this.onProviderRequest = (s9) => {
-        var _a8;
+        var _a7;
         if (s9.context !== this.context) return;
-        if (((_a8 = s9.contextTarget) != null ? _a8 : s9.composedPath()[0]) === this.host) return;
+        if (((_a7 = s9.contextTarget) != null ? _a7 : s9.composedPath()[0]) === this.host) return;
         const e13 = /* @__PURE__ */ new Set();
         for (const [s10, { consumerHost: i8 }] of this.subscriptions) e13.has(s10) || (e13.add(s10), i8.dispatchEvent(new s5(this.context, i8, s10, true)));
         s9.stopPropagation();
-      }, this.host = s8, void 0 !== e12.context ? this.context = e12.context : this.context = e12, this.attachListeners(), (_b2 = (_a7 = this.host).addController) == null ? void 0 : _b2.call(_a7, this);
+      }, this.host = s8, void 0 !== e12.context ? this.context = e12.context : this.context = e12, this.attachListeners(), (_b2 = (_a6 = this.host).addController) == null ? void 0 : _b2.call(_a6, this);
     }
     attachListeners() {
       this.host.addEventListener("context-request", this.onContextRequest), this.host.addEventListener("context-provider", this.onProviderRequest);
@@ -17754,10 +17754,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.dispatchEvent(ev);
     }
     _highlightIndentGuideOfItem(item) {
-      var _a7, _b2;
+      var _a6, _b2;
       if (item.branch && item.open) {
         item.highlightedGuides = true;
-        (_a7 = this._treeContextState.highlightedItems) == null ? void 0 : _a7.add(item);
+        (_a6 = this._treeContextState.highlightedItems) == null ? void 0 : _a6.add(item);
       } else {
         const parent = findParentItem(item);
         if (parent) {
@@ -17767,11 +17767,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _highlightIndentGuides() {
-      var _a7, _b2;
+      var _a6, _b2;
       if (this.indentGuides === IndentGuides.none) {
         return;
       }
-      (_a7 = this._treeContextState.highlightedItems) == null ? void 0 : _a7.forEach((i7) => i7.highlightedGuides = false);
+      (_a6 = this._treeContextState.highlightedItems) == null ? void 0 : _a6.forEach((i7) => i7.highlightedGuides = false);
       (_b2 = this._treeContextState.highlightedItems) == null ? void 0 : _b2.clear();
       if (this._treeContextState.activeItem) {
         this._highlightIndentGuideOfItem(this._treeContextState.activeItem);
@@ -18262,7 +18262,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _selectRange() {
-      var _a7, _b2;
+      var _a6, _b2;
       const prevFocused = this._treeContextState.prevFocusedItem;
       if (!prevFocused || prevFocused === this) {
         return;
@@ -18276,7 +18276,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         this._treeContextState.itemListUpToDate = true;
       }
-      let from = +((_a7 = prevFocused.dataset.score) != null ? _a7 : -1);
+      let from = +((_a6 = prevFocused.dataset.score) != null ? _a6 : -1);
       let to = +((_b2 = this.dataset.score) != null ? _b2 : -1);
       if (from > to) {
         [from, to] = [to, from];
@@ -18319,23 +18319,23 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _handleContentClick(ev) {
-      var _a7, _b2, _c, _d;
+      var _a6, _b2, _c, _d;
       ev.stopPropagation();
       const isCtrlDown = ev.ctrlKey;
       const isShiftDown = ev.shiftKey;
       if (isShiftDown && this._configContext.multiSelect) {
         this._selectRange();
-        (_b2 = (_a7 = this._treeContextState).emitSelectEvent) == null ? void 0 : _b2.call(_a7);
+        (_b2 = (_a6 = this._treeContextState).emitSelectEvent) == null ? void 0 : _b2.call(_a6);
         this.updateComplete.then(() => {
-          var _a8, _b3;
-          (_b3 = (_a8 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a8);
+          var _a7, _b3;
+          (_b3 = (_a7 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a7);
         });
       } else {
         this._selectItem(isCtrlDown);
         (_d = (_c = this._treeContextState).emitSelectEvent) == null ? void 0 : _d.call(_c);
         this.updateComplete.then(() => {
-          var _a8, _b3;
-          (_b3 = (_a8 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a8);
+          var _a7, _b3;
+          (_b3 = (_a7 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a7);
         });
         if (this._configContext.expandMode === ExpandMode.singleClick) {
           if (this.branch && !(this._configContext.multiSelect && isCtrlDown)) {
@@ -18620,7 +18620,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     focusControl,
     setReveal
   }) => {
-    var _a7, _b2;
+    var _a6, _b2;
     const state = form[meta.id];
     const err = state == null ? void 0 : state.error;
     const invalid = !!err && (state == null ? void 0 : state.touched);
@@ -18637,24 +18637,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       {
         value: state == null ? void 0 : state.value,
         "data-allow-custom": meta.allowCustom || void 0,
-        onInput: (e12) => {
-          console.log("DEBUG: Select onInput fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
-        onChange: (e12) => {
-          console.log("DEBUG: Select onChange fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
-        onSelect: (e12) => {
-          console.log("DEBUG: Select onSelect fired for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-          updateValue(meta.id, e12.target.value);
-        },
+        onInput: (e12) => updateValue(meta.id, e12.target.value),
+        onChange: (e12) => updateValue(meta.id, e12.target.value),
+        onSelect: (e12) => updateValue(meta.id, e12.target.value),
         ref: (el) => {
           if (el) {
-            const handleChange = (e12) => {
-              console.log("DEBUG: Select addEventListener change for", meta.id, "- value:", e12.target.value, "- detail:", e12.detail);
-              updateValue(meta.id, e12.target.value);
-            };
+            const handleChange = (e12) => updateValue(meta.id, e12.target.value);
             el.addEventListener("change", handleChange);
             el.addEventListener("vsc-change", handleChange);
             return () => {
@@ -18663,7 +18651,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             };
           }
         },
-        children: (_a7 = meta.options) == null ? void 0 : _a7.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
+        children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
       }
     );
     switch (meta.type) {
@@ -18883,15 +18871,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   ];
   var sortByOrder = (arr) => [...arr].sort(
     (a3, b3) => {
-      var _a7, _b2;
-      return ((_a7 = a3.order) != null ? _a7 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
+      var _a6, _b2;
+      return ((_a6 = a3.order) != null ? _a6 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
     }
   );
   var buildInitialState = () => {
-    var _a7;
+    var _a6;
     const state = {};
     for (const s8 of SETTINGS) {
-      state[s8.id] = { value: (_a7 = s8.defaultValue) != null ? _a7 : s8.type === "boolean" ? false : "", touched: false };
+      state[s8.id] = { value: (_a6 = s8.defaultValue) != null ? _a6 : s8.type === "boolean" ? false : "", touched: false };
     }
     return state;
   };
@@ -18901,7 +18889,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     onSave: onSaveExternal,
     heading
   }) => {
-    var _a7;
+    var _a6;
     const [form, setForm] = (0, import_react76.useState)(() => buildInitialState());
     const [search, setSearch] = (0, import_react76.useState)("");
     const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react76.useState)(false);
@@ -18915,29 +18903,29 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return void 0;
     }, []);
     const invalidCount = (0, import_react76.useMemo)(() => SETTINGS.reduce((acc, s8) => {
-      var _a8;
-      const err = validateField(s8, (_a8 = form[s8.id]) == null ? void 0 : _a8.value);
+      var _a7;
+      const err = validateField(s8, (_a7 = form[s8.id]) == null ? void 0 : _a7.value);
       return acc + (err ? 1 : 0);
     }, 0), [form, validateField]);
     const filteredSettings = (0, import_react76.useMemo)(() => {
-      var _a8;
+      var _a7;
       const term = search.trim().toLowerCase();
-      const authType = ((_a8 = form["authType"]) == null ? void 0 : _a8.value) || "internal";
+      const authType = ((_a7 = form["authType"]) == null ? void 0 : _a7.value) || "internal";
       return SETTINGS.filter((s8) => {
-        var _a9;
+        var _a8;
         if (s8.id === "authType") return true;
         if (s8.id === "apikey" && authType !== "apikey") return false;
         if ((s8.id === "username" || s8.id === "password") && authType === "apikey") return false;
         if (showOnlyInvalid && !validateField(s8, form[s8.id].value)) return false;
         if (!term) return true;
-        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a9 = s8.description) == null ? void 0 : _a9.toLowerCase().includes(term));
+        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a8 = s8.description) == null ? void 0 : _a8.toLowerCase().includes(term));
       });
     }, [search, showOnlyInvalid, form, validateField]);
     const grouped = (0, import_react76.useMemo)(() => {
-      var _a8;
+      var _a7;
       const map = {};
       for (const s8 of filteredSettings) {
-        (map[_a8 = s8.group] || (map[_a8] = [])).push(s8);
+        (map[_a7 = s8.group] || (map[_a7] = [])).push(s8);
       }
       return map;
     }, [filteredSettings]);
@@ -18949,18 +18937,18 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }));
     };
     (0, import_react76.useEffect)(() => {
-      var _a8;
+      var _a7;
       if (selectedId && filteredSettings.some((s8) => s8.id === selectedId)) return;
       const firstGroup = groupsOrdered.find((g2) => (grouped[g2.id] || []).length);
-      const firstId = firstGroup ? (_a8 = grouped[firstGroup.id][0]) == null ? void 0 : _a8.id : void 0;
+      const firstId = firstGroup ? (_a7 = grouped[firstGroup.id][0]) == null ? void 0 : _a7.id : void 0;
       setSelectedId(firstId != null ? firstId : null);
     }, [filteredSettings, grouped, groupsOrdered, selectedId]);
     const focusControl = (id) => {
-      var _a8, _b2;
+      var _a7, _b2;
       const container = document.querySelector(`[data-control-id="${id}"]`);
       if (!container) return;
       const focusable = container.querySelector('input, textarea, select, button, vscode-textfield, vscode-text-area, vscode-single-select, [tabindex]:not([tabindex="-1"])');
-      (_b2 = (_a8 = focusable || container).focus) == null ? void 0 : _b2.call(_a8);
+      (_b2 = (_a7 = focusable || container).focus) == null ? void 0 : _b2.call(_a7);
     };
     (0, import_react76.useEffect)(() => {
       if (!initialValues) return;
@@ -18980,15 +18968,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       });
     }, [initialValues, validateField]);
     const collectValues = () => {
-      var _a8;
+      var _a7;
       const result = {};
       for (const s8 of SETTINGS) {
-        result[s8.id] = (_a8 = form[s8.id]) == null ? void 0 : _a8.value;
+        result[s8.id] = (_a7 = form[s8.id]) == null ? void 0 : _a7.value;
       }
-      console.log("DEBUG: collectValues() returning:", result);
       return result;
     };
-    const onSave2 = async () => {
+    const onSave = async () => {
       setSaveStatus("saving");
       setLastError(void 0);
       const next = { ...form };
@@ -19065,7 +19052,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       },
       meta.id
     );
-    useSyncSelectValue("authType", (_a7 = form["authType"]) == null ? void 0 : _a7.value, (val) => updateValue("authType", val));
+    useSyncSelectValue("authType", (_a6 = form["authType"]) == null ? void 0 : _a6.value, (val) => updateValue("authType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "env-editor-root", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h1", { className: "page-heading", children: heading || (mode === "edit" ? "Edit Environment" : "Add New Environment") }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "toolbar-row", children: [
@@ -19082,7 +19069,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: "discard", slot: "content-before" }),
             "Reset"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: onSave2, disabled: saveStatus === "saving", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: onSave, disabled: saveStatus === "saving", children: [
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: saveStatus === "saving" ? "loading~spin" : saveStatus === "saved" ? "pass-filled" : "save", slot: "content-before" }),
             saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved" : "Save"
           ] })
@@ -19193,112 +19180,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
 
   // src/webview/react/playground/environmentEditorEntry.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime());
-  var vscode = window.acquireVsCodeApi ? window.acquireVsCodeApi() : void 0;
-  var bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: "add" };
-  var toInitialValues = (env) => {
-    if (!env) return void 0;
-    return {
-      envName: env.name,
-      hostname: env.hostname,
-      port: env.port,
-      httpProtocol: env.httpProtocol,
-      authType: env.authenticationType,
-      username: env.username,
-      password: env.password,
-      apikey: env.apikey,
-      objectStructure: env.objectStructure,
-      appxmlObjectStructure: env.appxml_objectStructure,
-      logLevel: env.logLevel,
-      createPythonFile: env.createPythonFileForJythonScripts,
-      ignoreSsl: env.ignoreSslErrors,
-      formatXmlOnDownload: env.formatXmlOnDownloadAndCompare,
-      scope: env.scope,
-      sslcertificate: env.sslcertificate
-    };
-  };
-  var _a6;
-  var existingId = (_a6 = bootstrap.environment) == null ? void 0 : _a6.id;
-  var onSave = async (values, mode) => {
-    var _a7, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
-    const incoming = values;
-    const existing = bootstrap.environment;
-    console.log("DEBUG: === SAVE DEBUG START ===");
-    console.log("DEBUG: Mode:", mode);
-    console.log("DEBUG: existingId:", existingId);
-    console.log("DEBUG: Form value - envName:", incoming.envName);
-    console.log("DEBUG: Form value - hostname:", incoming.hostname);
-    console.log("DEBUG: Form value - port:", incoming.port);
-    console.log("DEBUG: Form value - httpProtocol:", incoming.httpProtocol);
-    console.log("DEBUG: Form value - authType:", incoming.authType);
-    console.log("DEBUG: Form value - objectStructure:", incoming.objectStructure);
-    console.log("DEBUG: Form value - appxmlObjectStructure:", incoming.appxmlObjectStructure);
-    console.log("DEBUG: Form value - logLevel:", incoming.logLevel);
-    console.log("DEBUG: Form value - createPythonFile:", incoming.createPythonFile);
-    console.log("DEBUG: Form value - ignoreSsl:", incoming.ignoreSsl);
-    console.log("DEBUG: Form value - formatXmlOnDownload:", incoming.formatXmlOnDownload);
-    console.log("DEBUG: Form value - scope:", incoming.scope);
-    console.log("DEBUG: Existing value - name:", existing == null ? void 0 : existing.name);
-    console.log("DEBUG: Existing value - hostname:", existing == null ? void 0 : existing.hostname);
-    console.log("DEBUG: Existing value - port:", existing == null ? void 0 : existing.port);
-    console.log("DEBUG: Existing value - httpProtocol:", existing == null ? void 0 : existing.httpProtocol);
-    console.log("DEBUG: Existing value - authenticationType:", existing == null ? void 0 : existing.authenticationType);
-    console.log("DEBUG: Existing value - objectStructure:", existing == null ? void 0 : existing.objectStructure);
-    console.log("DEBUG: Existing value - appxml_objectStructure:", existing == null ? void 0 : existing.appxml_objectStructure);
-    console.log("DEBUG: Existing value - logLevel:", existing == null ? void 0 : existing.logLevel);
-    console.log("DEBUG: Existing value - createPythonFileForJythonScripts:", existing == null ? void 0 : existing.createPythonFileForJythonScripts);
-    console.log("DEBUG: Existing value - ignoreSslErrors:", existing == null ? void 0 : existing.ignoreSslErrors);
-    console.log("DEBUG: Existing value - formatXmlOnDownloadAndCompare:", existing == null ? void 0 : existing.formatXmlOnDownloadAndCompare);
-    console.log("DEBUG: Existing value - scope:", existing == null ? void 0 : existing.scope);
-    const normalized = {
-      id: existingId || (existing == null ? void 0 : existing.id) || "",
-      name: incoming.envName || (existing == null ? void 0 : existing.name) || "Unnamed Environment",
-      hostname: incoming.hostname || (existing == null ? void 0 : existing.hostname) || "",
-      port: Number((_b2 = (_a7 = incoming.port) != null ? _a7 : existing == null ? void 0 : existing.port) != null ? _b2 : incoming.httpProtocol === "https" ? 443 : 9080),
-      httpProtocol: incoming.httpProtocol || (existing == null ? void 0 : existing.httpProtocol) || "https",
-      authenticationType: incoming.authType || (existing == null ? void 0 : existing.authenticationType) || "internal",
-      username: (_d = (_c = incoming.username) != null ? _c : existing == null ? void 0 : existing.username) != null ? _d : "",
-      password: (_f = (_e = incoming.password) != null ? _e : existing == null ? void 0 : existing.password) != null ? _f : "",
-      apikey: (_h = (_g = incoming.apikey) != null ? _g : existing == null ? void 0 : existing.apikey) != null ? _h : "",
-      objectStructure: incoming.objectStructure || (existing == null ? void 0 : existing.objectStructure) || "MXSCRIPT",
-      appxml_objectStructure: incoming.appxmlObjectStructure || (existing == null ? void 0 : existing.appxml_objectStructure) || "MXL_APPS",
-      logLevel: incoming.logLevel || (existing == null ? void 0 : existing.logLevel) || "INFO",
-      createPythonFileForJythonScripts: !!((_j = (_i = incoming.createPythonFile) != null ? _i : existing == null ? void 0 : existing.createPythonFileForJythonScripts) != null ? _j : true),
-      ignoreSslErrors: !!((_l = (_k = incoming.ignoreSsl) != null ? _k : existing == null ? void 0 : existing.ignoreSslErrors) != null ? _l : true),
-      formatXmlOnDownloadAndCompare: !!((_n = (_m = incoming.formatXmlOnDownload) != null ? _m : existing == null ? void 0 : existing.formatXmlOnDownloadAndCompare) != null ? _n : true),
-      scope: incoming.scope || (existing == null ? void 0 : existing.scope) || "global",
-      sslcertificate: incoming.sslcertificate || (existing == null ? void 0 : existing.sslcertificate) || ""
-    };
-    console.log("DEBUG: Normalized - name:", normalized.name);
-    console.log("DEBUG: Normalized - hostname:", normalized.hostname);
-    console.log("DEBUG: Normalized - port:", normalized.port);
-    console.log("DEBUG: Normalized - httpProtocol:", normalized.httpProtocol);
-    console.log("DEBUG: Normalized - authenticationType:", normalized.authenticationType);
-    console.log("DEBUG: Normalized - objectStructure:", normalized.objectStructure);
-    console.log("DEBUG: Normalized - appxml_objectStructure:", normalized.appxml_objectStructure);
-    console.log("DEBUG: Normalized - logLevel:", normalized.logLevel);
-    console.log("DEBUG: Normalized - createPythonFileForJythonScripts:", normalized.createPythonFileForJythonScripts);
-    console.log("DEBUG: Normalized - ignoreSslErrors:", normalized.ignoreSslErrors);
-    console.log("DEBUG: Normalized - formatXmlOnDownloadAndCompare:", normalized.formatXmlOnDownloadAndCompare);
-    console.log("DEBUG: Normalized - scope:", normalized.scope);
-    console.log("DEBUG: === SAVE DEBUG END ===");
-    vscode == null ? void 0 : vscode.postMessage({ type: "save", environment: normalized });
-  };
-  var App = () => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: 12 }, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
-      EnvironmentEditor,
-      {
-        mode: bootstrap.mode,
-        initialValues: toInitialValues(bootstrap.environment),
-        onSave
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { onClick: () => vscode == null ? void 0 : vscode.postMessage({ type: "cancel" }), children: "Cancel" }) })
-  ] });
-  var rootEl = document.getElementById("root");
-  if (rootEl) {
-    const root = (0, import_client.createRoot)(rootEl);
-    root.render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(App, {}));
-  }
+  (0, import_client.createRoot)(document.getElementById("root")).render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(EnvironmentEditor, {}));
 })();
 /*! Bundled license information:
 

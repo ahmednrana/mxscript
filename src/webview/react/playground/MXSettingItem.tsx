@@ -46,24 +46,12 @@ export const MXSettingItem: React.FC<MXSettingItemProps> = ({
     <vscode-single-select
       value={state?.value}
       data-allow-custom={meta.allowCustom || undefined}
-      onInput={(e: any) => {
-        console.log('DEBUG: Select onInput fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
-        updateValue(meta.id, e.target.value);
-      }}
-      onChange={(e: any) => {
-        console.log('DEBUG: Select onChange fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
-        updateValue(meta.id, e.target.value);
-      }}
-      onSelect={(e: any) => {
-        console.log('DEBUG: Select onSelect fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
-        updateValue(meta.id, e.target.value);
-      }}
+      onInput={(e: any) => updateValue(meta.id, e.target.value)}
+      onChange={(e: any) => updateValue(meta.id, e.target.value)}
+      onSelect={(e: any) => updateValue(meta.id, e.target.value)}
       ref={(el: any) => {
         if (el) {
-          const handleChange = (e: any) => {
-            console.log('DEBUG: Select addEventListener change for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
-            updateValue(meta.id, e.target.value);
-          };
+          const handleChange = (e: any) => updateValue(meta.id, e.target.value);
           el.addEventListener('change', handleChange);
           el.addEventListener('vsc-change', handleChange);
           return () => {

@@ -1,6 +1,7 @@
 // Enhanced build script for React playground webview with optional watch mode
 const esbuild = require('esbuild');
 const path = require('path');
+const fs = require('fs');
 
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch');
@@ -22,6 +23,21 @@ const baseOpts = {
 
 async function run() {
   try {
+    // Ensure codicon assets copied to media/codicons (webview can't access node_modules directly in some contexts)
+    const codiconSrcDir = path.join(__dirname, '..', 'node_modules', '@vscode', 'codicons', 'dist');
+    const codiconDestDir = path.join(__dirname, '..', 'media', 'codicons');
+    try {
+      if (fs.existsSync(codiconSrcDir)) {
+        if (!fs.existsSync(codiconDestDir)) fs.mkdirSync(codiconDestDir, { recursive: true });
+        // Copy codicon.css and font files
+        const assets = fs.readdirSync(codiconSrcDir).filter(f => /codicon\.(css|ttf|woff2?)$/i.test(f));
+        for (const file of assets) {
+          fs.copyFileSync(path.join(codiconSrcDir, file), path.join(codiconDestDir, file));
+        }
+      }
+    } catch(copyErr) {
+      console.warn('[mxscript] Warning copying codicon assets:', copyErr.message);
+    }
     if (isWatch) {
       const ctx1 = await esbuild.context({ ...baseOpts, entryPoints: [playgroundEntry], outfile: playgroundOutFile });
       const ctx2 = await esbuild.context({ ...baseOpts, entryPoints: [envEditorEntry], outfile: envEditorOutFile });

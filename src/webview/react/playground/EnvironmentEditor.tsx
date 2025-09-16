@@ -179,7 +179,6 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
     for (const s of SETTINGS) {
       result[s.id] = form[s.id]?.value;
     }
-    console.log('DEBUG: collectValues() returning:', result);
     return result;
   };
 

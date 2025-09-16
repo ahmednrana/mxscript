@@ -199,7 +199,7 @@ export class EnvironmentEditorPanel {
     private _getHtmlForWebview(): string {
         const webview = this._panel.webview;
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'environmentEditor.js'));
-        const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
+    const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.css'));
         const nonce = this._nonce();
         const bootstrap = {
             mode: this._environment ? 'edit' : 'add',
@@ -212,7 +212,7 @@ export class EnvironmentEditorPanel {
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="${codiconUri}" rel="stylesheet" />
+    <link id="vscode-codicon-stylesheet" href="${codiconUri}" rel="stylesheet" />
   <title>${this._environment ? 'Edit Environment' : 'Add Environment'}</title>
   <style>
     body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); padding: 0 12px 24px; }

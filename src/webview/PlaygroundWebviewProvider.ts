@@ -124,7 +124,7 @@ export class PlaygroundPanel {
 
   private _getHtml(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'playground.js'));
-    const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
+  const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.css'));
     const nonce = this._nonce();
     return `<!DOCTYPE html>
 <html lang="en">
@@ -137,7 +137,7 @@ export class PlaygroundPanel {
     This is the crucial line that enables icons in vscode-elements.
     It points to the codicon font file inside your extension's node_modules.
   -->
-    <link id="vscode-codicon-stylesheet" href="${codiconUri}" rel="stylesheet" />
+  <link id="vscode-codicon-stylesheet" href="${codiconUri}" rel="stylesheet" />
 
   <title>MxScript Playground</title>
 </head>

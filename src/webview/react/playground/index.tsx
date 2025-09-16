@@ -4,10 +4,6 @@ import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { VscodeButton } from '@vscode-elements/react-elements';
 import { EnvironmentEditor } from './EnvironmentEditor';
 import PageThree from './PageThree';
-// import '@vscode-elements/elements/dist/elements.css'; // This import breaks the webview due to font bundling issues.
-
-// The stylesheet is now injected by the extension's HTML, so this is no longer needed.
-
 // Acquire VS Code API
 declare global { function acquireVsCodeApi(): any; }
 const vscode = acquireVsCodeApi?.();
