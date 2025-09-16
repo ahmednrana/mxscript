@@ -5,13 +5,13 @@ const path = require('path');
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch');
 
-const entryFile = path.join(__dirname, '..', 'src', 'webview', 'react', 'playground', 'index.tsx');
-const outFile = path.join(__dirname, '..', 'media', 'playground.js');
+const playgroundEntry = path.join(__dirname, '..', 'src', 'webview', 'react', 'playground', 'index.tsx');
+const envEditorEntry = path.join(__dirname, '..', 'src', 'webview', 'react', 'playground', 'environmentEditorEntry.tsx');
+const playgroundOutFile = path.join(__dirname, '..', 'media', 'playground.js');
+const envEditorOutFile = path.join(__dirname, '..', 'media', 'environmentEditor.js');
 
-const buildOpts = {
-  entryPoints: [entryFile],
+const baseOpts = {
   bundle: true,
-  outfile: outFile,
   platform: 'browser',
   format: 'iife',
   target: ['es2019'],
@@ -23,14 +23,16 @@ const buildOpts = {
 async function run() {
   try {
     if (isWatch) {
-      const ctx = await esbuild.context(buildOpts);
-      await ctx.watch();
-      console.log('[mxscript] Webview playground watch started');
-      // Keep process alive
+      const ctx1 = await esbuild.context({ ...baseOpts, entryPoints: [playgroundEntry], outfile: playgroundOutFile });
+      const ctx2 = await esbuild.context({ ...baseOpts, entryPoints: [envEditorEntry], outfile: envEditorOutFile });
+      await ctx1.watch();
+      await ctx2.watch();
+      console.log('[mxscript] Webview playground & environment editor watch started');
       process.stdin.resume();
     } else {
-      await esbuild.build(buildOpts);
-      console.log('[mxscript] Webview playground build complete');
+      await esbuild.build({ ...baseOpts, entryPoints: [playgroundEntry], outfile: playgroundOutFile });
+      await esbuild.build({ ...baseOpts, entryPoints: [envEditorEntry], outfile: envEditorOutFile });
+      console.log('[mxscript] Webview playground & environment editor build complete');
     }
   } catch (err) {
     console.error('[mxscript] Webview playground build failed', err);

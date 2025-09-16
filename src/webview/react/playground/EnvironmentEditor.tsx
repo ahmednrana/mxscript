@@ -24,6 +24,7 @@ const GROUPS: GroupMeta[] = [
 
 const SETTINGS: SettingMeta[] = [
   // Connection
+  { id: 'envName', label: 'Environment Name', group: 'connection', required: true, type: 'string', placeholder: 'Production, Dev...', description: 'Friendly display name for this environment.' },
   {
     id: 'hostname', label: 'Hostname / Base URL', group: 'connection', required: true, type: 'string',
     placeholder: 'https://mymaximo.example.com',
@@ -32,17 +33,20 @@ const SETTINGS: SettingMeta[] = [
   },
   { id: 'port', label: 'Port', group: 'connection', type: 'number', placeholder: '443', defaultValue: 443, description: 'Port to connect to the Maximo server (usually 443 for HTTPS).' },
   { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http','https'], description: 'Choose HTTPS for secure connections when supported.' },
+  { id: 'scope', label: 'Scope', group: 'connection', type: 'radio', defaultValue: 'global', options: ['global','workspace'], description: 'Whether this environment is stored globally or only for this workspace.' },
   // Auth
-  { id: 'authenticationType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey','internal','ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
-  { id: 'apiKey', label: 'API Key', group: 'auth', order: 2, type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
+  { id: 'authType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey','internal','ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
+  { id: 'apikey', label: 'API Key', group: 'auth', order: 2, type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
   { id: 'username', label: 'Username', group: 'auth', order: 3, type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
   { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
   // Behavior
   { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT','MXAPIAUTOSCRIPT','MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
   { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS','MXL_APPS2'], description: 'Object Structure used for App XML operations.' },
   { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG','INFO','WARN','ERROR','FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
+  { id: 'createPythonFile', label: 'Create Python File for Jython Scripts', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, a Python file will be created for Jython scripts if necessary.' },
+  { id: 'formatXmlOnDownload', label: 'Format XML on Download/Compare', group: 'behavior', type: 'boolean', defaultValue: true, description: 'Automatically format XML when downloading or comparing.' },
   // Advanced
-  { id: 'ignoreSslErrors', label: 'Ignore SSL Errors', group: 'advanced', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
+  { id: 'ignoreSsl', label: 'Ignore SSL Errors', group: 'advanced', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
   { id: 'sslcertificate', label: 'SSL Certificate (PEM)', group: 'advanced', type: 'multiline', placeholder: 'Paste PEM certificate here', description: 'Optional custom CA certificate in PEM format.' },
 ];
 
@@ -64,7 +68,22 @@ const buildInitialState = (): FormState => {
   return state;
 };
 
-export const EnvironmentEditor: React.FC = () => {
+export interface EnvironmentEditorProps {
+  mode?: 'add' | 'edit';
+  /** Map of initial values keyed by setting id (e.g. hostname, port, authenticationType, etc.) */
+  initialValues?: Partial<Record<string, any>>;
+  /** Optional callback invoked when user presses Save and validation passes */
+  onSave?: (values: Record<string, any>, mode: 'add' | 'edit') => void | Promise<void>;
+  /** Optional override for heading (else derived from mode) */
+  heading?: string;
+}
+
+export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
+  mode = 'add',
+  initialValues,
+  onSave: onSaveExternal,
+  heading
+}) => {
   const [form, setForm] = useState<FormState>(() => buildInitialState());
   const [search, setSearch] = useState('');
   const [showOnlyInvalid, setShowOnlyInvalid] = useState(false);
@@ -89,21 +108,19 @@ export const EnvironmentEditor: React.FC = () => {
 
   const filteredSettings = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const authType = form['authenticationType']?.value || 'internal';
+    const authType = form['authType']?.value || 'internal';
 
     return SETTINGS.filter(s => {
       // Conditional visibility based on authentication type
-      if (s.id === 'authenticationType') return true; // always show selector
-      if (s.id === 'apiKey' && authType !== 'apikey') return false;
+      if (s.id === 'authType') return true; // always show selector (was 'authenticationType')
+      if (s.id === 'apikey' && authType !== 'apikey') return false;
       if ((s.id === 'username' || s.id === 'password') && authType === 'apikey') return false;
 
       if (showOnlyInvalid && !validateField(s, form[s.id].value)) return false;
       if (!term) return true;
       return s.label.toLowerCase().includes(term) || s.id.toLowerCase().includes(term) || (s.description?.toLowerCase().includes(term));
     });
-  }, [search, showOnlyInvalid, form, validateField]);
-
-  const grouped = useMemo(() => {
+  }, [search, showOnlyInvalid, form, validateField]);  const grouped = useMemo(() => {
     // Preserve original declaration order from SETTINGS (after filtering)
     const map: Record<string, SettingMeta[]> = {};
     for (const s of filteredSettings) {
@@ -138,6 +155,34 @@ export const EnvironmentEditor: React.FC = () => {
     (focusable || container).focus?.();
   };
 
+  // Rehydrate form when initialValues provided / changed (edit mode typically)
+  useEffect(() => {
+    if (!initialValues) return;
+    setForm(prev => {
+      const next: FormState = { ...prev };
+      for (const s of SETTINGS) {
+        if (initialValues[s.id] !== undefined) {
+          next[s.id] = {
+            ...next[s.id],
+            value: initialValues[s.id],
+            // don't mark as touched yet
+            error: validateField(s, initialValues[s.id])
+          };
+        }
+      }
+      return next;
+    });
+  }, [initialValues, validateField]);
+
+  const collectValues = () => {
+    const result: Record<string, any> = {};
+    for (const s of SETTINGS) {
+      result[s.id] = form[s.id]?.value;
+    }
+    console.log('DEBUG: collectValues() returning:', result);
+    return result;
+  };
+
   const onSave = async () => {
     setSaveStatus('saving');
     setLastError(undefined);
@@ -157,7 +202,22 @@ export const EnvironmentEditor: React.FC = () => {
       return;
     }
 
-    // Simulate async save (in real extension: postMessage / API call)
+    const values = collectValues();
+
+    // If consumer provided callback, delegate
+    if (onSaveExternal) {
+      try {
+        await onSaveExternal(values, mode);
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 1200);
+      } catch (e:any) {
+        setSaveStatus('error');
+        setLastError(e?.message || 'Save failed');
+      }
+      return;
+    }
+
+    // Fallback simulated save
     try {
       await new Promise(r => setTimeout(r, 400));
       setSaveStatus('saved');
@@ -169,7 +229,28 @@ export const EnvironmentEditor: React.FC = () => {
   };
 
   const reset = () => {
-    setForm(buildInitialState());
+    if (initialValues) {
+      // Reapply initial values (edit mode reset)
+      setForm(buildInitialState());
+      setTimeout(() => {
+        setForm(prev => {
+          const next: FormState = { ...prev };
+            for (const s of SETTINGS) {
+              if (initialValues[s.id] !== undefined) {
+                next[s.id] = {
+                  ...next[s.id],
+                  value: initialValues[s.id],
+                  touched: false,
+                  error: validateField(s, initialValues[s.id])
+                };
+              }
+            }
+          return next;
+        });
+      }, 0);
+    } else {
+      setForm(buildInitialState());
+    }
     setSaveStatus('idle');
     setLastError(undefined);
   };
@@ -189,11 +270,11 @@ export const EnvironmentEditor: React.FC = () => {
   );
 
   // Sync custom select (authenticationType) with state reliably
-  useSyncSelectValue('authenticationType', form['authenticationType']?.value, (val) => updateValue('authenticationType', val));
+  useSyncSelectValue('authType', form['authType']?.value, (val) => updateValue('authType', val));
 
   return (
     <div className="env-editor-root">
-      <h1 className="page-heading">Add New Environment</h1>
+  <h1 className="page-heading">{heading || (mode === 'edit' ? 'Edit Environment' : 'Add New Environment')}</h1>
       <div className="toolbar-row">
         <div className="left">
           <VscodeTextfield placeholder="Search settings" value={search} onInput={(e: any) => setSearch(e.target.value)}>

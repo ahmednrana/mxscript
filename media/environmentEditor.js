@@ -7280,1499 +7280,37 @@
     }
   });
 
-  // src/webview/react/playground/index.tsx
-  var import_react78 = __toESM(require_react());
+  // src/webview/react/playground/environmentEditorEntry.tsx
   var import_client = __toESM(require_client());
 
-  // node_modules/react-router-dom/dist/index.js
-  var React2 = __toESM(require_react());
-  var ReactDOM = __toESM(require_react_dom());
+  // src/webview/react/playground/EnvironmentEditor.tsx
+  var import_react76 = __toESM(require_react());
 
-  // node_modules/react-router/dist/index.js
-  var React = __toESM(require_react());
-
-  // node_modules/@remix-run/router/dist/router.js
-  function _extends() {
-    _extends = Object.assign ? Object.assign.bind() : function(target) {
-      for (var i7 = 1; i7 < arguments.length; i7++) {
-        var source = arguments[i7];
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
+  // src/webview/react/hooks/useSyncSelectValue.ts
+  var import_react = __toESM(require_react());
+  function useSyncSelectValue(controlId, currentValue, onChange) {
+    (0, import_react.useEffect)(() => {
+      const selector = `[data-control-id="${controlId}"] vscode-single-select`;
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const sync = () => {
+        const val = el.value;
+        if (val !== currentValue) {
+          onChange(val);
         }
-      }
-      return target;
-    };
-    return _extends.apply(this, arguments);
-  }
-  var Action;
-  (function(Action2) {
-    Action2["Pop"] = "POP";
-    Action2["Push"] = "PUSH";
-    Action2["Replace"] = "REPLACE";
-  })(Action || (Action = {}));
-  var PopStateEventType = "popstate";
-  function createHashHistory(options) {
-    if (options === void 0) {
-      options = {};
-    }
-    function createHashLocation(window2, globalHistory) {
-      let {
-        pathname = "/",
-        search = "",
-        hash = ""
-      } = parsePath(window2.location.hash.substr(1));
-      if (!pathname.startsWith("/") && !pathname.startsWith(".")) {
-        pathname = "/" + pathname;
-      }
-      return createLocation(
-        "",
-        {
-          pathname,
-          search,
-          hash
-        },
-        // state defaults to `null` because `window.history.state` does
-        globalHistory.state && globalHistory.state.usr || null,
-        globalHistory.state && globalHistory.state.key || "default"
-      );
-    }
-    function createHashHref(window2, to) {
-      let base = window2.document.querySelector("base");
-      let href = "";
-      if (base && base.getAttribute("href")) {
-        let url = window2.location.href;
-        let hashIndex = url.indexOf("#");
-        href = hashIndex === -1 ? url : url.slice(0, hashIndex);
-      }
-      return href + "#" + (typeof to === "string" ? to : createPath(to));
-    }
-    function validateHashLocation(location, to) {
-      warning(location.pathname.charAt(0) === "/", "relative pathnames are not supported in hash history.push(" + JSON.stringify(to) + ")");
-    }
-    return getUrlBasedHistory(createHashLocation, createHashHref, validateHashLocation, options);
-  }
-  function invariant(value, message) {
-    if (value === false || value === null || typeof value === "undefined") {
-      throw new Error(message);
-    }
-  }
-  function warning(cond, message) {
-    if (!cond) {
-      if (typeof console !== "undefined") console.warn(message);
-      try {
-        throw new Error(message);
-      } catch (e12) {
-      }
-    }
-  }
-  function createKey() {
-    return Math.random().toString(36).substr(2, 8);
-  }
-  function getHistoryState(location, index) {
-    return {
-      usr: location.state,
-      key: location.key,
-      idx: index
-    };
-  }
-  function createLocation(current, to, state, key) {
-    if (state === void 0) {
-      state = null;
-    }
-    let location = _extends({
-      pathname: typeof current === "string" ? current : current.pathname,
-      search: "",
-      hash: ""
-    }, typeof to === "string" ? parsePath(to) : to, {
-      state,
-      // TODO: This could be cleaned up.  push/replace should probably just take
-      // full Locations now and avoid the need to run through this flow at all
-      // But that's a pretty big refactor to the current test suite so going to
-      // keep as is for the time being and just let any incoming keys take precedence
-      key: to && to.key || key || createKey()
-    });
-    return location;
-  }
-  function createPath(_ref) {
-    let {
-      pathname = "/",
-      search = "",
-      hash = ""
-    } = _ref;
-    if (search && search !== "?") pathname += search.charAt(0) === "?" ? search : "?" + search;
-    if (hash && hash !== "#") pathname += hash.charAt(0) === "#" ? hash : "#" + hash;
-    return pathname;
-  }
-  function parsePath(path) {
-    let parsedPath = {};
-    if (path) {
-      let hashIndex = path.indexOf("#");
-      if (hashIndex >= 0) {
-        parsedPath.hash = path.substr(hashIndex);
-        path = path.substr(0, hashIndex);
-      }
-      let searchIndex = path.indexOf("?");
-      if (searchIndex >= 0) {
-        parsedPath.search = path.substr(searchIndex);
-        path = path.substr(0, searchIndex);
-      }
-      if (path) {
-        parsedPath.pathname = path;
-      }
-    }
-    return parsedPath;
-  }
-  function getUrlBasedHistory(getLocation, createHref, validateLocation, options) {
-    if (options === void 0) {
-      options = {};
-    }
-    let {
-      window: window2 = document.defaultView,
-      v5Compat = false
-    } = options;
-    let globalHistory = window2.history;
-    let action = Action.Pop;
-    let listener = null;
-    let index = getIndex();
-    if (index == null) {
-      index = 0;
-      globalHistory.replaceState(_extends({}, globalHistory.state, {
-        idx: index
-      }), "");
-    }
-    function getIndex() {
-      let state = globalHistory.state || {
-        idx: null
       };
-      return state.idx;
-    }
-    function handlePop() {
-      action = Action.Pop;
-      let nextIndex = getIndex();
-      let delta = nextIndex == null ? null : nextIndex - index;
-      index = nextIndex;
-      if (listener) {
-        listener({
-          action,
-          location: history.location,
-          delta
-        });
-      }
-    }
-    function push(to, state) {
-      action = Action.Push;
-      let location = createLocation(history.location, to, state);
-      if (validateLocation) validateLocation(location, to);
-      index = getIndex() + 1;
-      let historyState = getHistoryState(location, index);
-      let url = history.createHref(location);
-      try {
-        globalHistory.pushState(historyState, "", url);
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "DataCloneError") {
-          throw error;
-        }
-        window2.location.assign(url);
-      }
-      if (v5Compat && listener) {
-        listener({
-          action,
-          location: history.location,
-          delta: 1
-        });
-      }
-    }
-    function replace2(to, state) {
-      action = Action.Replace;
-      let location = createLocation(history.location, to, state);
-      if (validateLocation) validateLocation(location, to);
-      index = getIndex();
-      let historyState = getHistoryState(location, index);
-      let url = history.createHref(location);
-      globalHistory.replaceState(historyState, "", url);
-      if (v5Compat && listener) {
-        listener({
-          action,
-          location: history.location,
-          delta: 0
-        });
-      }
-    }
-    function createURL(to) {
-      let base = window2.location.origin !== "null" ? window2.location.origin : window2.location.href;
-      let href = typeof to === "string" ? to : createPath(to);
-      href = href.replace(/ $/, "%20");
-      invariant(base, "No window.location.(origin|href) available to create URL for href: " + href);
-      return new URL(href, base);
-    }
-    let history = {
-      get action() {
-        return action;
-      },
-      get location() {
-        return getLocation(window2, globalHistory);
-      },
-      listen(fn) {
-        if (listener) {
-          throw new Error("A history only accepts one active listener");
-        }
-        window2.addEventListener(PopStateEventType, handlePop);
-        listener = fn;
-        return () => {
-          window2.removeEventListener(PopStateEventType, handlePop);
-          listener = null;
-        };
-      },
-      createHref(to) {
-        return createHref(window2, to);
-      },
-      createURL,
-      encodeLocation(to) {
-        let url = createURL(to);
-        return {
-          pathname: url.pathname,
-          search: url.search,
-          hash: url.hash
-        };
-      },
-      push,
-      replace: replace2,
-      go(n9) {
-        return globalHistory.go(n9);
-      }
-    };
-    return history;
-  }
-  var ResultType;
-  (function(ResultType2) {
-    ResultType2["data"] = "data";
-    ResultType2["deferred"] = "deferred";
-    ResultType2["redirect"] = "redirect";
-    ResultType2["error"] = "error";
-  })(ResultType || (ResultType = {}));
-  function matchRoutes(routes, locationArg, basename) {
-    if (basename === void 0) {
-      basename = "/";
-    }
-    return matchRoutesImpl(routes, locationArg, basename, false);
-  }
-  function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
-    let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
-    let pathname = stripBasename(location.pathname || "/", basename);
-    if (pathname == null) {
-      return null;
-    }
-    let branches = flattenRoutes(routes);
-    rankRouteBranches(branches);
-    let matches = null;
-    for (let i7 = 0; matches == null && i7 < branches.length; ++i7) {
-      let decoded = decodePath(pathname);
-      matches = matchRouteBranch(branches[i7], decoded, allowPartial);
-    }
-    return matches;
-  }
-  function flattenRoutes(routes, branches, parentsMeta, parentPath) {
-    if (branches === void 0) {
-      branches = [];
-    }
-    if (parentsMeta === void 0) {
-      parentsMeta = [];
-    }
-    if (parentPath === void 0) {
-      parentPath = "";
-    }
-    let flattenRoute = (route, index, relativePath) => {
-      let meta = {
-        relativePath: relativePath === void 0 ? route.path || "" : relativePath,
-        caseSensitive: route.caseSensitive === true,
-        childrenIndex: index,
-        route
+      sync();
+      el.addEventListener("change", sync);
+      el.addEventListener("input", sync);
+      return () => {
+        el.removeEventListener("change", sync);
+        el.removeEventListener("input", sync);
       };
-      if (meta.relativePath.startsWith("/")) {
-        invariant(meta.relativePath.startsWith(parentPath), 'Absolute route path "' + meta.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes.");
-        meta.relativePath = meta.relativePath.slice(parentPath.length);
-      }
-      let path = joinPaths([parentPath, meta.relativePath]);
-      let routesMeta = parentsMeta.concat(meta);
-      if (route.children && route.children.length > 0) {
-        invariant(
-          // Our types know better, but runtime JS may not!
-          // @ts-expect-error
-          route.index !== true,
-          "Index routes must not have child routes. Please remove " + ('all child routes from route path "' + path + '".')
-        );
-        flattenRoutes(route.children, branches, routesMeta, path);
-      }
-      if (route.path == null && !route.index) {
-        return;
-      }
-      branches.push({
-        path,
-        score: computeScore(path, route.index),
-        routesMeta
-      });
-    };
-    routes.forEach((route, index) => {
-      var _route$path;
-      if (route.path === "" || !((_route$path = route.path) != null && _route$path.includes("?"))) {
-        flattenRoute(route, index);
-      } else {
-        for (let exploded of explodeOptionalSegments(route.path)) {
-          flattenRoute(route, index, exploded);
-        }
-      }
-    });
-    return branches;
-  }
-  function explodeOptionalSegments(path) {
-    let segments = path.split("/");
-    if (segments.length === 0) return [];
-    let [first, ...rest] = segments;
-    let isOptional = first.endsWith("?");
-    let required = first.replace(/\?$/, "");
-    if (rest.length === 0) {
-      return isOptional ? [required, ""] : [required];
-    }
-    let restExploded = explodeOptionalSegments(rest.join("/"));
-    let result = [];
-    result.push(...restExploded.map((subpath) => subpath === "" ? required : [required, subpath].join("/")));
-    if (isOptional) {
-      result.push(...restExploded);
-    }
-    return result.map((exploded) => path.startsWith("/") && exploded === "" ? "/" : exploded);
-  }
-  function rankRouteBranches(branches) {
-    branches.sort((a3, b3) => a3.score !== b3.score ? b3.score - a3.score : compareIndexes(a3.routesMeta.map((meta) => meta.childrenIndex), b3.routesMeta.map((meta) => meta.childrenIndex)));
-  }
-  var paramRe = /^:[\w-]+$/;
-  var dynamicSegmentValue = 3;
-  var indexRouteValue = 2;
-  var emptySegmentValue = 1;
-  var staticSegmentValue = 10;
-  var splatPenalty = -2;
-  var isSplat = (s8) => s8 === "*";
-  function computeScore(path, index) {
-    let segments = path.split("/");
-    let initialScore = segments.length;
-    if (segments.some(isSplat)) {
-      initialScore += splatPenalty;
-    }
-    if (index) {
-      initialScore += indexRouteValue;
-    }
-    return segments.filter((s8) => !isSplat(s8)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
-  }
-  function compareIndexes(a3, b3) {
-    let siblings = a3.length === b3.length && a3.slice(0, -1).every((n9, i7) => n9 === b3[i7]);
-    return siblings ? (
-      // If two routes are siblings, we should try to match the earlier sibling
-      // first. This allows people to have fine-grained control over the matching
-      // behavior by simply putting routes with identical paths in the order they
-      // want them tried.
-      a3[a3.length - 1] - b3[b3.length - 1]
-    ) : (
-      // Otherwise, it doesn't really make sense to rank non-siblings by index,
-      // so they sort equally.
-      0
-    );
-  }
-  function matchRouteBranch(branch, pathname, allowPartial) {
-    if (allowPartial === void 0) {
-      allowPartial = false;
-    }
-    let {
-      routesMeta
-    } = branch;
-    let matchedParams = {};
-    let matchedPathname = "/";
-    let matches = [];
-    for (let i7 = 0; i7 < routesMeta.length; ++i7) {
-      let meta = routesMeta[i7];
-      let end = i7 === routesMeta.length - 1;
-      let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-      let match = matchPath({
-        path: meta.relativePath,
-        caseSensitive: meta.caseSensitive,
-        end
-      }, remainingPathname);
-      let route = meta.route;
-      if (!match && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
-        match = matchPath({
-          path: meta.relativePath,
-          caseSensitive: meta.caseSensitive,
-          end: false
-        }, remainingPathname);
-      }
-      if (!match) {
-        return null;
-      }
-      Object.assign(matchedParams, match.params);
-      matches.push({
-        // TODO: Can this as be avoided?
-        params: matchedParams,
-        pathname: joinPaths([matchedPathname, match.pathname]),
-        pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
-        route
-      });
-      if (match.pathnameBase !== "/") {
-        matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
-      }
-    }
-    return matches;
-  }
-  function matchPath(pattern, pathname) {
-    if (typeof pattern === "string") {
-      pattern = {
-        path: pattern,
-        caseSensitive: false,
-        end: true
-      };
-    }
-    let [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
-    let match = pathname.match(matcher);
-    if (!match) return null;
-    let matchedPathname = match[0];
-    let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
-    let captureGroups = match.slice(1);
-    let params = compiledParams.reduce((memo2, _ref, index) => {
-      let {
-        paramName,
-        isOptional
-      } = _ref;
-      if (paramName === "*") {
-        let splatValue = captureGroups[index] || "";
-        pathnameBase = matchedPathname.slice(0, matchedPathname.length - splatValue.length).replace(/(.)\/+$/, "$1");
-      }
-      const value = captureGroups[index];
-      if (isOptional && !value) {
-        memo2[paramName] = void 0;
-      } else {
-        memo2[paramName] = (value || "").replace(/%2F/g, "/");
-      }
-      return memo2;
-    }, {});
-    return {
-      params,
-      pathname: matchedPathname,
-      pathnameBase,
-      pattern
-    };
-  }
-  function compilePath(path, caseSensitive, end) {
-    if (caseSensitive === void 0) {
-      caseSensitive = false;
-    }
-    if (end === void 0) {
-      end = true;
-    }
-    warning(path === "*" || !path.endsWith("*") || path.endsWith("/*"), 'Route path "' + path + '" will be treated as if it were ' + ('"' + path.replace(/\*$/, "/*") + '" because the `*` character must ') + "always follow a `/` in the pattern. To get rid of this warning, " + ('please change the route path to "' + path.replace(/\*$/, "/*") + '".'));
-    let params = [];
-    let regexpSource = "^" + path.replace(/\/*\*?$/, "").replace(/^\/*/, "/").replace(/[\\.*+^${}|()[\]]/g, "\\$&").replace(/\/:([\w-]+)(\?)?/g, (_2, paramName, isOptional) => {
-      params.push({
-        paramName,
-        isOptional: isOptional != null
-      });
-      return isOptional ? "/?([^\\/]+)?" : "/([^\\/]+)";
-    });
-    if (path.endsWith("*")) {
-      params.push({
-        paramName: "*"
-      });
-      regexpSource += path === "*" || path === "/*" ? "(.*)$" : "(?:\\/(.+)|\\/*)$";
-    } else if (end) {
-      regexpSource += "\\/*$";
-    } else if (path !== "" && path !== "/") {
-      regexpSource += "(?:(?=\\/|$))";
-    } else ;
-    let matcher = new RegExp(regexpSource, caseSensitive ? void 0 : "i");
-    return [matcher, params];
-  }
-  function decodePath(value) {
-    try {
-      return value.split("/").map((v3) => decodeURIComponent(v3).replace(/\//g, "%2F")).join("/");
-    } catch (error) {
-      warning(false, 'The URL path "' + value + '" could not be decoded because it is is a malformed URL segment. This is probably due to a bad percent ' + ("encoding (" + error + ")."));
-      return value;
-    }
-  }
-  function stripBasename(pathname, basename) {
-    if (basename === "/") return pathname;
-    if (!pathname.toLowerCase().startsWith(basename.toLowerCase())) {
-      return null;
-    }
-    let startIndex = basename.endsWith("/") ? basename.length - 1 : basename.length;
-    let nextChar = pathname.charAt(startIndex);
-    if (nextChar && nextChar !== "/") {
-      return null;
-    }
-    return pathname.slice(startIndex) || "/";
-  }
-  function resolvePath(to, fromPathname) {
-    if (fromPathname === void 0) {
-      fromPathname = "/";
-    }
-    let {
-      pathname: toPathname,
-      search = "",
-      hash = ""
-    } = typeof to === "string" ? parsePath(to) : to;
-    let pathname = toPathname ? toPathname.startsWith("/") ? toPathname : resolvePathname(toPathname, fromPathname) : fromPathname;
-    return {
-      pathname,
-      search: normalizeSearch(search),
-      hash: normalizeHash(hash)
-    };
-  }
-  function resolvePathname(relativePath, fromPathname) {
-    let segments = fromPathname.replace(/\/+$/, "").split("/");
-    let relativeSegments = relativePath.split("/");
-    relativeSegments.forEach((segment) => {
-      if (segment === "..") {
-        if (segments.length > 1) segments.pop();
-      } else if (segment !== ".") {
-        segments.push(segment);
-      }
-    });
-    return segments.length > 1 ? segments.join("/") : "/";
-  }
-  function getInvalidPathError(char, field, dest, path) {
-    return "Cannot include a '" + char + "' character in a manually specified " + ("`to." + field + "` field [" + JSON.stringify(path) + "].  Please separate it out to the ") + ("`to." + dest + "` field. Alternatively you may provide the full path as ") + 'a string in <Link to="..."> and the router will parse it for you.';
-  }
-  function getPathContributingMatches(matches) {
-    return matches.filter((match, index) => index === 0 || match.route.path && match.route.path.length > 0);
-  }
-  function getResolveToMatches(matches, v7_relativeSplatPath) {
-    let pathMatches = getPathContributingMatches(matches);
-    if (v7_relativeSplatPath) {
-      return pathMatches.map((match, idx) => idx === pathMatches.length - 1 ? match.pathname : match.pathnameBase);
-    }
-    return pathMatches.map((match) => match.pathnameBase);
-  }
-  function resolveTo(toArg, routePathnames, locationPathname, isPathRelative) {
-    if (isPathRelative === void 0) {
-      isPathRelative = false;
-    }
-    let to;
-    if (typeof toArg === "string") {
-      to = parsePath(toArg);
-    } else {
-      to = _extends({}, toArg);
-      invariant(!to.pathname || !to.pathname.includes("?"), getInvalidPathError("?", "pathname", "search", to));
-      invariant(!to.pathname || !to.pathname.includes("#"), getInvalidPathError("#", "pathname", "hash", to));
-      invariant(!to.search || !to.search.includes("#"), getInvalidPathError("#", "search", "hash", to));
-    }
-    let isEmptyPath = toArg === "" || to.pathname === "";
-    let toPathname = isEmptyPath ? "/" : to.pathname;
-    let from;
-    if (toPathname == null) {
-      from = locationPathname;
-    } else {
-      let routePathnameIndex = routePathnames.length - 1;
-      if (!isPathRelative && toPathname.startsWith("..")) {
-        let toSegments = toPathname.split("/");
-        while (toSegments[0] === "..") {
-          toSegments.shift();
-          routePathnameIndex -= 1;
-        }
-        to.pathname = toSegments.join("/");
-      }
-      from = routePathnameIndex >= 0 ? routePathnames[routePathnameIndex] : "/";
-    }
-    let path = resolvePath(to, from);
-    let hasExplicitTrailingSlash = toPathname && toPathname !== "/" && toPathname.endsWith("/");
-    let hasCurrentTrailingSlash = (isEmptyPath || toPathname === ".") && locationPathname.endsWith("/");
-    if (!path.pathname.endsWith("/") && (hasExplicitTrailingSlash || hasCurrentTrailingSlash)) {
-      path.pathname += "/";
-    }
-    return path;
-  }
-  var joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
-  var normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
-  var normalizeSearch = (search) => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
-  var normalizeHash = (hash) => !hash || hash === "#" ? "" : hash.startsWith("#") ? hash : "#" + hash;
-  function isRouteErrorResponse(error) {
-    return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
-  }
-  var validMutationMethodsArr = ["post", "put", "patch", "delete"];
-  var validMutationMethods = new Set(validMutationMethodsArr);
-  var validRequestMethodsArr = ["get", ...validMutationMethodsArr];
-  var validRequestMethods = new Set(validRequestMethodsArr);
-  var UNSAFE_DEFERRED_SYMBOL = Symbol("deferred");
-
-  // node_modules/react-router/dist/index.js
-  function _extends2() {
-    _extends2 = Object.assign ? Object.assign.bind() : function(target) {
-      for (var i7 = 1; i7 < arguments.length; i7++) {
-        var source = arguments[i7];
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-      return target;
-    };
-    return _extends2.apply(this, arguments);
-  }
-  var DataRouterContext = /* @__PURE__ */ React.createContext(null);
-  if (false) {
-    DataRouterContext.displayName = "DataRouter";
-  }
-  var DataRouterStateContext = /* @__PURE__ */ React.createContext(null);
-  if (false) {
-    DataRouterStateContext.displayName = "DataRouterState";
-  }
-  if (false) {
-    AwaitContext.displayName = "Await";
-  }
-  var NavigationContext = /* @__PURE__ */ React.createContext(null);
-  if (false) {
-    NavigationContext.displayName = "Navigation";
-  }
-  var LocationContext = /* @__PURE__ */ React.createContext(null);
-  if (false) {
-    LocationContext.displayName = "Location";
-  }
-  var RouteContext = /* @__PURE__ */ React.createContext({
-    outlet: null,
-    matches: [],
-    isDataRoute: false
-  });
-  if (false) {
-    RouteContext.displayName = "Route";
-  }
-  var RouteErrorContext = /* @__PURE__ */ React.createContext(null);
-  if (false) {
-    RouteErrorContext.displayName = "RouteError";
-  }
-  function useHref(to, _temp) {
-    let {
-      relative
-    } = _temp === void 0 ? {} : _temp;
-    !useInRouterContext() ? false ? invariant(
-      false,
-      // TODO: This error is probably because they somehow have 2 versions of the
-      // router loaded. We can help them understand how to avoid that.
-      "useHref() may be used only in the context of a <Router> component."
-    ) : invariant(false) : void 0;
-    let {
-      basename,
-      navigator: navigator2
-    } = React.useContext(NavigationContext);
-    let {
-      hash,
-      pathname,
-      search
-    } = useResolvedPath(to, {
-      relative
-    });
-    let joinedPathname = pathname;
-    if (basename !== "/") {
-      joinedPathname = pathname === "/" ? basename : joinPaths([basename, pathname]);
-    }
-    return navigator2.createHref({
-      pathname: joinedPathname,
-      search,
-      hash
-    });
-  }
-  function useInRouterContext() {
-    return React.useContext(LocationContext) != null;
-  }
-  function useLocation() {
-    !useInRouterContext() ? false ? invariant(
-      false,
-      // TODO: This error is probably because they somehow have 2 versions of the
-      // router loaded. We can help them understand how to avoid that.
-      "useLocation() may be used only in the context of a <Router> component."
-    ) : invariant(false) : void 0;
-    return React.useContext(LocationContext).location;
-  }
-  function useIsomorphicLayoutEffect(cb) {
-    let isStatic = React.useContext(NavigationContext).static;
-    if (!isStatic) {
-      React.useLayoutEffect(cb);
-    }
-  }
-  function useNavigate() {
-    let {
-      isDataRoute
-    } = React.useContext(RouteContext);
-    return isDataRoute ? useNavigateStable() : useNavigateUnstable();
-  }
-  function useNavigateUnstable() {
-    !useInRouterContext() ? false ? invariant(
-      false,
-      // TODO: This error is probably because they somehow have 2 versions of the
-      // router loaded. We can help them understand how to avoid that.
-      "useNavigate() may be used only in the context of a <Router> component."
-    ) : invariant(false) : void 0;
-    let dataRouterContext = React.useContext(DataRouterContext);
-    let {
-      basename,
-      future,
-      navigator: navigator2
-    } = React.useContext(NavigationContext);
-    let {
-      matches
-    } = React.useContext(RouteContext);
-    let {
-      pathname: locationPathname
-    } = useLocation();
-    let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
-    let activeRef = React.useRef(false);
-    useIsomorphicLayoutEffect(() => {
-      activeRef.current = true;
-    });
-    let navigate = React.useCallback(function(to, options) {
-      if (options === void 0) {
-        options = {};
-      }
-      false ? warning(activeRef.current, navigateEffectWarning) : void 0;
-      if (!activeRef.current) return;
-      if (typeof to === "number") {
-        navigator2.go(to);
-        return;
-      }
-      let path = resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, options.relative === "path");
-      if (dataRouterContext == null && basename !== "/") {
-        path.pathname = path.pathname === "/" ? basename : joinPaths([basename, path.pathname]);
-      }
-      (!!options.replace ? navigator2.replace : navigator2.push)(path, options.state, options);
-    }, [basename, navigator2, routePathnamesJson, locationPathname, dataRouterContext]);
-    return navigate;
-  }
-  function useResolvedPath(to, _temp2) {
-    let {
-      relative
-    } = _temp2 === void 0 ? {} : _temp2;
-    let {
-      future
-    } = React.useContext(NavigationContext);
-    let {
-      matches
-    } = React.useContext(RouteContext);
-    let {
-      pathname: locationPathname
-    } = useLocation();
-    let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
-    return React.useMemo(() => resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, relative === "path"), [to, routePathnamesJson, locationPathname, relative]);
-  }
-  function useRoutes(routes, locationArg) {
-    return useRoutesImpl(routes, locationArg);
-  }
-  function useRoutesImpl(routes, locationArg, dataRouterState, future) {
-    !useInRouterContext() ? false ? invariant(
-      false,
-      // TODO: This error is probably because they somehow have 2 versions of the
-      // router loaded. We can help them understand how to avoid that.
-      "useRoutes() may be used only in the context of a <Router> component."
-    ) : invariant(false) : void 0;
-    let {
-      navigator: navigator2
-    } = React.useContext(NavigationContext);
-    let {
-      matches: parentMatches
-    } = React.useContext(RouteContext);
-    let routeMatch = parentMatches[parentMatches.length - 1];
-    let parentParams = routeMatch ? routeMatch.params : {};
-    let parentPathname = routeMatch ? routeMatch.pathname : "/";
-    let parentPathnameBase = routeMatch ? routeMatch.pathnameBase : "/";
-    let parentRoute = routeMatch && routeMatch.route;
-    if (false) {
-      let parentPath = parentRoute && parentRoute.path || "";
-      warningOnce(parentPathname, !parentRoute || parentPath.endsWith("*"), "You rendered descendant <Routes> (or called `useRoutes()`) at " + ('"' + parentPathname + '" (under <Route path="' + parentPath + '">) but the ') + `parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
-
-` + ('Please change the parent <Route path="' + parentPath + '"> to <Route ') + ('path="' + (parentPath === "/" ? "*" : parentPath + "/*") + '">.'));
-    }
-    let locationFromContext = useLocation();
-    let location;
-    if (locationArg) {
-      var _parsedLocationArg$pa;
-      let parsedLocationArg = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
-      !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ? false ? invariant(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, the location pathname must begin with the portion of the URL pathname that was " + ('matched by all parent routes. The current pathname base is "' + parentPathnameBase + '" ') + ('but pathname "' + parsedLocationArg.pathname + '" was given in the `location` prop.')) : invariant(false) : void 0;
-      location = parsedLocationArg;
-    } else {
-      location = locationFromContext;
-    }
-    let pathname = location.pathname || "/";
-    let remainingPathname = pathname;
-    if (parentPathnameBase !== "/") {
-      let parentSegments = parentPathnameBase.replace(/^\//, "").split("/");
-      let segments = pathname.replace(/^\//, "").split("/");
-      remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
-    }
-    let matches = matchRoutes(routes, {
-      pathname: remainingPathname
-    });
-    if (false) {
-      false ? warning(parentRoute || matches != null, 'No routes matched location "' + location.pathname + location.search + location.hash + '" ') : void 0;
-      false ? warning(matches == null || matches[matches.length - 1].route.element !== void 0 || matches[matches.length - 1].route.Component !== void 0 || matches[matches.length - 1].route.lazy !== void 0, 'Matched leaf route at location "' + location.pathname + location.search + location.hash + '" does not have an element or Component. This means it will render an <Outlet /> with a null value by default resulting in an "empty" page.') : void 0;
-    }
-    let renderedMatches = _renderMatches(matches && matches.map((match) => Object.assign({}, match, {
-      params: Object.assign({}, parentParams, match.params),
-      pathname: joinPaths([
-        parentPathnameBase,
-        // Re-encode pathnames that were decoded inside matchRoutes
-        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathname).pathname : match.pathname
-      ]),
-      pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([
-        parentPathnameBase,
-        // Re-encode pathnames that were decoded inside matchRoutes
-        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathnameBase).pathname : match.pathnameBase
-      ])
-    })), parentMatches, dataRouterState, future);
-    if (locationArg && renderedMatches) {
-      return /* @__PURE__ */ React.createElement(LocationContext.Provider, {
-        value: {
-          location: _extends2({
-            pathname: "/",
-            search: "",
-            hash: "",
-            state: null,
-            key: "default"
-          }, location),
-          navigationType: Action.Pop
-        }
-      }, renderedMatches);
-    }
-    return renderedMatches;
-  }
-  function DefaultErrorComponent() {
-    let error = useRouteError();
-    let message = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
-    let stack = error instanceof Error ? error.stack : null;
-    let lightgrey = "rgba(200,200,200, 0.5)";
-    let preStyles = {
-      padding: "0.5rem",
-      backgroundColor: lightgrey
-    };
-    let codeStyles = {
-      padding: "2px 4px",
-      backgroundColor: lightgrey
-    };
-    let devInfo = null;
-    if (false) {
-      console.error("Error handled by React Router default ErrorBoundary:", error);
-      devInfo = /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", null, "\u{1F4BF} Hey developer \u{1F44B}"), /* @__PURE__ */ React.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own ", /* @__PURE__ */ React.createElement("code", {
-        style: codeStyles
-      }, "ErrorBoundary"), " or", " ", /* @__PURE__ */ React.createElement("code", {
-        style: codeStyles
-      }, "errorElement"), " prop on your route."));
-    }
-    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React.createElement("h3", {
-      style: {
-        fontStyle: "italic"
-      }
-    }, message), stack ? /* @__PURE__ */ React.createElement("pre", {
-      style: preStyles
-    }, stack) : null, devInfo);
-  }
-  var defaultErrorElement = /* @__PURE__ */ React.createElement(DefaultErrorComponent, null);
-  var RenderErrorBoundary = class extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        location: props.location,
-        revalidation: props.revalidation,
-        error: props.error
-      };
-    }
-    static getDerivedStateFromError(error) {
-      return {
-        error
-      };
-    }
-    static getDerivedStateFromProps(props, state) {
-      if (state.location !== props.location || state.revalidation !== "idle" && props.revalidation === "idle") {
-        return {
-          error: props.error,
-          location: props.location,
-          revalidation: props.revalidation
-        };
-      }
-      return {
-        error: props.error !== void 0 ? props.error : state.error,
-        location: state.location,
-        revalidation: props.revalidation || state.revalidation
-      };
-    }
-    componentDidCatch(error, errorInfo) {
-      console.error("React Router caught the following error during render", error, errorInfo);
-    }
-    render() {
-      return this.state.error !== void 0 ? /* @__PURE__ */ React.createElement(RouteContext.Provider, {
-        value: this.props.routeContext
-      }, /* @__PURE__ */ React.createElement(RouteErrorContext.Provider, {
-        value: this.state.error,
-        children: this.props.component
-      })) : this.props.children;
-    }
-  };
-  function RenderedRoute(_ref) {
-    let {
-      routeContext,
-      match,
-      children
-    } = _ref;
-    let dataRouterContext = React.useContext(DataRouterContext);
-    if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match.route.errorElement || match.route.ErrorBoundary)) {
-      dataRouterContext.staticContext._deepestRenderedBoundaryId = match.route.id;
-    }
-    return /* @__PURE__ */ React.createElement(RouteContext.Provider, {
-      value: routeContext
-    }, children);
-  }
-  function _renderMatches(matches, parentMatches, dataRouterState, future) {
-    var _dataRouterState;
-    if (parentMatches === void 0) {
-      parentMatches = [];
-    }
-    if (dataRouterState === void 0) {
-      dataRouterState = null;
-    }
-    if (future === void 0) {
-      future = null;
-    }
-    if (matches == null) {
-      var _future;
-      if (!dataRouterState) {
-        return null;
-      }
-      if (dataRouterState.errors) {
-        matches = dataRouterState.matches;
-      } else if ((_future = future) != null && _future.v7_partialHydration && parentMatches.length === 0 && !dataRouterState.initialized && dataRouterState.matches.length > 0) {
-        matches = dataRouterState.matches;
-      } else {
-        return null;
-      }
-    }
-    let renderedMatches = matches;
-    let errors = (_dataRouterState = dataRouterState) == null ? void 0 : _dataRouterState.errors;
-    if (errors != null) {
-      let errorIndex = renderedMatches.findIndex((m3) => m3.route.id && (errors == null ? void 0 : errors[m3.route.id]) !== void 0);
-      !(errorIndex >= 0) ? false ? invariant(false, "Could not find a matching route for errors on route IDs: " + Object.keys(errors).join(",")) : invariant(false) : void 0;
-      renderedMatches = renderedMatches.slice(0, Math.min(renderedMatches.length, errorIndex + 1));
-    }
-    let renderFallback = false;
-    let fallbackIndex = -1;
-    if (dataRouterState && future && future.v7_partialHydration) {
-      for (let i7 = 0; i7 < renderedMatches.length; i7++) {
-        let match = renderedMatches[i7];
-        if (match.route.HydrateFallback || match.route.hydrateFallbackElement) {
-          fallbackIndex = i7;
-        }
-        if (match.route.id) {
-          let {
-            loaderData,
-            errors: errors2
-          } = dataRouterState;
-          let needsToRunLoader = match.route.loader && loaderData[match.route.id] === void 0 && (!errors2 || errors2[match.route.id] === void 0);
-          if (match.route.lazy || needsToRunLoader) {
-            renderFallback = true;
-            if (fallbackIndex >= 0) {
-              renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
-            } else {
-              renderedMatches = [renderedMatches[0]];
-            }
-            break;
-          }
-        }
-      }
-    }
-    return renderedMatches.reduceRight((outlet, match, index) => {
-      let error;
-      let shouldRenderHydrateFallback = false;
-      let errorElement = null;
-      let hydrateFallbackElement = null;
-      if (dataRouterState) {
-        error = errors && match.route.id ? errors[match.route.id] : void 0;
-        errorElement = match.route.errorElement || defaultErrorElement;
-        if (renderFallback) {
-          if (fallbackIndex < 0 && index === 0) {
-            warningOnce("route-fallback", false, "No `HydrateFallback` element provided to render during initial hydration");
-            shouldRenderHydrateFallback = true;
-            hydrateFallbackElement = null;
-          } else if (fallbackIndex === index) {
-            shouldRenderHydrateFallback = true;
-            hydrateFallbackElement = match.route.hydrateFallbackElement || null;
-          }
-        }
-      }
-      let matches2 = parentMatches.concat(renderedMatches.slice(0, index + 1));
-      let getChildren = () => {
-        let children;
-        if (error) {
-          children = errorElement;
-        } else if (shouldRenderHydrateFallback) {
-          children = hydrateFallbackElement;
-        } else if (match.route.Component) {
-          children = /* @__PURE__ */ React.createElement(match.route.Component, null);
-        } else if (match.route.element) {
-          children = match.route.element;
-        } else {
-          children = outlet;
-        }
-        return /* @__PURE__ */ React.createElement(RenderedRoute, {
-          match,
-          routeContext: {
-            outlet,
-            matches: matches2,
-            isDataRoute: dataRouterState != null
-          },
-          children
-        });
-      };
-      return dataRouterState && (match.route.ErrorBoundary || match.route.errorElement || index === 0) ? /* @__PURE__ */ React.createElement(RenderErrorBoundary, {
-        location: dataRouterState.location,
-        revalidation: dataRouterState.revalidation,
-        component: errorElement,
-        error,
-        children: getChildren(),
-        routeContext: {
-          outlet: null,
-          matches: matches2,
-          isDataRoute: true
-        }
-      }) : getChildren();
-    }, null);
-  }
-  var DataRouterHook = /* @__PURE__ */ (function(DataRouterHook3) {
-    DataRouterHook3["UseBlocker"] = "useBlocker";
-    DataRouterHook3["UseRevalidator"] = "useRevalidator";
-    DataRouterHook3["UseNavigateStable"] = "useNavigate";
-    return DataRouterHook3;
-  })(DataRouterHook || {});
-  var DataRouterStateHook = /* @__PURE__ */ (function(DataRouterStateHook3) {
-    DataRouterStateHook3["UseBlocker"] = "useBlocker";
-    DataRouterStateHook3["UseLoaderData"] = "useLoaderData";
-    DataRouterStateHook3["UseActionData"] = "useActionData";
-    DataRouterStateHook3["UseRouteError"] = "useRouteError";
-    DataRouterStateHook3["UseNavigation"] = "useNavigation";
-    DataRouterStateHook3["UseRouteLoaderData"] = "useRouteLoaderData";
-    DataRouterStateHook3["UseMatches"] = "useMatches";
-    DataRouterStateHook3["UseRevalidator"] = "useRevalidator";
-    DataRouterStateHook3["UseNavigateStable"] = "useNavigate";
-    DataRouterStateHook3["UseRouteId"] = "useRouteId";
-    return DataRouterStateHook3;
-  })(DataRouterStateHook || {});
-  function useDataRouterContext(hookName) {
-    let ctx = React.useContext(DataRouterContext);
-    !ctx ? false ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
-    return ctx;
-  }
-  function useDataRouterState(hookName) {
-    let state = React.useContext(DataRouterStateContext);
-    !state ? false ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
-    return state;
-  }
-  function useRouteContext(hookName) {
-    let route = React.useContext(RouteContext);
-    !route ? false ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
-    return route;
-  }
-  function useCurrentRouteId(hookName) {
-    let route = useRouteContext(hookName);
-    let thisRoute = route.matches[route.matches.length - 1];
-    !thisRoute.route.id ? false ? invariant(false, hookName + ' can only be used on routes that contain a unique "id"') : invariant(false) : void 0;
-    return thisRoute.route.id;
-  }
-  function useRouteError() {
-    var _state$errors;
-    let error = React.useContext(RouteErrorContext);
-    let state = useDataRouterState(DataRouterStateHook.UseRouteError);
-    let routeId = useCurrentRouteId(DataRouterStateHook.UseRouteError);
-    if (error !== void 0) {
-      return error;
-    }
-    return (_state$errors = state.errors) == null ? void 0 : _state$errors[routeId];
-  }
-  function useNavigateStable() {
-    let {
-      router
-    } = useDataRouterContext(DataRouterHook.UseNavigateStable);
-    let id = useCurrentRouteId(DataRouterStateHook.UseNavigateStable);
-    let activeRef = React.useRef(false);
-    useIsomorphicLayoutEffect(() => {
-      activeRef.current = true;
-    });
-    let navigate = React.useCallback(function(to, options) {
-      if (options === void 0) {
-        options = {};
-      }
-      false ? warning(activeRef.current, navigateEffectWarning) : void 0;
-      if (!activeRef.current) return;
-      if (typeof to === "number") {
-        router.navigate(to);
-      } else {
-        router.navigate(to, _extends2({
-          fromRouteId: id
-        }, options));
-      }
-    }, [router, id]);
-    return navigate;
-  }
-  var alreadyWarned$1 = {};
-  function warningOnce(key, cond, message) {
-    if (!cond && !alreadyWarned$1[key]) {
-      alreadyWarned$1[key] = true;
-      false ? warning(false, message) : void 0;
-    }
-  }
-  function warnOnce(key, message) {
-    if (false) {
-      alreadyWarned[message] = true;
-      console.warn(message);
-    }
-  }
-  var logDeprecation = (flag, msg, link) => warnOnce(flag, "\u26A0\uFE0F React Router Future Flag Warning: " + msg + ". " + ("You can use the `" + flag + "` future flag to opt-in early. ") + ("For more information, see " + link + "."));
-  function logV6DeprecationWarnings(renderFuture, routerFuture) {
-    if ((renderFuture == null ? void 0 : renderFuture.v7_startTransition) === void 0) {
-      logDeprecation("v7_startTransition", "React Router will begin wrapping state updates in `React.startTransition` in v7", "https://reactrouter.com/v6/upgrading/future#v7_starttransition");
-    }
-    if ((renderFuture == null ? void 0 : renderFuture.v7_relativeSplatPath) === void 0 && (!routerFuture || routerFuture.v7_relativeSplatPath === void 0)) {
-      logDeprecation("v7_relativeSplatPath", "Relative route resolution within Splat routes is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath");
-    }
-    if (routerFuture) {
-      if (routerFuture.v7_fetcherPersist === void 0) {
-        logDeprecation("v7_fetcherPersist", "The persistence behavior of fetchers is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_fetcherpersist");
-      }
-      if (routerFuture.v7_normalizeFormMethod === void 0) {
-        logDeprecation("v7_normalizeFormMethod", "Casing of `formMethod` fields is being normalized to uppercase in v7", "https://reactrouter.com/v6/upgrading/future#v7_normalizeformmethod");
-      }
-      if (routerFuture.v7_partialHydration === void 0) {
-        logDeprecation("v7_partialHydration", "`RouterProvider` hydration behavior is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_partialhydration");
-      }
-      if (routerFuture.v7_skipActionErrorRevalidation === void 0) {
-        logDeprecation("v7_skipActionErrorRevalidation", "The revalidation behavior after 4xx/5xx `action` responses is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_skipactionerrorrevalidation");
-      }
-    }
-  }
-  var START_TRANSITION = "startTransition";
-  var startTransitionImpl = React[START_TRANSITION];
-  function Route(_props) {
-    false ? invariant(false, "A <Route> is only ever to be used as the child of <Routes> element, never rendered directly. Please wrap your <Route> in a <Routes>.") : invariant(false);
-  }
-  function Router(_ref5) {
-    let {
-      basename: basenameProp = "/",
-      children = null,
-      location: locationProp,
-      navigationType = Action.Pop,
-      navigator: navigator2,
-      static: staticProp = false,
-      future
-    } = _ref5;
-    !!useInRouterContext() ? false ? invariant(false, "You cannot render a <Router> inside another <Router>. You should never have more than one in your app.") : invariant(false) : void 0;
-    let basename = basenameProp.replace(/^\/*/, "/");
-    let navigationContext = React.useMemo(() => ({
-      basename,
-      navigator: navigator2,
-      static: staticProp,
-      future: _extends2({
-        v7_relativeSplatPath: false
-      }, future)
-    }), [basename, future, navigator2, staticProp]);
-    if (typeof locationProp === "string") {
-      locationProp = parsePath(locationProp);
-    }
-    let {
-      pathname = "/",
-      search = "",
-      hash = "",
-      state = null,
-      key = "default"
-    } = locationProp;
-    let locationContext = React.useMemo(() => {
-      let trailingPathname = stripBasename(pathname, basename);
-      if (trailingPathname == null) {
-        return null;
-      }
-      return {
-        location: {
-          pathname: trailingPathname,
-          search,
-          hash,
-          state,
-          key
-        },
-        navigationType
-      };
-    }, [basename, pathname, search, hash, state, key, navigationType]);
-    false ? warning(locationContext != null, '<Router basename="' + basename + '"> is not able to match the URL ' + ('"' + pathname + search + hash + '" because it does not start with the ') + "basename, so the <Router> won't render anything.") : void 0;
-    if (locationContext == null) {
-      return null;
-    }
-    return /* @__PURE__ */ React.createElement(NavigationContext.Provider, {
-      value: navigationContext
-    }, /* @__PURE__ */ React.createElement(LocationContext.Provider, {
-      children,
-      value: locationContext
-    }));
-  }
-  function Routes(_ref6) {
-    let {
-      children,
-      location
-    } = _ref6;
-    return useRoutes(createRoutesFromChildren(children), location);
-  }
-  var neverSettledPromise = new Promise(() => {
-  });
-  function createRoutesFromChildren(children, parentPath) {
-    if (parentPath === void 0) {
-      parentPath = [];
-    }
-    let routes = [];
-    React.Children.forEach(children, (element, index) => {
-      if (!/* @__PURE__ */ React.isValidElement(element)) {
-        return;
-      }
-      let treePath = [...parentPath, index];
-      if (element.type === React.Fragment) {
-        routes.push.apply(routes, createRoutesFromChildren(element.props.children, treePath));
-        return;
-      }
-      !(element.type === Route) ? false ? invariant(false, "[" + (typeof element.type === "string" ? element.type : element.type.name) + "] is not a <Route> component. All component children of <Routes> must be a <Route> or <React.Fragment>") : invariant(false) : void 0;
-      !(!element.props.index || !element.props.children) ? false ? invariant(false, "An index route cannot have child routes.") : invariant(false) : void 0;
-      let route = {
-        id: element.props.id || treePath.join("-"),
-        caseSensitive: element.props.caseSensitive,
-        element: element.props.element,
-        Component: element.props.Component,
-        index: element.props.index,
-        path: element.props.path,
-        loader: element.props.loader,
-        action: element.props.action,
-        errorElement: element.props.errorElement,
-        ErrorBoundary: element.props.ErrorBoundary,
-        hasErrorBoundary: element.props.ErrorBoundary != null || element.props.errorElement != null,
-        shouldRevalidate: element.props.shouldRevalidate,
-        handle: element.props.handle,
-        lazy: element.props.lazy
-      };
-      if (element.props.children) {
-        route.children = createRoutesFromChildren(element.props.children, treePath);
-      }
-      routes.push(route);
-    });
-    return routes;
-  }
-
-  // node_modules/react-router-dom/dist/index.js
-  function _extends3() {
-    _extends3 = Object.assign ? Object.assign.bind() : function(target) {
-      for (var i7 = 1; i7 < arguments.length; i7++) {
-        var source = arguments[i7];
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-      return target;
-    };
-    return _extends3.apply(this, arguments);
-  }
-  function _objectWithoutPropertiesLoose(source, excluded) {
-    if (source == null) return {};
-    var target = {};
-    var sourceKeys = Object.keys(source);
-    var key, i7;
-    for (i7 = 0; i7 < sourceKeys.length; i7++) {
-      key = sourceKeys[i7];
-      if (excluded.indexOf(key) >= 0) continue;
-      target[key] = source[key];
-    }
-    return target;
-  }
-  function isModifiedEvent(event) {
-    return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-  }
-  function shouldProcessLinkClick(event, target) {
-    return event.button === 0 && // Ignore everything but left clicks
-    (!target || target === "_self") && // Let browser handle "target=_blank" etc.
-    !isModifiedEvent(event);
-  }
-  var _excluded = ["onClick", "relative", "reloadDocument", "replace", "state", "target", "to", "preventScrollReset", "viewTransition"];
-  var REACT_ROUTER_VERSION = "6";
-  try {
-    window.__reactRouterVersion = REACT_ROUTER_VERSION;
-  } catch (e12) {
-  }
-  if (false) {
-    ViewTransitionContext.displayName = "ViewTransition";
-  }
-  if (false) {
-    FetchersContext.displayName = "Fetchers";
-  }
-  var START_TRANSITION2 = "startTransition";
-  var startTransitionImpl2 = React2[START_TRANSITION2];
-  var FLUSH_SYNC = "flushSync";
-  var flushSyncImpl = ReactDOM[FLUSH_SYNC];
-  var USE_ID = "useId";
-  var useIdImpl = React2[USE_ID];
-  function HashRouter(_ref5) {
-    let {
-      basename,
-      children,
-      future,
-      window: window2
-    } = _ref5;
-    let historyRef = React2.useRef();
-    if (historyRef.current == null) {
-      historyRef.current = createHashHistory({
-        window: window2,
-        v5Compat: true
-      });
-    }
-    let history = historyRef.current;
-    let [state, setStateImpl] = React2.useState({
-      action: history.action,
-      location: history.location
-    });
-    let {
-      v7_startTransition
-    } = future || {};
-    let setState = React2.useCallback((newState) => {
-      v7_startTransition && startTransitionImpl2 ? startTransitionImpl2(() => setStateImpl(newState)) : setStateImpl(newState);
-    }, [setStateImpl, v7_startTransition]);
-    React2.useLayoutEffect(() => history.listen(setState), [history, setState]);
-    React2.useEffect(() => logV6DeprecationWarnings(future), [future]);
-    return /* @__PURE__ */ React2.createElement(Router, {
-      basename,
-      children,
-      location: state.location,
-      navigationType: state.action,
-      navigator: history,
-      future
-    });
-  }
-  if (false) {
-    HistoryRouter.displayName = "unstable_HistoryRouter";
-  }
-  var isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
-  var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
-  var Link = /* @__PURE__ */ React2.forwardRef(function LinkWithRef(_ref7, ref) {
-    let {
-      onClick,
-      relative,
-      reloadDocument,
-      replace: replace2,
-      state,
-      target,
-      to,
-      preventScrollReset,
-      viewTransition
-    } = _ref7, rest = _objectWithoutPropertiesLoose(_ref7, _excluded);
-    let {
-      basename
-    } = React2.useContext(NavigationContext);
-    let absoluteHref;
-    let isExternal = false;
-    if (typeof to === "string" && ABSOLUTE_URL_REGEX.test(to)) {
-      absoluteHref = to;
-      if (isBrowser) {
-        try {
-          let currentUrl = new URL(window.location.href);
-          let targetUrl = to.startsWith("//") ? new URL(currentUrl.protocol + to) : new URL(to);
-          let path = stripBasename(targetUrl.pathname, basename);
-          if (targetUrl.origin === currentUrl.origin && path != null) {
-            to = path + targetUrl.search + targetUrl.hash;
-          } else {
-            isExternal = true;
-          }
-        } catch (e12) {
-          false ? warning(false, '<Link to="' + to + '"> contains an invalid URL which will probably break when clicked - please update to a valid URL path.') : void 0;
-        }
-      }
-    }
-    let href = useHref(to, {
-      relative
-    });
-    let internalOnClick = useLinkClickHandler(to, {
-      replace: replace2,
-      state,
-      target,
-      preventScrollReset,
-      relative,
-      viewTransition
-    });
-    function handleClick(event) {
-      if (onClick) onClick(event);
-      if (!event.defaultPrevented) {
-        internalOnClick(event);
-      }
-    }
-    return (
-      // eslint-disable-next-line jsx-a11y/anchor-has-content
-      /* @__PURE__ */ React2.createElement("a", _extends3({}, rest, {
-        href: absoluteHref || href,
-        onClick: isExternal || reloadDocument ? onClick : handleClick,
-        ref,
-        target
-      }))
-    );
-  });
-  if (false) {
-    Link.displayName = "Link";
-  }
-  if (false) {
-    NavLink.displayName = "NavLink";
-  }
-  if (false) {
-    Form.displayName = "Form";
-  }
-  if (false) {
-    ScrollRestoration.displayName = "ScrollRestoration";
-  }
-  var DataRouterHook2;
-  (function(DataRouterHook3) {
-    DataRouterHook3["UseScrollRestoration"] = "useScrollRestoration";
-    DataRouterHook3["UseSubmit"] = "useSubmit";
-    DataRouterHook3["UseSubmitFetcher"] = "useSubmitFetcher";
-    DataRouterHook3["UseFetcher"] = "useFetcher";
-    DataRouterHook3["useViewTransitionState"] = "useViewTransitionState";
-  })(DataRouterHook2 || (DataRouterHook2 = {}));
-  var DataRouterStateHook2;
-  (function(DataRouterStateHook3) {
-    DataRouterStateHook3["UseFetcher"] = "useFetcher";
-    DataRouterStateHook3["UseFetchers"] = "useFetchers";
-    DataRouterStateHook3["UseScrollRestoration"] = "useScrollRestoration";
-  })(DataRouterStateHook2 || (DataRouterStateHook2 = {}));
-  function useLinkClickHandler(to, _temp) {
-    let {
-      target,
-      replace: replaceProp,
-      state,
-      preventScrollReset,
-      relative,
-      viewTransition
-    } = _temp === void 0 ? {} : _temp;
-    let navigate = useNavigate();
-    let location = useLocation();
-    let path = useResolvedPath(to, {
-      relative
-    });
-    return React2.useCallback((event) => {
-      if (shouldProcessLinkClick(event, target)) {
-        event.preventDefault();
-        let replace2 = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
-        navigate(to, {
-          replace: replace2,
-          state,
-          preventScrollReset,
-          relative,
-          viewTransition
-        });
-      }
-    }, [location, navigate, path, replaceProp, state, target, to, preventScrollReset, relative, viewTransition]);
+    }, [controlId, currentValue, onChange]);
   }
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeBadge.js
-  var import_react = __toESM(require_react(), 1);
+  var import_react2 = __toESM(require_react(), 1);
 
   // node_modules/@lit/react/create-component.js
   var e = /* @__PURE__ */ new Set(["children", "localName", "ref", "style", "className"]);
@@ -8797,8 +7335,8 @@
         for (const [e13, n10] of i7.current) t(d3.current, e13, void 0, n10, a3);
         i7.current = e12;
       })), n9.useLayoutEffect((() => {
-        var _a6;
-        (_a6 = d3.current) == null ? void 0 : _a6.removeAttribute("defer-hydration");
+        var _a7;
+        (_a7 = d3.current) == null ? void 0 : _a7.removeAttribute("defer-hydration");
       }), []), f3.suppressHydrationWarning = true, n9.createElement(o9, { ...f3, ref: n9.useCallback(((e12) => {
         d3.current = e12, "function" == typeof r9 ? r9(e12) : null !== r9 && (r9.current = e12);
       }), [r9]) });
@@ -8893,8 +7431,8 @@
   (_a = Symbol.metadata) != null ? _a : Symbol.metadata = Symbol("metadata"), (_b = a.litPropertyMetadata) != null ? _b : a.litPropertyMetadata = /* @__PURE__ */ new WeakMap();
   var y = class extends HTMLElement {
     static addInitializer(t7) {
-      var _a6;
-      this._$Ei(), ((_a6 = this.l) != null ? _a6 : this.l = []).push(t7);
+      var _a7;
+      this._$Ei(), ((_a7 = this.l) != null ? _a7 : this.l = []).push(t7);
     }
     static get observedAttributes() {
       return this.finalize(), this._$Eh && [...this._$Eh.keys()];
@@ -8906,8 +7444,8 @@
       }
     }
     static getPropertyDescriptor(t7, s8, i7) {
-      var _a6;
-      const { get: e12, set: r8 } = (_a6 = h(this.prototype, t7)) != null ? _a6 : { get() {
+      var _a7;
+      const { get: e12, set: r8 } = (_a7 = h(this.prototype, t7)) != null ? _a7 : { get() {
         return this[s8];
       }, set(t8) {
         this[s8] = t8;
@@ -8918,8 +7456,8 @@
       }, configurable: true, enumerable: true };
     }
     static getPropertyOptions(t7) {
-      var _a6;
-      return (_a6 = this.elementProperties.get(t7)) != null ? _a6 : b;
+      var _a7;
+      return (_a7 = this.elementProperties.get(t7)) != null ? _a7 : b;
     }
     static _$Ei() {
       if (this.hasOwnProperty(d("elementProperties"))) return;
@@ -8960,16 +7498,16 @@
       super(), this._$Ep = void 0, this.isUpdatePending = false, this.hasUpdated = false, this._$Em = null, this._$Ev();
     }
     _$Ev() {
-      var _a6;
-      this._$ES = new Promise(((t7) => this.enableUpdating = t7)), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), (_a6 = this.constructor.l) == null ? void 0 : _a6.forEach(((t7) => t7(this)));
+      var _a7;
+      this._$ES = new Promise(((t7) => this.enableUpdating = t7)), this._$AL = /* @__PURE__ */ new Map(), this._$E_(), this.requestUpdate(), (_a7 = this.constructor.l) == null ? void 0 : _a7.forEach(((t7) => t7(this)));
     }
     addController(t7) {
-      var _a6, _b2;
-      ((_a6 = this._$EO) != null ? _a6 : this._$EO = /* @__PURE__ */ new Set()).add(t7), void 0 !== this.renderRoot && this.isConnected && ((_b2 = t7.hostConnected) == null ? void 0 : _b2.call(t7));
+      var _a7, _b2;
+      ((_a7 = this._$EO) != null ? _a7 : this._$EO = /* @__PURE__ */ new Set()).add(t7), void 0 !== this.renderRoot && this.isConnected && ((_b2 = t7.hostConnected) == null ? void 0 : _b2.call(t7));
     }
     removeController(t7) {
-      var _a6;
-      (_a6 = this._$EO) == null ? void 0 : _a6.delete(t7);
+      var _a7;
+      (_a7 = this._$EO) == null ? void 0 : _a7.delete(t7);
     }
     _$E_() {
       const t7 = /* @__PURE__ */ new Map(), s8 = this.constructor.elementProperties;
@@ -8977,59 +7515,59 @@
       t7.size > 0 && (this._$Ep = t7);
     }
     createRenderRoot() {
-      var _a6;
-      const t7 = (_a6 = this.shadowRoot) != null ? _a6 : this.attachShadow(this.constructor.shadowRootOptions);
+      var _a7;
+      const t7 = (_a7 = this.shadowRoot) != null ? _a7 : this.attachShadow(this.constructor.shadowRootOptions);
       return S(t7, this.constructor.elementStyles), t7;
     }
     connectedCallback() {
-      var _a6, _b2;
-      (_a6 = this.renderRoot) != null ? _a6 : this.renderRoot = this.createRenderRoot(), this.enableUpdating(true), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t7) => {
-        var _a7;
-        return (_a7 = t7.hostConnected) == null ? void 0 : _a7.call(t7);
+      var _a7, _b2;
+      (_a7 = this.renderRoot) != null ? _a7 : this.renderRoot = this.createRenderRoot(), this.enableUpdating(true), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t7) => {
+        var _a8;
+        return (_a8 = t7.hostConnected) == null ? void 0 : _a8.call(t7);
       }));
     }
     enableUpdating(t7) {
     }
     disconnectedCallback() {
-      var _a6;
-      (_a6 = this._$EO) == null ? void 0 : _a6.forEach(((t7) => {
-        var _a7;
-        return (_a7 = t7.hostDisconnected) == null ? void 0 : _a7.call(t7);
+      var _a7;
+      (_a7 = this._$EO) == null ? void 0 : _a7.forEach(((t7) => {
+        var _a8;
+        return (_a8 = t7.hostDisconnected) == null ? void 0 : _a8.call(t7);
       }));
     }
     attributeChangedCallback(t7, s8, i7) {
       this._$AK(t7, i7);
     }
     _$ET(t7, s8) {
-      var _a6;
+      var _a7;
       const i7 = this.constructor.elementProperties.get(t7), e12 = this.constructor._$Eu(t7, i7);
       if (void 0 !== e12 && true === i7.reflect) {
-        const h3 = (void 0 !== ((_a6 = i7.converter) == null ? void 0 : _a6.toAttribute) ? i7.converter : u).toAttribute(s8, i7.type);
+        const h3 = (void 0 !== ((_a7 = i7.converter) == null ? void 0 : _a7.toAttribute) ? i7.converter : u).toAttribute(s8, i7.type);
         this._$Em = t7, null == h3 ? this.removeAttribute(e12) : this.setAttribute(e12, h3), this._$Em = null;
       }
     }
     _$AK(t7, s8) {
-      var _a6, _b2, _c;
+      var _a7, _b2, _c;
       const i7 = this.constructor, e12 = i7._$Eh.get(t7);
       if (void 0 !== e12 && this._$Em !== e12) {
-        const t8 = i7.getPropertyOptions(e12), h3 = "function" == typeof t8.converter ? { fromAttribute: t8.converter } : void 0 !== ((_a6 = t8.converter) == null ? void 0 : _a6.fromAttribute) ? t8.converter : u;
+        const t8 = i7.getPropertyOptions(e12), h3 = "function" == typeof t8.converter ? { fromAttribute: t8.converter } : void 0 !== ((_a7 = t8.converter) == null ? void 0 : _a7.fromAttribute) ? t8.converter : u;
         this._$Em = e12;
         const r8 = h3.fromAttribute(s8, t8.type);
         this[e12] = (_c = r8 != null ? r8 : (_b2 = this._$Ej) == null ? void 0 : _b2.get(e12)) != null ? _c : r8, this._$Em = null;
       }
     }
     requestUpdate(t7, s8, i7) {
-      var _a6, _b2;
+      var _a7, _b2;
       if (void 0 !== t7) {
         const e12 = this.constructor, h3 = this[t7];
-        if (i7 != null ? i7 : i7 = e12.getPropertyOptions(t7), !(((_a6 = i7.hasChanged) != null ? _a6 : f)(h3, s8) || i7.useDefault && i7.reflect && h3 === ((_b2 = this._$Ej) == null ? void 0 : _b2.get(t7)) && !this.hasAttribute(e12._$Eu(t7, i7)))) return;
+        if (i7 != null ? i7 : i7 = e12.getPropertyOptions(t7), !(((_a7 = i7.hasChanged) != null ? _a7 : f)(h3, s8) || i7.useDefault && i7.reflect && h3 === ((_b2 = this._$Ej) == null ? void 0 : _b2.get(t7)) && !this.hasAttribute(e12._$Eu(t7, i7)))) return;
         this.C(t7, s8, i7);
       }
       false === this.isUpdatePending && (this._$ES = this._$EP());
     }
     C(t7, s8, { useDefault: i7, reflect: e12, wrapped: h3 }, r8) {
-      var _a6, _b2, _c;
-      i7 && !((_a6 = this._$Ej) != null ? _a6 : this._$Ej = /* @__PURE__ */ new Map()).has(t7) && (this._$Ej.set(t7, (_b2 = r8 != null ? r8 : s8) != null ? _b2 : this[t7]), true !== h3 || void 0 !== r8) || (this._$AL.has(t7) || (this.hasUpdated || i7 || (s8 = void 0), this._$AL.set(t7, s8)), true === e12 && this._$Em !== t7 && ((_c = this._$Eq) != null ? _c : this._$Eq = /* @__PURE__ */ new Set()).add(t7));
+      var _a7, _b2, _c;
+      i7 && !((_a7 = this._$Ej) != null ? _a7 : this._$Ej = /* @__PURE__ */ new Map()).has(t7) && (this._$Ej.set(t7, (_b2 = r8 != null ? r8 : s8) != null ? _b2 : this[t7]), true !== h3 || void 0 !== r8) || (this._$AL.has(t7) || (this.hasUpdated || i7 || (s8 = void 0), this._$AL.set(t7, s8)), true === e12 && this._$Em !== t7 && ((_c = this._$Eq) != null ? _c : this._$Eq = /* @__PURE__ */ new Set()).add(t7));
     }
     async _$EP() {
       this.isUpdatePending = true;
@@ -9045,10 +7583,10 @@
       return this.performUpdate();
     }
     performUpdate() {
-      var _a6, _b2;
+      var _a7, _b2;
       if (!this.isUpdatePending) return;
       if (!this.hasUpdated) {
-        if ((_a6 = this.renderRoot) != null ? _a6 : this.renderRoot = this.createRenderRoot(), this._$Ep) {
+        if ((_a7 = this.renderRoot) != null ? _a7 : this.renderRoot = this.createRenderRoot(), this._$Ep) {
           for (const [t9, s9] of this._$Ep) this[t9] = s9;
           this._$Ep = void 0;
         }
@@ -9062,8 +7600,8 @@
       const s8 = this._$AL;
       try {
         t7 = this.shouldUpdate(s8), t7 ? (this.willUpdate(s8), (_b2 = this._$EO) == null ? void 0 : _b2.forEach(((t8) => {
-          var _a7;
-          return (_a7 = t8.hostUpdate) == null ? void 0 : _a7.call(t8);
+          var _a8;
+          return (_a8 = t8.hostUpdate) == null ? void 0 : _a8.call(t8);
         })), this.update(s8)) : this._$EM();
       } catch (s9) {
         throw t7 = false, this._$EM(), s9;
@@ -9073,10 +7611,10 @@
     willUpdate(t7) {
     }
     _$AE(t7) {
-      var _a6;
-      (_a6 = this._$EO) == null ? void 0 : _a6.forEach(((t8) => {
-        var _a7;
-        return (_a7 = t8.hostUpdated) == null ? void 0 : _a7.call(t8);
+      var _a7;
+      (_a7 = this._$EO) == null ? void 0 : _a7.forEach(((t8) => {
+        var _a8;
+        return (_a8 = t8.hostUpdated) == null ? void 0 : _a8.call(t8);
       })), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t7)), this.updated(t7);
     }
     _$EM() {
@@ -9186,9 +7724,9 @@
     }
   };
   function S2(t7, i7, s8 = t7, e12) {
-    var _a6, _b2, _c;
+    var _a7, _b2, _c;
     if (i7 === T) return i7;
-    let h3 = void 0 !== e12 ? (_a6 = s8._$Co) == null ? void 0 : _a6[e12] : s8._$Cl;
+    let h3 = void 0 !== e12 ? (_a7 = s8._$Co) == null ? void 0 : _a7[e12] : s8._$Cl;
     const o9 = c3(i7) ? void 0 : i7._$litDirective$;
     return (h3 == null ? void 0 : h3.constructor) !== o9 && ((_b2 = h3 == null ? void 0 : h3._$AO) == null ? void 0 : _b2.call(h3, false), void 0 === o9 ? h3 = void 0 : (h3 = new o9(t7), h3._$AT(t7, s8, e12)), void 0 !== e12 ? ((_c = s8._$Co) != null ? _c : s8._$Co = [])[e12] = h3 : s8._$Cl = h3), void 0 !== h3 && (i7 = S2(t7, h3._$AS(t7, i7.values), h3, e12)), i7;
   }
@@ -9203,8 +7741,8 @@
       return this._$AM._$AU;
     }
     u(t7) {
-      var _a6;
-      const { el: { content: i7 }, parts: s8 } = this._$AD, e12 = ((_a6 = t7 == null ? void 0 : t7.creationScope) != null ? _a6 : r3).importNode(i7, true);
+      var _a7;
+      const { el: { content: i7 }, parts: s8 } = this._$AD, e12 = ((_a7 = t7 == null ? void 0 : t7.creationScope) != null ? _a7 : r3).importNode(i7, true);
       C.currentNode = e12;
       let h3 = C.nextNode(), o9 = 0, n9 = 0, l3 = s8[0];
       for (; void 0 !== l3; ) {
@@ -9223,12 +7761,12 @@
   };
   var R = class _R {
     get _$AU() {
-      var _a6, _b2;
-      return (_b2 = (_a6 = this._$AM) == null ? void 0 : _a6._$AU) != null ? _b2 : this._$Cv;
+      var _a7, _b2;
+      return (_b2 = (_a7 = this._$AM) == null ? void 0 : _a7._$AU) != null ? _b2 : this._$Cv;
     }
     constructor(t7, i7, s8, e12) {
-      var _a6;
-      this.type = 2, this._$AH = E, this._$AN = void 0, this._$AA = t7, this._$AB = i7, this._$AM = s8, this.options = e12, this._$Cv = (_a6 = e12 == null ? void 0 : e12.isConnected) != null ? _a6 : true;
+      var _a7;
+      this.type = 2, this._$AH = E, this._$AN = void 0, this._$AA = t7, this._$AB = i7, this._$AM = s8, this.options = e12, this._$Cv = (_a7 = e12 == null ? void 0 : e12.isConnected) != null ? _a7 : true;
     }
     get parentNode() {
       let t7 = this._$AA.parentNode;
@@ -9254,9 +7792,9 @@
       this._$AH !== E && c3(this._$AH) ? this._$AA.nextSibling.data = t7 : this.T(r3.createTextNode(t7)), this._$AH = t7;
     }
     $(t7) {
-      var _a6;
+      var _a7;
       const { values: i7, _$litType$: s8 } = t7, e12 = "number" == typeof s8 ? this._$AC(t7) : (void 0 === s8.el && (s8.el = N.createElement(P(s8.h, s8.h[0]), this.options)), s8);
-      if (((_a6 = this._$AH) == null ? void 0 : _a6._$AD) === e12) this._$AH.p(i7);
+      if (((_a7 = this._$AH) == null ? void 0 : _a7._$AD) === e12) this._$AH.p(i7);
       else {
         const t8 = new M(e12, this), s9 = t8.u(this.options);
         t8.p(i7), this.T(s9), this._$AH = t8;
@@ -9274,15 +7812,15 @@
       e12 < i7.length && (this._$AR(s8 && s8._$AB.nextSibling, e12), i7.length = e12);
     }
     _$AR(t7 = this._$AA.nextSibling, i7) {
-      var _a6;
-      for ((_a6 = this._$AP) == null ? void 0 : _a6.call(this, false, true, i7); t7 !== this._$AB; ) {
+      var _a7;
+      for ((_a7 = this._$AP) == null ? void 0 : _a7.call(this, false, true, i7); t7 !== this._$AB; ) {
         const i8 = t7.nextSibling;
         t7.remove(), t7 = i8;
       }
     }
     setConnected(t7) {
-      var _a6;
-      void 0 === this._$AM && (this._$Cv = t7, (_a6 = this._$AP) == null ? void 0 : _a6.call(this, t7));
+      var _a7;
+      void 0 === this._$AM && (this._$Cv = t7, (_a7 = this._$AP) == null ? void 0 : _a7.call(this, t7));
     }
   };
   var k = class {
@@ -9331,14 +7869,14 @@
       super(t7, i7, s8, e12, h3), this.type = 5;
     }
     _$AI(t7, i7 = this) {
-      var _a6;
-      if ((t7 = (_a6 = S2(this, t7, i7, 0)) != null ? _a6 : E) === T) return;
+      var _a7;
+      if ((t7 = (_a7 = S2(this, t7, i7, 0)) != null ? _a7 : E) === T) return;
       const s8 = this._$AH, e12 = t7 === E && s8 !== E || t7.capture !== s8.capture || t7.once !== s8.once || t7.passive !== s8.passive, h3 = t7 !== E && (s8 === E || e12);
       e12 && this.element.removeEventListener(this.name, this, s8), h3 && this.element.addEventListener(this.name, this, t7), this._$AH = t7;
     }
     handleEvent(t7) {
-      var _a6, _b2;
-      "function" == typeof this._$AH ? this._$AH.call((_b2 = (_a6 = this.options) == null ? void 0 : _a6.host) != null ? _b2 : this.element, t7) : this._$AH.handleEvent(t7);
+      var _a7, _b2;
+      "function" == typeof this._$AH ? this._$AH.call((_b2 = (_a7 = this.options) == null ? void 0 : _a7.host) != null ? _b2 : this.element, t7) : this._$AH.handleEvent(t7);
     }
   };
   var z = class {
@@ -9357,8 +7895,8 @@
   var _a3;
   j == null ? void 0 : j(N, R), ((_a3 = t3.litHtmlVersions) != null ? _a3 : t3.litHtmlVersions = []).push("3.3.1");
   var B = (t7, i7, s8) => {
-    var _a6, _b2;
-    const e12 = (_a6 = s8 == null ? void 0 : s8.renderBefore) != null ? _a6 : i7;
+    var _a7, _b2;
+    const e12 = (_a7 = s8 == null ? void 0 : s8.renderBefore) != null ? _a7 : i7;
     let h3 = e12._$litPart$;
     if (void 0 === h3) {
       const t8 = (_b2 = s8 == null ? void 0 : s8.renderBefore) != null ? _b2 : null;
@@ -9374,21 +7912,21 @@
       super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
     }
     createRenderRoot() {
-      var _a6, _b2;
+      var _a7, _b2;
       const t7 = super.createRenderRoot();
-      return (_b2 = (_a6 = this.renderOptions).renderBefore) != null ? _b2 : _a6.renderBefore = t7.firstChild, t7;
+      return (_b2 = (_a7 = this.renderOptions).renderBefore) != null ? _b2 : _a7.renderBefore = t7.firstChild, t7;
     }
     update(t7) {
       const r8 = this.render();
       this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t7), this._$Do = B(r8, this.renderRoot, this.renderOptions);
     }
     connectedCallback() {
-      var _a6;
-      super.connectedCallback(), (_a6 = this._$Do) == null ? void 0 : _a6.setConnected(true);
+      var _a7;
+      super.connectedCallback(), (_a7 = this._$Do) == null ? void 0 : _a7.setConnected(true);
     }
     disconnectedCallback() {
-      var _a6;
-      super.disconnectedCallback(), (_a6 = this._$Do) == null ? void 0 : _a6.setConnected(false);
+      var _a7;
+      super.disconnectedCallback(), (_a7 = this._$Do) == null ? void 0 : _a7.setConnected(false);
     }
     render() {
       return T;
@@ -9443,8 +7981,8 @@
   function e6(e12, r8) {
     return (n9, s8, i7) => {
       const o9 = (t7) => {
-        var _a6, _b2;
-        return (_b2 = (_a6 = t7.renderRoot) == null ? void 0 : _a6.querySelector(e12)) != null ? _b2 : null;
+        var _a7, _b2;
+        return (_b2 = (_a7 = t7.renderRoot) == null ? void 0 : _a7.querySelector(e12)) != null ? _b2 : null;
       };
       if (r8) {
         const { get: e13, set: r9 } = "object" == typeof s8 ? n9 : i7 != null ? i7 : (() => {
@@ -9470,8 +8008,8 @@
   var e7;
   function r6(r8) {
     return (n9, o9) => e5(n9, o9, { get() {
-      var _a6;
-      return ((_a6 = this.renderRoot) != null ? _a6 : e7 != null ? e7 : e7 = document.createDocumentFragment()).querySelectorAll(r8);
+      var _a7;
+      return ((_a7 = this.renderRoot) != null ? _a7 : e7 != null ? e7 : e7 = document.createDocumentFragment()).querySelectorAll(r8);
     } });
   }
 
@@ -9480,8 +8018,8 @@
     return (e12, n9) => {
       const { slot: r8, selector: s8 } = o9 != null ? o9 : {}, c6 = "slot" + (r8 ? `[name=${r8}]` : ":not([name])");
       return e5(e12, n9, { get() {
-        var _a6, _b2;
-        const t7 = (_a6 = this.renderRoot) == null ? void 0 : _a6.querySelector(c6), e13 = (_b2 = t7 == null ? void 0 : t7.assignedElements(o9)) != null ? _b2 : [];
+        var _a7, _b2;
+        const t7 = (_a7 = this.renderRoot) == null ? void 0 : _a7.querySelector(c6), e13 = (_b2 = t7 == null ? void 0 : t7.assignedElements(o9)) != null ? _b2 : [];
         return void 0 === s8 ? e13 : e13.filter(((t8) => t8.matches(s8)));
       } });
     };
@@ -9492,8 +8030,8 @@
     return (o9, r8) => {
       const { slot: e12 } = n9 != null ? n9 : {}, s8 = "slot" + (e12 ? `[name=${e12}]` : ":not([name])");
       return e5(o9, r8, { get() {
-        var _a6, _b2;
-        const t7 = (_a6 = this.renderRoot) == null ? void 0 : _a6.querySelector(s8);
+        var _a7, _b2;
+        const t7 = (_a7 = this.renderRoot) == null ? void 0 : _a7.querySelector(s8);
         return (_b2 = t7 == null ? void 0 : t7.assignedNodes(n9)) != null ? _b2 : [];
       } });
     };
@@ -9649,13 +8187,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeBadge3 = o({
     tagName: "vscode-badge",
     elementClass: VscodeBadge,
-    react: import_react.default,
+    react: import_react2.default,
     displayName: "VscodeBadge"
   });
   var VscodeBadge_default = VscodeBadge3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeButton.js
-  var import_react3 = __toESM(require_react(), 1);
+  var import_react4 = __toESM(require_react(), 1);
 
   // node_modules/lit-html/directive.js
   var t4 = { ATTRIBUTE: 1, CHILD: 2, PROPERTY: 3, BOOLEAN_ATTRIBUTE: 4, EVENT: 5, ELEMENT: 6 };
@@ -9680,17 +8218,17 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   // node_modules/lit-html/directives/class-map.js
   var e9 = e8(class extends i5 {
     constructor(t7) {
-      var _a6;
-      if (super(t7), t7.type !== t4.ATTRIBUTE || "class" !== t7.name || ((_a6 = t7.strings) == null ? void 0 : _a6.length) > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
+      var _a7;
+      if (super(t7), t7.type !== t4.ATTRIBUTE || "class" !== t7.name || ((_a7 = t7.strings) == null ? void 0 : _a7.length) > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
     }
     render(t7) {
       return " " + Object.keys(t7).filter(((s8) => t7[s8])).join(" ") + " ";
     }
     update(s8, [i7]) {
-      var _a6, _b2;
+      var _a7, _b2;
       if (void 0 === this.st) {
         this.st = /* @__PURE__ */ new Set(), void 0 !== s8.strings && (this.nt = new Set(s8.strings.join(" ").split(/\s/).filter(((t7) => "" !== t7))));
-        for (const t7 in i7) i7[t7] && !((_a6 = this.nt) == null ? void 0 : _a6.has(t7)) && this.st.add(t7);
+        for (const t7 in i7) i7[t7] && !((_a7 = this.nt) == null ? void 0 : _a7.has(t7)) && this.st.add(t7);
         return this.render(i7);
       }
       const r8 = s8.element.classList;
@@ -10298,13 +8836,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeButton3 = o({
     tagName: "vscode-button",
     elementClass: VscodeButton,
-    react: import_react3.default,
+    react: import_react4.default,
     displayName: "VscodeButton"
   });
   var VscodeButton_default = VscodeButton3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeCheckbox.js
-  var import_react5 = __toESM(require_react(), 1);
+  var import_react6 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/includes/form-button-widget/FormButtonWidgetBase.js
   var __decorate4 = function(decorators, target, key, desc) {
@@ -10658,14 +9196,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         this._toggleState();
       };
       this._handleKeyDown = (ev) => {
-        var _a6;
+        var _a7;
         if (!this.disabled && (ev.key === "Enter" || ev.key === " ")) {
           ev.preventDefault();
           if (ev.key === " ") {
             this._toggleState();
           }
           if (ev.key === "Enter") {
-            (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
+            (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
           }
         }
       };
@@ -10714,11 +9252,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.dispatchEvent(new Event("change", { bubbles: true }));
     }
     _manageRequired() {
-      var _a6;
+      var _a7;
       if (!this.checked && this.required) {
         this._internals.setValidity({
           valueMissing: true
-        }, "Please check this box if you want to proceed.", (_a6 = this._inputEl) != null ? _a6 : void 0);
+        }, "Please check this box if you want to proceed.", (_a7 = this._inputEl) != null ? _a7 : void 0);
       } else {
         this._internals.setValidity({});
       }
@@ -10822,7 +9360,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeCheckbox3 = o({
     tagName: "vscode-checkbox",
     elementClass: VscodeCheckbox,
-    react: import_react5.default,
+    react: import_react6.default,
     displayName: "VscodeCheckbox",
     events: {
       onChange: "change"
@@ -10831,7 +9369,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeCheckbox_default = VscodeCheckbox3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeCheckboxGroup.js
-  var import_react7 = __toESM(require_react(), 1);
+  var import_react8 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-checkbox-group/vscode-checkbox-group.styles.js
   var styles5 = [
@@ -10906,12 +9444,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeCheckboxGroup3 = o({
     tagName: "vscode-checkbox-group",
     elementClass: VscodeCheckboxGroup,
-    react: import_react7.default,
+    react: import_react8.default,
     displayName: "VscodeCheckboxGroup"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeCollapsible.js
-  var import_react9 = __toESM(require_react(), 1);
+  var import_react10 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-collapsible/vscode-collapsible.styles.js
   var styles6 = [
@@ -11115,13 +9653,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeCollapsible3 = o({
     tagName: "vscode-collapsible",
     elementClass: VscodeCollapsible,
-    react: import_react9.default,
+    react: import_react10.default,
     displayName: "VscodeCollapsible"
   });
-  var VscodeCollapsible_default = VscodeCollapsible3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeContextMenu.js
-  var import_react11 = __toESM(require_react(), 1);
+  var import_react12 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-context-menu-item/vscode-context-menu-item.styles.js
   var styles7 = [
@@ -11490,7 +10027,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeContextMenu3 = o({
     tagName: "vscode-context-menu",
     elementClass: VscodeContextMenu,
-    react: import_react11.default,
+    react: import_react12.default,
     displayName: "VscodeContextMenu",
     events: {
       onVscContextMenuSelect: "vsc-context-menu-select"
@@ -11498,16 +10035,16 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeContextMenuItem.js
-  var import_react13 = __toESM(require_react(), 1);
+  var import_react14 = __toESM(require_react(), 1);
   var VscodeContextMenuItem3 = o({
     tagName: "vscode-context-menu-item",
     elementClass: VscodeContextMenuItem,
-    react: import_react13.default,
+    react: import_react14.default,
     displayName: "VscodeContextMenuItem"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeDivider.js
-  var import_react15 = __toESM(require_react(), 1);
+  var import_react16 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-divider/vscode-divider.styles.js
   var styles9 = [
@@ -11556,13 +10093,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeDivider3 = o({
     tagName: "vscode-divider",
     elementClass: VscodeDivider,
-    react: import_react15.default,
+    react: import_react16.default,
     displayName: "VscodeDivider"
   });
   var VscodeDivider_default = VscodeDivider3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeFormContainer.js
-  var import_react17 = __toESM(require_react(), 1);
+  var import_react18 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-form-container/vscode-form-container.styles.js
   var styles10 = [
@@ -11650,8 +10187,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._resizeObserver.observe(this._wrapperElement);
     }
     _deactivateResizeObserver() {
-      var _a6;
-      (_a6 = this._resizeObserver) == null ? void 0 : _a6.disconnect();
+      var _a7;
+      (_a7 = this._resizeObserver) == null ? void 0 : _a7.disconnect();
       this._resizeObserver = null;
     }
     firstUpdated() {
@@ -11689,12 +10226,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeFormContainer3 = o({
     tagName: "vscode-form-container",
     elementClass: VscodeFormContainer,
-    react: import_react17.default,
+    react: import_react18.default,
     displayName: "VscodeFormContainer"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeFormGroup.js
-  var import_react19 = __toESM(require_react(), 1);
+  var import_react20 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-form-group/vscode-form-group.styles.js
   var styles11 = [
@@ -11820,12 +10357,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeFormGroup3 = o({
     tagName: "vscode-form-group",
     elementClass: VscodeFormGroup,
-    react: import_react19.default,
+    react: import_react20.default,
     displayName: "VscodeFormGroup"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeFormHelper.js
-  var import_react21 = __toESM(require_react(), 1);
+  var import_react22 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-form-helper/vscode-form-helper.styles.js
   var styles12 = [
@@ -11888,22 +10425,22 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeFormHelper3 = o({
     tagName: "vscode-form-helper",
     elementClass: VscodeFormHelper,
-    react: import_react21.default,
+    react: import_react22.default,
     displayName: "VscodeFormHelper"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeIcon.js
-  var import_react23 = __toESM(require_react(), 1);
+  var import_react24 = __toESM(require_react(), 1);
   var VscodeIcon3 = o({
     tagName: "vscode-icon",
     elementClass: VscodeIcon,
-    react: import_react23.default,
+    react: import_react24.default,
     displayName: "VscodeIcon"
   });
   var VscodeIcon_default = VscodeIcon3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeLabel.js
-  var import_react25 = __toESM(require_react(), 1);
+  var import_react26 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/includes/uniqueId.js
   var counter = 0;
@@ -12002,10 +10539,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return target;
     }
     async _connectWithTarget() {
-      var _a6, _b2;
+      var _a7, _b2;
       await this.updateComplete;
       const target = this._getTarget();
-      if (["vscode-radio-group", "vscode-checkbox-group"].includes((_a6 = target == null ? void 0 : target.tagName.toLowerCase()) != null ? _a6 : "")) {
+      if (["vscode-radio-group", "vscode-checkbox-group"].includes((_a7 = target == null ? void 0 : target.tagName.toLowerCase()) != null ? _a7 : "")) {
         target.setAttribute("aria-labelledby", this._id);
       }
       let label = "";
@@ -12055,12 +10592,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeLabel3 = o({
     tagName: "vscode-label",
     elementClass: VscodeLabel,
-    react: import_react25.default,
+    react: import_react26.default,
     displayName: "VscodeLabel"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeMultiSelect.js
-  var import_react27 = __toESM(require_react(), 1);
+  var import_react28 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/includes/vscode-select/template-elements.js
   var chevronDownIcon = x`
@@ -12098,7 +10635,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var { I: t5 } = Z;
   var r7 = () => document.createComment("");
   var s4 = (o9, i7, n9) => {
-    var _a6;
+    var _a7;
     const e12 = o9._$AA.parentNode, l3 = void 0 === i7 ? o9._$AB : i7._$AA;
     if (void 0 === n9) {
       const i8 = e12.insertBefore(r7(), l3), d3 = e12.insertBefore(r7(), l3);
@@ -12107,7 +10644,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const t7 = n9._$AB.nextSibling, i8 = n9._$AM, d3 = i8 !== o9;
       if (d3) {
         let t8;
-        (_a6 = n9._$AQ) == null ? void 0 : _a6.call(n9, o9), n9._$AM = o9, void 0 !== n9._$AP && (t8 = o9._$AU) !== i8._$AU && n9._$AP(t8);
+        (_a7 = n9._$AQ) == null ? void 0 : _a7.call(n9, o9), n9._$AM = o9, void 0 !== n9._$AP && (t8 = o9._$AU) !== i8._$AU && n9._$AP(t8);
       }
       if (t7 !== l3 || d3) {
         let o10 = n9._$AA;
@@ -12149,10 +10686,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this.dt(e12, s8, t7).values;
     }
     update(s8, [t7, r8, c6]) {
-      var _a6;
+      var _a7;
       const d3 = p3(s8), { values: p4, keys: a3 } = this.dt(t7, r8, c6);
       if (!Array.isArray(d3)) return this.ut = a3, p4;
-      const h3 = (_a6 = this.ut) != null ? _a6 : this.ut = [], v3 = [];
+      const h3 = (_a7 = this.ut) != null ? _a7 : this.ut = [], v3 = [];
       let m3, y3, x2 = 0, j2 = d3.length - 1, k2 = 0, w2 = p4.length - 1;
       for (; x2 <= j2 && k2 <= w2; ) if (null === d3[x2]) x2++;
       else if (null === d3[j2]) j2--;
@@ -12405,8 +10942,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     get relativeActiveIndex() {
-      var _a6, _b2;
-      return (_b2 = (_a6 = this._options[this._activeIndex]) == null ? void 0 : _a6.filteredIndex) != null ? _b2 : -1;
+      var _a7, _b2;
+      return (_b2 = (_a7 = this._options[this._activeIndex]) == null ? void 0 : _a7.filteredIndex) != null ? _b2 : -1;
     }
     set comboboxMode(enabled) {
       this._combobox = enabled;
@@ -12428,9 +10965,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._selectedIndex;
     }
     set selectedIndex(index) {
-      var _a6, _b2;
+      var _a7, _b2;
       if (this._selectedIndex !== -1) {
-        (_b2 = (_a6 = this._options[this._selectedIndex]).selected) != null ? _b2 : _a6.selected = false;
+        (_b2 = (_a7 = this._options[this._selectedIndex]).selected) != null ? _b2 : _a7.selected = false;
       }
       const op = this.getOptionByIndex(index);
       this._selectedIndex = op ? index : -1;
@@ -12452,12 +10989,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     set value(newValue) {
-      var _a6;
+      var _a7;
       if (this._multiSelect) {
         const valueList = newValue.map((v3) => this._indexByValue.get(v3)).filter((v3) => v3 !== void 0);
         this._selectedIndexes = new Set(valueList);
       } else {
-        this._selectedIndex = (_a6 = this._indexByValue.get(newValue)) != null ? _a6 : -1;
+        this._selectedIndex = (_a7 = this._indexByValue.get(newValue)) != null ? _a7 : -1;
       }
       this._host.requestUpdate();
     }
@@ -12508,8 +11045,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._indexByValue.clear();
       this._indexByLabel.clear();
       this._options = options.map((op, index) => {
-        var _a6, _b2, _c, _d, _e, _f, _g;
-        this._indexByValue.set((_a6 = op.value) != null ? _a6 : "", index);
+        var _a7, _b2, _c, _d, _e, _f, _g;
+        this._indexByValue.set((_a7 = op.value) != null ? _a7 : "", index);
         this._indexByLabel.set((_b2 = op.label) != null ? _b2 : "", index);
         return {
           description: (_c = op.description) != null ? _c : "",
@@ -12572,8 +11109,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }
     expandMultiSelection(values) {
       values.forEach((v3) => {
-        var _a6;
-        const foundIndex = (_a6 = this._indexByValue.get(v3)) != null ? _a6 : -1;
+        var _a7;
+        const foundIndex = (_a7 = this._indexByValue.get(v3)) != null ? _a7 : -1;
         if (foundIndex !== -1) {
           this._selectedIndexes.add(foundIndex);
         }
@@ -12581,8 +11118,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     toggleActiveMultiselectOption() {
-      var _a6;
-      const activeOption = (_a6 = this._options[this._activeIndex]) != null ? _a6 : null;
+      var _a7;
+      const activeOption = (_a7 = this._options[this._activeIndex]) != null ? _a7 : null;
       if (!activeOption) {
         return;
       }
@@ -12605,24 +11142,24 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._host.requestUpdate();
     }
     getActiveOption() {
-      var _a6;
-      return (_a6 = this._options[this._activeIndex]) != null ? _a6 : null;
+      var _a7;
+      return (_a7 = this._options[this._activeIndex]) != null ? _a7 : null;
     }
     getSelectedOption() {
-      var _a6;
-      return (_a6 = this._options[this._selectedIndex]) != null ? _a6 : null;
+      var _a7;
+      return (_a7 = this._options[this._selectedIndex]) != null ? _a7 : null;
     }
     getOptionByIndex(index) {
-      var _a6;
-      return (_a6 = this._options[index]) != null ? _a6 : null;
+      var _a7;
+      return (_a7 = this._options[index]) != null ? _a7 : null;
     }
     findOptionIndex(value) {
-      var _a6;
-      return (_a6 = this._indexByValue.get(value)) != null ? _a6 : -1;
+      var _a7;
+      return (_a7 = this._indexByValue.get(value)) != null ? _a7 : -1;
     }
     getOptionByValue(value, includeHiddenOptions = false) {
-      var _a6;
-      const index = (_a6 = this._indexByValue.get(value)) != null ? _a6 : -1;
+      var _a7;
+      const index = (_a7 = this._indexByValue.get(value)) != null ? _a7 : -1;
       if (index === -1) {
         return null;
       }
@@ -12632,8 +11169,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._options[index];
     }
     getOptionByLabel(label) {
-      var _a6;
-      const index = (_a6 = this._indexByLabel.get(label)) != null ? _a6 : -1;
+      var _a7;
+      const index = (_a7 = this._indexByLabel.get(label)) != null ? _a7 : -1;
       if (index === -1) {
         return null;
       }
@@ -12978,15 +11515,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._updateThumbPosition();
     }
     _calcThumbHeight() {
-      var _a6, _b2;
+      var _a7, _b2;
       const componentHeight = this.offsetHeight;
-      const contentHeight = (_b2 = (_a6 = this._contentElement) == null ? void 0 : _a6.offsetHeight) != null ? _b2 : 0;
+      const contentHeight = (_b2 = (_a7 = this._contentElement) == null ? void 0 : _a7.offsetHeight) != null ? _b2 : 0;
       const proposedSize = componentHeight * (componentHeight / contentHeight);
       return Math.max(this.minThumbSize, proposedSize);
     }
     _updateScrollbar() {
-      var _a6, _b2;
-      const contentHeight = (_b2 = (_a6 = this._contentElement) == null ? void 0 : _a6.offsetHeight) != null ? _b2 : 0;
+      var _a7, _b2;
+      const contentHeight = (_b2 = (_a7 = this._contentElement) == null ? void 0 : _a7.offsetHeight) != null ? _b2 : 0;
       const componentHeight = this.offsetHeight;
       if (componentHeight >= contentHeight) {
         this._scrollbarVisible = false;
@@ -13192,14 +11729,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
      * The element cannot be used and is not focusable.
      */
     set disabled(newState) {
-      var _a6;
+      var _a7;
       this._disabled = newState;
       this.ariaDisabled = newState ? "true" : "false";
       if (newState === true) {
         this._originalTabIndex = this.tabIndex;
         this.tabIndex = -1;
       } else {
-        this.tabIndex = (_a6 = this._originalTabIndex) != null ? _a6 : 0;
+        this.tabIndex = (_a7 = this._originalTabIndex) != null ? _a7 : 0;
         this._originalTabIndex = void 0;
       }
       this.requestUpdate();
@@ -13365,13 +11902,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         if (this.combobox) {
           this.updateComplete.then(() => {
-            var _a6;
-            (_a6 = this.shadowRoot) == null ? void 0 : _a6.querySelector(".combobox-input").focus();
+            var _a7;
+            (_a7 = this.shadowRoot) == null ? void 0 : _a7.querySelector(".combobox-input").focus();
           });
         } else {
           this.updateComplete.then(() => {
-            var _a6;
-            (_a6 = this.shadowRoot) == null ? void 0 : _a6.querySelector(".select-face").focus();
+            var _a7;
+            (_a7 = this.shadowRoot) == null ? void 0 : _a7.querySelector(".select-face").focus();
           });
         }
       }
@@ -13387,14 +11924,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     _manageRequired() {
     }
     _setStateFromSlottedElements() {
-      var _a6;
-      const optionElements = (_a6 = this._assignedOptions) != null ? _a6 : [];
+      var _a7;
+      const optionElements = (_a7 = this._assignedOptions) != null ? _a7 : [];
       this._opts.clear();
       optionElements.forEach((el) => {
-        var _a7;
+        var _a8;
         const { innerText, description, disabled } = el;
         const value = typeof el.value === "string" ? el.value : innerText.trim();
-        const selected = (_a7 = el.selected) != null ? _a7 : false;
+        const selected = (_a8 = el.selected) != null ? _a8 : false;
         const op = {
           label: innerText.trim(),
           value,
@@ -13502,7 +12039,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _onArrowUpKeyDown() {
-      var _a6, _b2;
+      var _a7, _b2;
       if (this.open) {
         if (this._opts.activeIndex <= 0 && !(this.combobox && this.creatable)) {
           return;
@@ -13514,7 +12051,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         } else {
           const prevOp = this._opts.prev();
           if (prevOp !== null) {
-            this._opts.activeIndex = (_a6 = prevOp == null ? void 0 : prevOp.index) != null ? _a6 : -1;
+            this._opts.activeIndex = (_a7 = prevOp == null ? void 0 : prevOp.index) != null ? _a7 : -1;
             const prevSelectableIndex = (_b2 = prevOp == null ? void 0 : prevOp.filteredIndex) != null ? _b2 : -1;
             if (prevSelectableIndex > -1) {
               this._adjustOptionListScrollPos("up", prevSelectableIndex);
@@ -13527,7 +12064,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _onArrowDownKeyDown() {
-      var _a6, _b2;
+      var _a7, _b2;
       let numOpts = this._opts.numOfVisibleOptions;
       const suggestedOptionVisible = this._isSuggestedOptionVisible;
       if (suggestedOptionVisible) {
@@ -13543,7 +12080,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           this._adjustOptionListScrollPos("down", numOpts - 1);
           this._opts.activeIndex = -1;
         } else if (nextOp !== null) {
-          const nextSelectableIndex = (_a6 = nextOp == null ? void 0 : nextOp.filteredIndex) != null ? _a6 : -1;
+          const nextSelectableIndex = (_a7 = nextOp == null ? void 0 : nextOp.filteredIndex) != null ? _a7 : -1;
           this._opts.activeIndex = (_b2 = nextOp == null ? void 0 : nextOp.index) != null ? _b2 : -1;
           if (nextSelectableIndex > -1) {
             this._adjustOptionListScrollPos("down", nextSelectableIndex);
@@ -13599,11 +12136,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       ><span class="option-label">${label}</span>`;
     }
     _renderOptions() {
-      var _a6;
+      var _a7;
       const list = this._opts.options;
       return x`
       <ul
-        aria-label=${o8((_a6 = this.label) != null ? _a6 : void 0)}
+        aria-label=${o8((_a7 = this.label) != null ? _a7 : void 0)}
         aria-multiselectable=${o8(this._opts.multiSelect ? "true" : void 0)}
         class="options"
         id="select-listbox"
@@ -13613,7 +12150,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         @mouseover=${this._onOptionMouseOver}
       >
         ${c4(list, (op) => op.index, (op, index) => {
-        var _a7, _b2, _c;
+        var _a8, _b2, _c;
         if (!op.visible) {
           return E;
         }
@@ -13627,7 +12164,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           "multi-select": this._opts.multiSelect,
           selected
         };
-        const labelText = ((_b2 = (_a7 = op.ranges) == null ? void 0 : _a7.length) != null ? _b2 : 0 > 0) ? highlightRanges(op.label, (_c = op.ranges) != null ? _c : []) : op.label;
+        const labelText = ((_b2 = (_a8 = op.ranges) == null ? void 0 : _a8.length) != null ? _b2 : 0 > 0) ? highlightRanges(op.label, (_c = op.ranges) != null ? _c : []) : op.label;
         return x`
               <li
                 aria-selected=${selected ? "true" : "false"}
@@ -14354,19 +12891,19 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     _setFormValue() {
       const fd = new FormData();
       this._values.forEach((v3) => {
-        var _a6;
-        fd.append((_a6 = this.name) != null ? _a6 : "", v3);
+        var _a7;
+        fd.append((_a7 = this.name) != null ? _a7 : "", v3);
       });
       this._internals.setFormValue(fd);
     }
     async _createAndSelectSuggestedOption() {
-      var _a6, _b2;
+      var _a7, _b2;
       super._createAndSelectSuggestedOption();
       const nextIndex = this._createSuggestedOption();
       await this.updateComplete;
       this.selectedIndexes = [...this.selectedIndexes, nextIndex];
       this._dispatchChangeEvent();
-      const opCreateEvent = new CustomEvent("vsc-multi-select-create-option", { detail: { value: (_b2 = (_a6 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a6.value) != null ? _b2 : "" } });
+      const opCreateEvent = new CustomEvent("vsc-multi-select-create-option", { detail: { value: (_b2 = (_a7 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a7.value) != null ? _b2 : "" } });
       this.dispatchEvent(opCreateEvent);
       this.open = false;
       this._isPlaceholderOptionActive = false;
@@ -14430,13 +12967,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _renderComboboxFace() {
-      var _a6;
+      var _a7;
       let inputVal = "";
       if (this._isBeingFiltered) {
         inputVal = this._opts.filterPattern;
       } else {
         const op = this._opts.getSelectedOption();
-        inputVal = (_a6 = op == null ? void 0 : op.label) != null ? _a6 : "";
+        inputVal = (_a7 = op == null ? void 0 : op.label) != null ? _a7 : "";
       }
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
@@ -14476,7 +13013,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     `;
     }
     _renderSelectFace() {
-      var _a6;
+      var _a7;
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
       return x`
@@ -14485,7 +13022,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         aria-controls="select-listbox"
         aria-expanded=${o8(this._opts.multiSelect ? void 0 : expanded)}
         aria-haspopup="listbox"
-        aria-label=${o8((_a6 = this.label) != null ? _a6 : void 0)}
+        aria-label=${o8((_a7 = this.label) != null ? _a7 : void 0)}
         class="select-face face multiselect"
         @click=${this._onFaceClick}
         .tabIndex=${this.disabled ? -1 : 0}
@@ -14565,7 +13102,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeMultiSelect3 = o({
     tagName: "vscode-multi-select",
     elementClass: VscodeMultiSelect,
-    react: import_react27.default,
+    react: import_react28.default,
     displayName: "VscodeMultiSelect",
     events: {
       onChange: "change",
@@ -14575,16 +13112,16 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeOption.js
-  var import_react29 = __toESM(require_react(), 1);
+  var import_react30 = __toESM(require_react(), 1);
   var VscodeOption3 = o({
     tagName: "vscode-option",
     elementClass: VscodeOption,
-    react: import_react29.default,
+    react: import_react30.default,
     displayName: "VscodeOption"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeProgressBar.js
-  var import_react31 = __toESM(require_react(), 1);
+  var import_react32 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-progress-bar/vscode-progress-bar.styles.js
   var styles15 = [
@@ -14698,9 +13235,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._maybeStartLongRunningTimer();
     }
     render() {
-      var _a6;
+      var _a7;
       const max = this.max > 0 ? this.max : 100;
-      const clamped = this._isDeterminate ? Math.min(Math.max((_a6 = this.value) != null ? _a6 : 0, 0), max) : 0;
+      const clamped = this._isDeterminate ? Math.min(Math.max((_a7 = this.value) != null ? _a7 : 0, 0), max) : 0;
       const percent = this._isDeterminate ? clamped / max * 100 : 0;
       const containerClasses = {
         container: true,
@@ -14779,12 +13316,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeProgressBar3 = o({
     tagName: "vscode-progress-bar",
     elementClass: VscodeProgressBar,
-    react: import_react31.default,
+    react: import_react32.default,
     displayName: "VscodeProgressBar"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeProgressRing.js
-  var import_react33 = __toESM(require_react(), 1);
+  var import_react34 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-progress-ring/vscode-progress-ring.styles.js
   var styles16 = [
@@ -14889,12 +13426,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeProgressRing3 = o({
     tagName: "vscode-progress-ring",
     elementClass: VscodeProgressRing,
-    react: import_react33.default,
+    react: import_react34.default,
     displayName: "VscodeProgressRing"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeRadio.js
-  var import_react35 = __toESM(require_react(), 1);
+  var import_react36 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-radio/vscode-radio.styles.js
   var styles17 = [
@@ -14964,7 +13501,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
       };
       this._handleKeyDown = (ev) => {
-        var _a6;
+        var _a7;
         if (!this.disabled && (ev.key === "Enter" || ev.key === " ")) {
           ev.preventDefault();
           if (ev.key === " " && !this.checked) {
@@ -14973,7 +13510,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             this.dispatchEvent(new Event("change", { bubbles: true }));
           }
           if (ev.key === "Enter") {
-            (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
+            (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
           }
         }
       };
@@ -15184,7 +13721,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeRadio3 = o({
     tagName: "vscode-radio",
     elementClass: VscodeRadio,
-    react: import_react35.default,
+    react: import_react36.default,
     displayName: "VscodeRadio",
     events: {
       onChange: "change",
@@ -15193,7 +13730,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeRadioGroup.js
-  var import_react37 = __toESM(require_react(), 1);
+  var import_react38 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-radio-group/vscode-radio-group.styles.js
   var styles18 = [
@@ -15377,7 +13914,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeRadioGroup3 = o({
     tagName: "vscode-radio-group",
     elementClass: VscodeRadioGroup,
-    react: import_react37.default,
+    react: import_react38.default,
     displayName: "VscodeRadioGroup",
     events: {
       onChange: "change"
@@ -15385,16 +13922,16 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeScrollable.js
-  var import_react39 = __toESM(require_react(), 1);
+  var import_react40 = __toESM(require_react(), 1);
   var VscodeScrollable3 = o({
     tagName: "vscode-scrollable",
     elementClass: VscodeScrollable,
-    react: import_react39.default,
+    react: import_react40.default,
     displayName: "VscodeScrollable"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeSingleSelect.js
-  var import_react41 = __toESM(require_react(), 1);
+  var import_react42 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-single-select/vscode-single-select.styles.js
   var vscode_single_select_styles_default = styles_default;
@@ -15453,14 +13990,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._internals.reportValidity();
     }
     updateInputValue() {
-      var _a6;
+      var _a7;
       if (!this.combobox) {
         return;
       }
       const input = this.renderRoot.querySelector(".combobox-input");
       if (input) {
         const selectedOption = this._opts.getSelectedOption();
-        input.value = (_a6 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a6 : "";
+        input.value = (_a7 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a7 : "";
       }
     }
     constructor() {
@@ -15496,12 +14033,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return this._internals.form;
     }
     async _createAndSelectSuggestedOption() {
-      var _a6, _b2;
+      var _a7, _b2;
       const nextIndex = this._createSuggestedOption();
       await this.updateComplete;
       this._opts.selectedIndex = nextIndex;
       this._dispatchChangeEvent();
-      const opCreateEvent = new CustomEvent("vsc-single-select-create-option", { detail: { value: (_b2 = (_a6 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a6.value) != null ? _b2 : "" } });
+      const opCreateEvent = new CustomEvent("vsc-single-select-create-option", { detail: { value: (_b2 = (_a7 = this._opts.getOptionByIndex(nextIndex)) == null ? void 0 : _a7.value) != null ? _b2 : "" } });
       this.dispatchEvent(opCreateEvent);
       this.open = false;
       this._isPlaceholderOptionActive = false;
@@ -15600,9 +14137,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }
     //#region render functions
     _renderSelectFace() {
-      var _a6;
+      var _a7;
       const selectedOption = this._opts.getSelectedOption();
-      const label = (_a6 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a6 : "";
+      const label = (_a7 = selectedOption == null ? void 0 : selectedOption.label) != null ? _a7 : "";
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       return x`
       <div
@@ -15621,13 +14158,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     `;
     }
     _renderComboboxFace() {
-      var _a6;
+      var _a7;
       let inputVal = "";
       if (this._isBeingFiltered) {
         inputVal = this._opts.filterPattern;
       } else {
         const op = this._opts.getSelectedOption();
-        inputVal = (_a6 = op == null ? void 0 : op.label) != null ? _a6 : "";
+        inputVal = (_a7 = op == null ? void 0 : op.label) != null ? _a7 : "";
       }
       const activeDescendant = this._opts.activeIndex > -1 ? `op-${this._opts.activeIndex}` : "";
       const expanded = this.open ? "true" : "false";
@@ -15707,7 +14244,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeSingleSelect3 = o({
     tagName: "vscode-single-select",
     elementClass: VscodeSingleSelect,
-    react: import_react41.default,
+    react: import_react42.default,
     displayName: "VscodeSingleSelect",
     events: {
       onChange: "change",
@@ -15717,7 +14254,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeSplitLayout.js
-  var import_react43 = __toESM(require_react(), 1);
+  var import_react44 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-split-layout/vscode-split-layout.styles.js
   var styles19 = [
@@ -15970,14 +14507,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
      * Sets the handle position to the value specified in the `initialHandlePosition` property.
      */
     resetHandlePosition() {
-      var _a6;
+      var _a7;
       if (!this._wrapperEl) {
         this._handlePosition = 0;
         return;
       }
       const { width, height } = this._wrapperEl.getBoundingClientRect();
       const max = this.split === "vertical" ? width : height;
-      const { value, unit } = parseValue((_a6 = this.initialHandlePosition) != null ? _a6 : DEFAULT_INITIAL_POSITION);
+      const { value, unit } = parseValue((_a7 = this.initialHandlePosition) != null ? _a7 : DEFAULT_INITIAL_POSITION);
       if (unit === "percent") {
         this._handlePosition = percentToPx(value, max);
       } else {
@@ -16077,7 +14614,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       });
     }
     render() {
-      var _a6;
+      var _a7;
       const { width, height } = this._boundRect;
       const maxPos = this.split === "vertical" ? width : height;
       const handlePosCss = this.fixedPane !== "none" ? `${this._handlePosition}px` : `${pxToPercent(this._handlePosition, maxPos)}%`;
@@ -16097,7 +14634,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         left: this.split === "vertical" ? handlePosCss : "0",
         top: this.split === "vertical" ? "0" : handlePosCss
       };
-      const handleSize = (_a6 = this.handleSize) != null ? _a6 : DEFAULT_HANDLE_SIZE;
+      const handleSize = (_a7 = this.handleSize) != null ? _a7 : DEFAULT_HANDLE_SIZE;
       if (this.split === "vertical") {
         handleStylesPropObj.marginLeft = `${0 - handleSize / 2}px`;
         handleStylesPropObj.width = `${handleSize}px`;
@@ -16195,7 +14732,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeSplitLayout3 = o({
     tagName: "vscode-split-layout",
     elementClass: VscodeSplitLayout,
-    react: import_react43.default,
+    react: import_react44.default,
     displayName: "VscodeSplitLayout",
     events: {
       onVscSplitLayoutChange: "vsc-split-layout-change"
@@ -16203,7 +14740,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTabHeader.js
-  var import_react45 = __toESM(require_react(), 1);
+  var import_react46 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-tab-header/vscode-tab-header.styles.js
   var styles20 = [
@@ -16382,13 +14919,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTabHeader3 = o({
     tagName: "vscode-tab-header",
     elementClass: VscodeTabHeader,
-    react: import_react45.default,
+    react: import_react46.default,
     displayName: "VscTabHeader"
   });
-  var VscodeTabHeader_default = VscodeTabHeader3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTable.js
-  var import_react47 = __toESM(require_react(), 1);
+  var import_react48 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table/helpers.js
   var rawValueToPercentage = (raw, base) => {
@@ -16643,9 +15179,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._initDefaultColumnSizes();
     }
     disconnectedCallback() {
-      var _a6, _b2, _c;
+      var _a7, _b2, _c;
       super.disconnectedCallback();
-      (_a6 = this._componentResizeObserver) == null ? void 0 : _a6.unobserve(this);
+      (_a7 = this._componentResizeObserver) == null ? void 0 : _a7.unobserve(this);
       (_b2 = this._componentResizeObserver) == null ? void 0 : _b2.disconnect();
       (_c = this._bodyResizeObserver) == null ? void 0 : _c.disconnect();
     }
@@ -16825,12 +15361,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._headerCells = this._queryHeaderCells();
     }
     _onBodySlotChange() {
-      var _a6;
+      var _a7;
       this._initDefaultColumnSizes();
       this._initResizeObserver();
       this._updateResizeHandlersSize();
       if (!this._bodyResizeObserver) {
-        const tbody = (_a6 = this._assignedBodyElements[0]) != null ? _a6 : null;
+        const tbody = (_a7 = this._assignedBodyElements[0]) != null ? _a7 : null;
         if (tbody) {
           this._bodyResizeObserver = new ResizeObserver(this._bodyResizeObserverCallback);
           this._bodyResizeObserver.observe(tbody);
@@ -17063,13 +15599,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTable3 = o({
     tagName: "vscode-table",
     elementClass: VscodeTable,
-    react: import_react47.default,
+    react: import_react48.default,
     displayName: "VscodeTable"
   });
-  var VscodeTable_default = VscodeTable3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableBody.js
-  var import_react49 = __toESM(require_react(), 1);
+  var import_react50 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table-body/vscode-table-body.styles.js
   var styles22 = [
@@ -17120,13 +15655,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTableBody3 = o({
     tagName: "vscode-table-body",
     elementClass: VscodeTableBody,
-    react: import_react49.default,
+    react: import_react50.default,
     displayName: "VscodeTableBody"
   });
-  var VscodeTableBody_default = VscodeTableBody3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableCell.js
-  var import_react51 = __toESM(require_react(), 1);
+  var import_react52 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table-cell/vscode-table-cell.styles.js
   var styles23 = [
@@ -17225,13 +15759,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTableCell3 = o({
     tagName: "vscode-table-cell",
     elementClass: VscodeTableCell,
-    react: import_react51.default,
+    react: import_react52.default,
     displayName: "VscodeTableCell"
   });
-  var VscodeTableCell_default = VscodeTableCell3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableHeader.js
-  var import_react53 = __toESM(require_react(), 1);
+  var import_react54 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table-header/vscode-table-header.styles.js
   var styles24 = [
@@ -17278,13 +15811,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTableHeader3 = o({
     tagName: "vscode-table-header",
     elementClass: VscodeTableHeader,
-    react: import_react53.default,
+    react: import_react54.default,
     displayName: "VscodeTableHeader"
   });
-  var VscodeTableHeader_default = VscodeTableHeader3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableHeaderCell.js
-  var import_react55 = __toESM(require_react(), 1);
+  var import_react56 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table-header-cell/vscode-table-header-cell.styles.js
   var styles25 = [
@@ -17350,13 +15882,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTableHeaderCell3 = o({
     tagName: "vscode-table-header-cell",
     elementClass: VscodeTableHeaderCell,
-    react: import_react55.default,
+    react: import_react56.default,
     displayName: "VscodeTableHeaderCell"
   });
-  var VscodeTableHeaderCell_default = VscodeTableHeaderCell3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableRow.js
-  var import_react57 = __toESM(require_react(), 1);
+  var import_react58 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-table-row/vscode-table-row.styles.js
   var styles26 = [
@@ -17404,13 +15935,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTableRow3 = o({
     tagName: "vscode-table-row",
     elementClass: VscodeTableRow,
-    react: import_react57.default,
+    react: import_react58.default,
     displayName: "VscodeTableRow"
   });
-  var VscodeTableRow_default = VscodeTableRow3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTabPanel.js
-  var import_react59 = __toESM(require_react(), 1);
+  var import_react60 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-tab-panel/vscode-tab-panel.styles.js
   var styles27 = [
@@ -17479,13 +16009,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTabPanel3 = o({
     tagName: "vscode-tab-panel",
     elementClass: VscodeTabPanel,
-    react: import_react59.default,
+    react: import_react60.default,
     displayName: "VscodeTabPanel"
   });
-  var VscodeTabPanel_default = VscodeTabPanel3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTabs.js
-  var import_react61 = __toESM(require_react(), 1);
+  var import_react62 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-tabs/vscode-tabs.styles.js
   var styles28 = [
@@ -17684,16 +16213,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTabs3 = o({
     tagName: "vscode-tabs",
     elementClass: VscodeTabs,
-    react: import_react61.default,
+    react: import_react62.default,
     events: {
       onVscTabsSelect: "vsc-tabs-select"
     },
     displayName: "VscodeTabs"
   });
-  var VscodeTabs_default = VscodeTabs3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTextarea.js
-  var import_react63 = __toESM(require_react(), 1);
+  var import_react64 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-textarea/vscode-textarea.styles.js
   var styles29 = [
@@ -18097,7 +16625,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTextarea3 = o({
     tagName: "vscode-textarea",
     elementClass: VscodeTextarea,
-    react: import_react63.default,
+    react: import_react64.default,
     displayName: "VscodeTextarea",
     events: {
       onChange: "change",
@@ -18108,7 +16636,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTextarea_default = VscodeTextarea3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTextfield.js
-  var import_react65 = __toESM(require_react(), 1);
+  var import_react66 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-textfield/vscode-textfield.styles.js
   var defaultFontStack3 = r(getDefaultFontStack());
@@ -18405,9 +16933,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.focused = false;
     }
     _onKeyDown(ev) {
-      var _a6;
+      var _a7;
       if (ev.key === "Enter" && this._internals.form) {
-        (_a6 = this._internals.form) == null ? void 0 : _a6.requestSubmit();
+        (_a7 = this._internals.form) == null ? void 0 : _a7.requestSubmit();
       }
     }
     render() {
@@ -18527,7 +17055,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTextfield3 = o({
     tagName: "vscode-textfield",
     elementClass: VscodeTextfield,
-    react: import_react65.default,
+    react: import_react66.default,
     displayName: "VscodeTextfield",
     events: {
       onChange: "change",
@@ -18538,7 +17066,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTextfield_default = VscodeTextfield3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeToolbarButton.js
-  var import_react67 = __toESM(require_react(), 1);
+  var import_react68 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-toolbar-button/vscode-toolbar-button.styles.js
   var styles31 = [
@@ -18633,8 +17161,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this._isSlotEmpty = true;
     }
     _handleSlotChange() {
-      var _a6, _b2;
-      this._isSlotEmpty = !(((_b2 = (_a6 = this._assignedNodes) == null ? void 0 : _a6.length) != null ? _b2 : 0) > 0);
+      var _a7, _b2;
+      this._isSlotEmpty = !(((_b2 = (_a7 = this._assignedNodes) == null ? void 0 : _a7.length) != null ? _b2 : 0) > 0);
     }
     _handleButtonClick() {
       if (!this.toggleable) {
@@ -18690,7 +17218,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeToolbarButton3 = o({
     tagName: "vscode-toolbar-button",
     elementClass: VscodeToolbarButton,
-    react: import_react67.default,
+    react: import_react68.default,
     displayName: "VscodeToolbarButton",
     events: {
       onChange: "change"
@@ -18698,7 +17226,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeToolbarContainer.js
-  var import_react69 = __toESM(require_react(), 1);
+  var import_react70 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-toolbar-container/vscode-toolbar-container.styles.js
   var styles32 = [
@@ -18738,12 +17266,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeToolbarContainer3 = o({
     tagName: "vscode-toolbar-container",
     elementClass: VscodeToolbarContainer,
-    react: import_react69.default,
+    react: import_react70.default,
     displayName: "VscodeToolbarContainer"
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTree.js
-  var import_react71 = __toESM(require_react(), 1);
+  var import_react72 = __toESM(require_react(), 1);
 
   // node_modules/@lit/context/lib/context-request-event.js
   var s5 = class extends Event {
@@ -18760,12 +17288,12 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   // node_modules/@lit/context/lib/controllers/context-consumer.js
   var s6 = class {
     constructor(t7, s8, i7, h3) {
-      var _a6;
+      var _a7;
       if (this.subscribe = false, this.provided = false, this.value = void 0, this.t = (t8, s9) => {
         this.unsubscribe && (this.unsubscribe !== s9 && (this.provided = false, this.unsubscribe()), this.subscribe || this.unsubscribe()), this.value = t8, this.host.requestUpdate(), this.provided && !this.subscribe || (this.provided = true, this.callback && this.callback(t8, s9)), this.unsubscribe = s9;
       }, this.host = t7, void 0 !== s8.context) {
         const t8 = s8;
-        this.context = t8.context, this.callback = t8.callback, this.subscribe = (_a6 = t8.subscribe) != null ? _a6 : false;
+        this.context = t8.context, this.callback = t8.callback, this.subscribe = (_a7 = t8.subscribe) != null ? _a7 : false;
       } else this.context = s8, this.callback = i7, this.subscribe = h3 != null ? h3 : false;
       this.host.addController(this);
     }
@@ -18818,20 +17346,20 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   };
   var i6 = class extends s7 {
     constructor(s8, e12, i7) {
-      var _a6, _b2;
+      var _a7, _b2;
       super(void 0 !== e12.context ? e12.initialValue : i7), this.onContextRequest = (t7) => {
-        var _a7;
+        var _a8;
         if (t7.context !== this.context) return;
-        const s9 = (_a7 = t7.contextTarget) != null ? _a7 : t7.composedPath()[0];
+        const s9 = (_a8 = t7.contextTarget) != null ? _a8 : t7.composedPath()[0];
         s9 !== this.host && (t7.stopPropagation(), this.addCallback(t7.callback, s9, t7.subscribe));
       }, this.onProviderRequest = (s9) => {
-        var _a7;
+        var _a8;
         if (s9.context !== this.context) return;
-        if (((_a7 = s9.contextTarget) != null ? _a7 : s9.composedPath()[0]) === this.host) return;
+        if (((_a8 = s9.contextTarget) != null ? _a8 : s9.composedPath()[0]) === this.host) return;
         const e13 = /* @__PURE__ */ new Set();
         for (const [s10, { consumerHost: i8 }] of this.subscriptions) e13.has(s10) || (e13.add(s10), i8.dispatchEvent(new s5(this.context, i8, s10, true)));
         s9.stopPropagation();
-      }, this.host = s8, void 0 !== e12.context ? this.context = e12.context : this.context = e12, this.attachListeners(), (_b2 = (_a6 = this.host).addController) == null ? void 0 : _b2.call(_a6, this);
+      }, this.host = s8, void 0 !== e12.context ? this.context = e12.context : this.context = e12, this.attachListeners(), (_b2 = (_a7 = this.host).addController) == null ? void 0 : _b2.call(_a7, this);
     }
     attachListeners() {
       this.host.addEventListener("context-request", this.onContextRequest), this.host.addEventListener("context-provider", this.onProviderRequest);
@@ -19226,10 +17754,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       this.dispatchEvent(ev);
     }
     _highlightIndentGuideOfItem(item) {
-      var _a6, _b2;
+      var _a7, _b2;
       if (item.branch && item.open) {
         item.highlightedGuides = true;
-        (_a6 = this._treeContextState.highlightedItems) == null ? void 0 : _a6.add(item);
+        (_a7 = this._treeContextState.highlightedItems) == null ? void 0 : _a7.add(item);
       } else {
         const parent = findParentItem(item);
         if (parent) {
@@ -19239,11 +17767,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _highlightIndentGuides() {
-      var _a6, _b2;
+      var _a7, _b2;
       if (this.indentGuides === IndentGuides.none) {
         return;
       }
-      (_a6 = this._treeContextState.highlightedItems) == null ? void 0 : _a6.forEach((i7) => i7.highlightedGuides = false);
+      (_a7 = this._treeContextState.highlightedItems) == null ? void 0 : _a7.forEach((i7) => i7.highlightedGuides = false);
       (_b2 = this._treeContextState.highlightedItems) == null ? void 0 : _b2.clear();
       if (this._treeContextState.activeItem) {
         this._highlightIndentGuideOfItem(this._treeContextState.activeItem);
@@ -19415,7 +17943,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTree3 = o({
     tagName: "vscode-tree",
     elementClass: VscodeTree,
-    react: import_react71.default,
+    react: import_react72.default,
     displayName: "VscodeTree",
     events: {
       onVscTreeSelect: "vsc-tree-select"
@@ -19423,7 +17951,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   });
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTreeItem.js
-  var import_react73 = __toESM(require_react(), 1);
+  var import_react74 = __toESM(require_react(), 1);
 
   // node_modules/@vscode-elements/elements/dist/vscode-tree-item/vscode-tree-item.styles.js
   var styles34 = [
@@ -19734,7 +18262,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _selectRange() {
-      var _a6, _b2;
+      var _a7, _b2;
       const prevFocused = this._treeContextState.prevFocusedItem;
       if (!prevFocused || prevFocused === this) {
         return;
@@ -19748,7 +18276,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         this._treeContextState.itemListUpToDate = true;
       }
-      let from = +((_a6 = prevFocused.dataset.score) != null ? _a6 : -1);
+      let from = +((_a7 = prevFocused.dataset.score) != null ? _a7 : -1);
       let to = +((_b2 = this.dataset.score) != null ? _b2 : -1);
       if (from > to) {
         [from, to] = [to, from];
@@ -19791,23 +18319,23 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     }
     _handleContentClick(ev) {
-      var _a6, _b2, _c, _d;
+      var _a7, _b2, _c, _d;
       ev.stopPropagation();
       const isCtrlDown = ev.ctrlKey;
       const isShiftDown = ev.shiftKey;
       if (isShiftDown && this._configContext.multiSelect) {
         this._selectRange();
-        (_b2 = (_a6 = this._treeContextState).emitSelectEvent) == null ? void 0 : _b2.call(_a6);
+        (_b2 = (_a7 = this._treeContextState).emitSelectEvent) == null ? void 0 : _b2.call(_a7);
         this.updateComplete.then(() => {
-          var _a7, _b3;
-          (_b3 = (_a7 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a7);
+          var _a8, _b3;
+          (_b3 = (_a8 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a8);
         });
       } else {
         this._selectItem(isCtrlDown);
         (_d = (_c = this._treeContextState).emitSelectEvent) == null ? void 0 : _d.call(_c);
         this.updateComplete.then(() => {
-          var _a7, _b3;
-          (_b3 = (_a7 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a7);
+          var _a8, _b3;
+          (_b3 = (_a8 = this._treeContextState).highlightIndentGuides) == null ? void 0 : _b3.call(_a8);
         });
         if (this._configContext.expandMode === ExpandMode.singleClick) {
           if (this.branch && !(this._configContext.multiSelect && isCtrlDown)) {
@@ -19971,35 +18499,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   var VscodeTree4 = o({
     tagName: "vscode-tree-item",
     elementClass: VscodeTreeItem,
-    react: import_react73.default,
+    react: import_react74.default,
     displayName: "VscodeTreeItem"
   });
-
-  // src/webview/react/playground/EnvironmentEditor.tsx
-  var import_react76 = __toESM(require_react());
-
-  // src/webview/react/hooks/useSyncSelectValue.ts
-  var import_react75 = __toESM(require_react());
-  function useSyncSelectValue(controlId, currentValue, onChange) {
-    (0, import_react75.useEffect)(() => {
-      const selector = `[data-control-id="${controlId}"] vscode-single-select`;
-      const el = document.querySelector(selector);
-      if (!el) return;
-      const sync = () => {
-        const val = el.value;
-        if (val !== currentValue) {
-          onChange(val);
-        }
-      };
-      sync();
-      el.addEventListener("change", sync);
-      el.addEventListener("input", sync);
-      return () => {
-        el.removeEventListener("change", sync);
-        el.removeEventListener("input", sync);
-      };
-    }, [controlId, currentValue, onChange]);
-  }
 
   // src/webview/react/components/SettingItem.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime());
@@ -20118,7 +18620,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     focusControl,
     setReveal
   }) => {
-    var _a6, _b2;
+    var _a7, _b2;
     const state = form[meta.id];
     const err = state == null ? void 0 : state.error;
     const invalid = !!err && (state == null ? void 0 : state.touched);
@@ -20161,7 +18663,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             };
           }
         },
-        children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
+        children: (_a7 = meta.options) == null ? void 0 : _a7.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
       }
     );
     switch (meta.type) {
@@ -20381,15 +18883,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   ];
   var sortByOrder = (arr) => [...arr].sort(
     (a3, b3) => {
-      var _a6, _b2;
-      return ((_a6 = a3.order) != null ? _a6 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
+      var _a7, _b2;
+      return ((_a7 = a3.order) != null ? _a7 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
     }
   );
   var buildInitialState = () => {
-    var _a6;
+    var _a7;
     const state = {};
     for (const s8 of SETTINGS) {
-      state[s8.id] = { value: (_a6 = s8.defaultValue) != null ? _a6 : s8.type === "boolean" ? false : "", touched: false };
+      state[s8.id] = { value: (_a7 = s8.defaultValue) != null ? _a7 : s8.type === "boolean" ? false : "", touched: false };
     }
     return state;
   };
@@ -20399,7 +18901,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     onSave: onSaveExternal,
     heading
   }) => {
-    var _a6;
+    var _a7;
     const [form, setForm] = (0, import_react76.useState)(() => buildInitialState());
     const [search, setSearch] = (0, import_react76.useState)("");
     const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react76.useState)(false);
@@ -20413,29 +18915,29 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       return void 0;
     }, []);
     const invalidCount = (0, import_react76.useMemo)(() => SETTINGS.reduce((acc, s8) => {
-      var _a7;
-      const err = validateField(s8, (_a7 = form[s8.id]) == null ? void 0 : _a7.value);
+      var _a8;
+      const err = validateField(s8, (_a8 = form[s8.id]) == null ? void 0 : _a8.value);
       return acc + (err ? 1 : 0);
     }, 0), [form, validateField]);
     const filteredSettings = (0, import_react76.useMemo)(() => {
-      var _a7;
+      var _a8;
       const term = search.trim().toLowerCase();
-      const authType = ((_a7 = form["authType"]) == null ? void 0 : _a7.value) || "internal";
+      const authType = ((_a8 = form["authType"]) == null ? void 0 : _a8.value) || "internal";
       return SETTINGS.filter((s8) => {
-        var _a8;
+        var _a9;
         if (s8.id === "authType") return true;
         if (s8.id === "apikey" && authType !== "apikey") return false;
         if ((s8.id === "username" || s8.id === "password") && authType === "apikey") return false;
         if (showOnlyInvalid && !validateField(s8, form[s8.id].value)) return false;
         if (!term) return true;
-        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a8 = s8.description) == null ? void 0 : _a8.toLowerCase().includes(term));
+        return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a9 = s8.description) == null ? void 0 : _a9.toLowerCase().includes(term));
       });
     }, [search, showOnlyInvalid, form, validateField]);
     const grouped = (0, import_react76.useMemo)(() => {
-      var _a7;
+      var _a8;
       const map = {};
       for (const s8 of filteredSettings) {
-        (map[_a7 = s8.group] || (map[_a7] = [])).push(s8);
+        (map[_a8 = s8.group] || (map[_a8] = [])).push(s8);
       }
       return map;
     }, [filteredSettings]);
@@ -20447,18 +18949,18 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }));
     };
     (0, import_react76.useEffect)(() => {
-      var _a7;
+      var _a8;
       if (selectedId && filteredSettings.some((s8) => s8.id === selectedId)) return;
       const firstGroup = groupsOrdered.find((g2) => (grouped[g2.id] || []).length);
-      const firstId = firstGroup ? (_a7 = grouped[firstGroup.id][0]) == null ? void 0 : _a7.id : void 0;
+      const firstId = firstGroup ? (_a8 = grouped[firstGroup.id][0]) == null ? void 0 : _a8.id : void 0;
       setSelectedId(firstId != null ? firstId : null);
     }, [filteredSettings, grouped, groupsOrdered, selectedId]);
     const focusControl = (id) => {
-      var _a7, _b2;
+      var _a8, _b2;
       const container = document.querySelector(`[data-control-id="${id}"]`);
       if (!container) return;
       const focusable = container.querySelector('input, textarea, select, button, vscode-textfield, vscode-text-area, vscode-single-select, [tabindex]:not([tabindex="-1"])');
-      (_b2 = (_a7 = focusable || container).focus) == null ? void 0 : _b2.call(_a7);
+      (_b2 = (_a8 = focusable || container).focus) == null ? void 0 : _b2.call(_a8);
     };
     (0, import_react76.useEffect)(() => {
       if (!initialValues) return;
@@ -20478,15 +18980,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       });
     }, [initialValues, validateField]);
     const collectValues = () => {
-      var _a7;
+      var _a8;
       const result = {};
       for (const s8 of SETTINGS) {
-        result[s8.id] = (_a7 = form[s8.id]) == null ? void 0 : _a7.value;
+        result[s8.id] = (_a8 = form[s8.id]) == null ? void 0 : _a8.value;
       }
       console.log("DEBUG: collectValues() returning:", result);
       return result;
     };
-    const onSave = async () => {
+    const onSave2 = async () => {
       setSaveStatus("saving");
       setLastError(void 0);
       const next = { ...form };
@@ -20563,7 +19065,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       },
       meta.id
     );
-    useSyncSelectValue("authType", (_a6 = form["authType"]) == null ? void 0 : _a6.value, (val) => updateValue("authType", val));
+    useSyncSelectValue("authType", (_a7 = form["authType"]) == null ? void 0 : _a7.value, (val) => updateValue("authType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "env-editor-root", children: [
       /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("h1", { className: "page-heading", children: heading || (mode === "edit" ? "Edit Environment" : "Add New Environment") }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "toolbar-row", children: [
@@ -20580,7 +19082,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: "discard", slot: "content-before" }),
             "Reset"
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: onSave, disabled: saveStatus === "saving", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeButton_default, { onClick: onSave2, disabled: saveStatus === "saving", children: [
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { name: saveStatus === "saving" ? "loading~spin" : saveStatus === "saved" ? "pass-filled" : "save", slot: "content-before" }),
             saveStatus === "saving" ? "Saving..." : saveStatus === "saved" ? "Saved" : "Save"
           ] })
@@ -20689,245 +19191,113 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     ] });
   };
 
-  // src/webview/react/playground/PageThree.tsx
-  var import_react77 = __toESM(require_react());
+  // src/webview/react/playground/environmentEditorEntry.tsx
   var import_jsx_runtime4 = __toESM(require_jsx_runtime());
-  var PageThree = () => {
-    const [checked, setChecked] = (0, import_react77.useState)(false);
-    const [text, setText] = (0, import_react77.useState)("");
-    const [area, setArea] = (0, import_react77.useState)("");
-    const [activeTab, setActiveTab] = (0, import_react77.useState)("tab-1");
-    return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h2", { style: { marginTop: 0 }, children: "Playground \u2014 Page Three (vscode-elements demo)" }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("p", { children: [
-        "This page demos a selection of components from ",
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("code", { children: "@vscode-elements/react-elements" }),
-        "."
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => alert("Primary clicked"), children: "Primary Button" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeButton_default, { onClick: () => alert("Secondary clicked"), secondary: true, children: "Secondary" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeBadge_default, { variant: "counter", children: "42" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeIcon_default, { name: "debug-start", size: 18 })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Form controls" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { display: "flex", gap: 12, alignItems: "center" }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeCheckbox_default, { checked, onChange: (e12) => {
-            var _a6, _b2;
-            return setChecked((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.checked) != null ? _b2 : !checked);
-          }, children: "Enable option" }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTextfield_default, { value: text, placeholder: "Type something", onInput: (e12) => {
-            var _a6, _b2;
-            return setText((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.value) != null ? _b2 : "");
-          } })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { marginTop: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTextarea_default, { value: area, placeholder: "Multiline", onInput: (e12) => {
-          var _a6, _b2;
-          return setArea((_b2 = (_a6 = e12.target) == null ? void 0 : _a6.value) != null ? _b2 : "");
-        }, rows: 4 }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Tabs" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTabs_default, { ...{ "selected-index": 0 }, onVscTabsSelect: (e12) => {
-          var _a6, _b2;
-          return setActiveTab(String((_b2 = (_a6 = e12.detail) == null ? void 0 : _a6.selectedIndex) != null ? _b2 : 0));
-        }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabHeader_default, { children: "First" }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabHeader_default, { children: "Second" }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "Content for first tab" }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTabPanel_default, { children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "Content for second tab" }) })
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { style: { marginTop: 12 }, children: "Table" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { height: 200, border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTable_default, { ...{ columns: ["1fr", "2fr", "1fr"], zebra: true }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableHeader_default, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "ID" }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "Name" }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableHeaderCell_default, { children: "State" })
-          ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableBody_default, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableRow_default, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "1" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Alpha" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Online" })
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTableRow_default, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "2" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Bravo" }),
-              /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeTableCell_default, { children: "Offline" })
-            ] })
-          ] })
-        ] }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { marginTop: 12 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeCollapsible_default, { ...{ open: true }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { padding: 8 }, children: "This is an example of a collapsible section. Use it to hide optional details." }) }) })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h3", { children: "Current values" }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("pre", { style: { background: "var(--vscode-editorBackground)", padding: 8, color: "var(--vscode-editor-foreground)" }, children: JSON.stringify({ checked, text, area, activeTab }, null, 2) })
-      ] })
-    ] });
-  };
-  var PageThree_default = PageThree;
-
-  // src/webview/react/playground/index.tsx
-  var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-  var vscode = acquireVsCodeApi == null ? void 0 : acquireVsCodeApi();
-  var Home = () => {
-    const [count, setCount] = (0, import_react78.useState)(0);
-    const [messages, setMessages] = (0, import_react78.useState)([]);
-    const [auth, setAuth] = (0, import_react78.useState)("");
-    const [loadingAuth, setLoadingAuth] = (0, import_react78.useState)(false);
-    const [verifying, setVerifying] = (0, import_react78.useState)(false);
-    const [verificationMessage, setVerificationMessage] = (0, import_react78.useState)("");
-    const requestResolvers = import_react78.default.useRef(/* @__PURE__ */ new Map());
-    const reqCounter = import_react78.default.useRef(0);
-    const sendRequest = (type, payload, timeout = 1e4) => {
-      const id = `${Date.now()}-${++reqCounter.current}`;
-      return new Promise((resolve, reject) => {
-        requestResolvers.current.set(id, { resolve, reject });
-        try {
-          vscode == null ? void 0 : vscode.postMessage({ type, id, payload });
-        } catch (err) {
-          requestResolvers.current.delete(id);
-          return reject(err);
-        }
-        const timer = setTimeout(() => {
-          if (requestResolvers.current.has(id)) {
-            requestResolvers.current.delete(id);
-            reject(new Error("Request timed out"));
-          }
-        }, timeout);
-        const originalResolve = resolve;
-        requestResolvers.current.set(id, {
-          resolve: (v3) => {
-            clearTimeout(timer);
-            originalResolve(v3);
-          },
-          reject: (e12) => {
-            clearTimeout(timer);
-            reject(e12);
-          }
-        });
-      });
+  var vscode = window.acquireVsCodeApi ? window.acquireVsCodeApi() : void 0;
+  var bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: "add" };
+  var toInitialValues = (env) => {
+    if (!env) return void 0;
+    return {
+      envName: env.name,
+      hostname: env.hostname,
+      port: env.port,
+      httpProtocol: env.httpProtocol,
+      authType: env.authenticationType,
+      username: env.username,
+      password: env.password,
+      apikey: env.apikey,
+      objectStructure: env.objectStructure,
+      appxmlObjectStructure: env.appxml_objectStructure,
+      logLevel: env.logLevel,
+      createPythonFile: env.createPythonFileForJythonScripts,
+      ignoreSsl: env.ignoreSslErrors,
+      formatXmlOnDownload: env.formatXmlOnDownloadAndCompare,
+      scope: env.scope,
+      sslcertificate: env.sslcertificate
     };
-    (0, import_react78.useEffect)(() => {
-      const listener = (event) => {
-        var _a6;
-        const msg = event.data;
-        setMessages((m3) => [...m3, JSON.stringify(msg)]);
-        try {
-          if ((msg == null ? void 0 : msg.id) && requestResolvers.current.has(msg.id)) {
-            const { resolve, reject } = requestResolvers.current.get(msg.id);
-            requestResolvers.current.delete(msg.id);
-            if (msg.error) {
-              reject(msg.error);
-            } else {
-              resolve((_a6 = msg.payload) != null ? _a6 : msg);
-            }
-          }
-        } catch (err) {
-        }
-      };
-      window.addEventListener("message", listener);
-      return () => window.removeEventListener("message", listener);
-    }, []);
-    const handleSendAuth = async () => {
-      var _a6;
-      setAuth("requesting...");
-      setLoadingAuth(true);
-      try {
-        const resp = await sendRequest("requestAuth", { reason: "playground" }, 15e3);
-        if (resp && typeof resp === "object" && resp.token) {
-          setAuth(resp.token);
-        } else {
-          setAuth(JSON.stringify(resp));
-        }
-      } catch (err) {
-        setAuth("error: " + ((_a6 = err == null ? void 0 : err.message) != null ? _a6 : String(err)));
+  };
+  var _a6;
+  var existingId = (_a6 = bootstrap.environment) == null ? void 0 : _a6.id;
+  var onSave = async (values, mode) => {
+    var _a7, _b2, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n;
+    const incoming = values;
+    const existing = bootstrap.environment;
+    console.log("DEBUG: === SAVE DEBUG START ===");
+    console.log("DEBUG: Mode:", mode);
+    console.log("DEBUG: existingId:", existingId);
+    console.log("DEBUG: Form value - envName:", incoming.envName);
+    console.log("DEBUG: Form value - hostname:", incoming.hostname);
+    console.log("DEBUG: Form value - port:", incoming.port);
+    console.log("DEBUG: Form value - httpProtocol:", incoming.httpProtocol);
+    console.log("DEBUG: Form value - authType:", incoming.authType);
+    console.log("DEBUG: Form value - objectStructure:", incoming.objectStructure);
+    console.log("DEBUG: Form value - appxmlObjectStructure:", incoming.appxmlObjectStructure);
+    console.log("DEBUG: Form value - logLevel:", incoming.logLevel);
+    console.log("DEBUG: Form value - createPythonFile:", incoming.createPythonFile);
+    console.log("DEBUG: Form value - ignoreSsl:", incoming.ignoreSsl);
+    console.log("DEBUG: Form value - formatXmlOnDownload:", incoming.formatXmlOnDownload);
+    console.log("DEBUG: Form value - scope:", incoming.scope);
+    console.log("DEBUG: Existing value - name:", existing == null ? void 0 : existing.name);
+    console.log("DEBUG: Existing value - hostname:", existing == null ? void 0 : existing.hostname);
+    console.log("DEBUG: Existing value - port:", existing == null ? void 0 : existing.port);
+    console.log("DEBUG: Existing value - httpProtocol:", existing == null ? void 0 : existing.httpProtocol);
+    console.log("DEBUG: Existing value - authenticationType:", existing == null ? void 0 : existing.authenticationType);
+    console.log("DEBUG: Existing value - objectStructure:", existing == null ? void 0 : existing.objectStructure);
+    console.log("DEBUG: Existing value - appxml_objectStructure:", existing == null ? void 0 : existing.appxml_objectStructure);
+    console.log("DEBUG: Existing value - logLevel:", existing == null ? void 0 : existing.logLevel);
+    console.log("DEBUG: Existing value - createPythonFileForJythonScripts:", existing == null ? void 0 : existing.createPythonFileForJythonScripts);
+    console.log("DEBUG: Existing value - ignoreSslErrors:", existing == null ? void 0 : existing.ignoreSslErrors);
+    console.log("DEBUG: Existing value - formatXmlOnDownloadAndCompare:", existing == null ? void 0 : existing.formatXmlOnDownloadAndCompare);
+    console.log("DEBUG: Existing value - scope:", existing == null ? void 0 : existing.scope);
+    const normalized = {
+      id: existingId || (existing == null ? void 0 : existing.id) || "",
+      name: incoming.envName || (existing == null ? void 0 : existing.name) || "Unnamed Environment",
+      hostname: incoming.hostname || (existing == null ? void 0 : existing.hostname) || "",
+      port: Number((_b2 = (_a7 = incoming.port) != null ? _a7 : existing == null ? void 0 : existing.port) != null ? _b2 : incoming.httpProtocol === "https" ? 443 : 9080),
+      httpProtocol: incoming.httpProtocol || (existing == null ? void 0 : existing.httpProtocol) || "https",
+      authenticationType: incoming.authType || (existing == null ? void 0 : existing.authenticationType) || "internal",
+      username: (_d = (_c = incoming.username) != null ? _c : existing == null ? void 0 : existing.username) != null ? _d : "",
+      password: (_f = (_e = incoming.password) != null ? _e : existing == null ? void 0 : existing.password) != null ? _f : "",
+      apikey: (_h = (_g = incoming.apikey) != null ? _g : existing == null ? void 0 : existing.apikey) != null ? _h : "",
+      objectStructure: incoming.objectStructure || (existing == null ? void 0 : existing.objectStructure) || "MXSCRIPT",
+      appxml_objectStructure: incoming.appxmlObjectStructure || (existing == null ? void 0 : existing.appxml_objectStructure) || "MXL_APPS",
+      logLevel: incoming.logLevel || (existing == null ? void 0 : existing.logLevel) || "INFO",
+      createPythonFileForJythonScripts: !!((_j = (_i = incoming.createPythonFile) != null ? _i : existing == null ? void 0 : existing.createPythonFileForJythonScripts) != null ? _j : true),
+      ignoreSslErrors: !!((_l = (_k = incoming.ignoreSsl) != null ? _k : existing == null ? void 0 : existing.ignoreSslErrors) != null ? _l : true),
+      formatXmlOnDownloadAndCompare: !!((_n = (_m = incoming.formatXmlOnDownload) != null ? _m : existing == null ? void 0 : existing.formatXmlOnDownloadAndCompare) != null ? _n : true),
+      scope: incoming.scope || (existing == null ? void 0 : existing.scope) || "global",
+      sslcertificate: incoming.sslcertificate || (existing == null ? void 0 : existing.sslcertificate) || ""
+    };
+    console.log("DEBUG: Normalized - name:", normalized.name);
+    console.log("DEBUG: Normalized - hostname:", normalized.hostname);
+    console.log("DEBUG: Normalized - port:", normalized.port);
+    console.log("DEBUG: Normalized - httpProtocol:", normalized.httpProtocol);
+    console.log("DEBUG: Normalized - authenticationType:", normalized.authenticationType);
+    console.log("DEBUG: Normalized - objectStructure:", normalized.objectStructure);
+    console.log("DEBUG: Normalized - appxml_objectStructure:", normalized.appxml_objectStructure);
+    console.log("DEBUG: Normalized - logLevel:", normalized.logLevel);
+    console.log("DEBUG: Normalized - createPythonFileForJythonScripts:", normalized.createPythonFileForJythonScripts);
+    console.log("DEBUG: Normalized - ignoreSslErrors:", normalized.ignoreSslErrors);
+    console.log("DEBUG: Normalized - formatXmlOnDownloadAndCompare:", normalized.formatXmlOnDownloadAndCompare);
+    console.log("DEBUG: Normalized - scope:", normalized.scope);
+    console.log("DEBUG: === SAVE DEBUG END ===");
+    vscode == null ? void 0 : vscode.postMessage({ type: "save", environment: normalized });
+  };
+  var App = () => /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: 12 }, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(
+      EnvironmentEditor,
+      {
+        mode: bootstrap.mode,
+        initialValues: toInitialValues(bootstrap.environment),
+        onSave
       }
-      setLoadingAuth(false);
-    };
-    const handleVerifySettings = async () => {
-      var _a6;
-      setVerifying(true);
-      setVerificationMessage("Verifying...");
-      const payload = {
-        hostname: "maximo.development.scannmax.trinmax.com",
-        port: 443,
-        httpProtocol: "https",
-        authenticationType: "internal",
-        username: "maxadmin",
-        password: "Maximo76Scannmax2019",
-        apikey: "",
-        logLevel: "DEBUG",
-        objectStructure: "mxscript",
-        ignoreSslErrors: false,
-        sslcertificate: ""
-      };
-      try {
-        const resp = await sendRequest("verifySettings", payload, 2e4);
-        if (resp && resp.payload) {
-          setVerificationMessage(resp.payload.message || JSON.stringify(resp.payload));
-        } else if (resp && resp.message) {
-          setVerificationMessage(resp.message);
-        } else {
-          setVerificationMessage(JSON.stringify(resp));
-        }
-      } catch (err) {
-        setVerificationMessage("Error: " + ((_a6 = err == null ? void 0 : err.message) != null ? _a6 : String(err)));
-      }
-      setVerifying(false);
-    };
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { padding: 12, fontFamily: "var(--vscode-font-family)" }, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { style: { marginTop: 0 }, children: "VSCode Elements Playground" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h1", { style: { color: "var(--vscode-editor-foreground)" }, children: "Hello World" }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("p", { children: [
-        "Minimal React test view using ",
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("code", { children: "vscode-elements" }),
-        ". Increment the counter and post a message back to the extension."
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", gap: 8, alignItems: "center" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeButton_default, { onClick: () => setCount((c6) => c6 + 1), children: [
-          "Count: ",
-          count
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => vscode == null ? void 0 : vscode.postMessage({ type: "ping", count }), disabled: loadingAuth || verifying, children: "Send Ping" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => handleSendAuth(), disabled: loadingAuth || verifying, children: loadingAuth ? "Authing..." : `Send Authet: ${auth || "start"}` }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => handleVerifySettings(), disabled: loadingAuth || verifying, children: verifying ? "Verifying..." : "Verify Settings" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => window.location.hash = "#/page-two", children: "Open Page Two" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("section", { style: { marginTop: 16 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h3", { children: "Incoming Messages" }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { marginBottom: 8 }, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("strong", { children: "Verification:" }),
-          " ",
-          verificationMessage
-        ] }),
-        messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("p", { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("i", { children: "No messages yet." }) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("ul", { style: { fontSize: 12, maxHeight: 120, overflow: "auto", border: "1px solid var(--vscode-panel-border)", padding: 8 }, children: messages.map((m3, i7) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("li", { style: { marginBottom: 4 }, children: m3 }, i7)) })
-      ] })
-    ] });
-  };
-  var App = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(HashRouter, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("nav", { style: { padding: 8, borderBottom: "1px solid var(--vscode-panel-border)" }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/", children: "Home" }),
-        " ",
-        " | ",
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/environment-editor", children: "Environment Editor" }),
-        " ",
-        " | ",
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Link, { to: "/page-three", children: "Page Three" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Routes, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Home, {}) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/environment-editor", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(EnvironmentEditor, {}) }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Route, { path: "/page-three", element: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(PageThree_default, {}) })
-      ] })
-    ] });
-  };
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { style: { display: "flex", justifyContent: "flex-end", gap: 8 }, children: /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("button", { onClick: () => vscode == null ? void 0 : vscode.postMessage({ type: "cancel" }), children: "Cancel" }) })
+  ] });
   var rootEl = document.getElementById("root");
   if (rootEl) {
-    (0, import_client.createRoot)(rootEl).render(/* @__PURE__ */ (0, import_jsx_runtime5.jsx)(App, {}));
+    const root = (0, import_client.createRoot)(rootEl);
+    root.render(/* @__PURE__ */ (0, import_jsx_runtime4.jsx)(App, {}));
   }
 })();
 /*! Bundled license information:
@@ -20974,42 +19344,6 @@ react/cjs/react-jsx-runtime.production.min.js:
    *
    * This source code is licensed under the MIT license found in the
    * LICENSE file in the root directory of this source tree.
-   *)
-
-@remix-run/router/dist/router.js:
-  (**
-   * @remix-run/router v1.23.0
-   *
-   * Copyright (c) Remix Software Inc.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
-   *)
-
-react-router/dist/index.js:
-  (**
-   * React Router v6.30.1
-   *
-   * Copyright (c) Remix Software Inc.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
-   *)
-
-react-router-dom/dist/index.js:
-  (**
-   * React Router DOM v6.30.1
-   *
-   * Copyright (c) Remix Software Inc.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE.md file in the root directory of this source tree.
-   *
-   * @license MIT
    *)
 
 @lit/react/create-component.js:
@@ -21078,4 +19412,4 @@ lit-html/directive-helpers.js:
    * SPDX-License-Identifier: BSD-3-Clause
    *)
 */
-//# sourceMappingURL=playground.js.map
+//# sourceMappingURL=environmentEditor.js.map

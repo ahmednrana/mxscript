@@ -46,8 +46,32 @@ export const MXSettingItem: React.FC<MXSettingItemProps> = ({
     <vscode-single-select
       value={state?.value}
       data-allow-custom={meta.allowCustom || undefined}
-      onInput={(e: any) => updateValue(meta.id, e.target.value)}
-      onChange={(e: any) => updateValue(meta.id, e.target.value)}
+      onInput={(e: any) => {
+        console.log('DEBUG: Select onInput fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
+        updateValue(meta.id, e.target.value);
+      }}
+      onChange={(e: any) => {
+        console.log('DEBUG: Select onChange fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
+        updateValue(meta.id, e.target.value);
+      }}
+      onSelect={(e: any) => {
+        console.log('DEBUG: Select onSelect fired for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
+        updateValue(meta.id, e.target.value);
+      }}
+      ref={(el: any) => {
+        if (el) {
+          const handleChange = (e: any) => {
+            console.log('DEBUG: Select addEventListener change for', meta.id, '- value:', e.target.value, '- detail:', e.detail);
+            updateValue(meta.id, e.target.value);
+          };
+          el.addEventListener('change', handleChange);
+          el.addEventListener('vsc-change', handleChange);
+          return () => {
+            el.removeEventListener('change', handleChange);
+            el.removeEventListener('vsc-change', handleChange);
+          };
+        }
+      }}
     >
       {meta.options?.map(opt => (
         <vscode-option key={opt} value={opt}>{opt}</vscode-option>
@@ -70,7 +94,37 @@ export const MXSettingItem: React.FC<MXSettingItemProps> = ({
           error={invalid ? err : undefined}
           onSelect={() => { onSelect(meta.id); focusControl(meta.id); }}
         >
-          <VscodeCheckbox checked={!!state?.value} onInput={(e: any) => updateValue(meta.id, e.target.checked)}></VscodeCheckbox>
+          <VscodeCheckbox checked={!!state?.value} onInput={(e: any) => updateValue(meta.id, !!e.target.checked)} onChange={(e: any) => updateValue(meta.id, !!e.target.checked)}></VscodeCheckbox>
+        </SettingItem>
+      );
+    case 'radio':
+      return (
+        <SettingItem
+          key={meta.id}
+          id={meta.id}
+          label={`${meta.label}${labelSuffix}`}
+          helperText={!invalid ? description : undefined}
+          badges={badges}
+          selected={selectedId === meta.id}
+          hoverColor={'var(--vscode-list-hoverBackground)'}
+          selectedColor={'var(--vscode-list-inactiveSelectionBackground)'}
+          error={invalid ? err : undefined}
+          onSelect={() => { onSelect(meta.id); focusControl(meta.id); }}
+        >
+          <div style={{ display: 'flex', gap: '16px', paddingTop: 4 }}>
+            {meta.options?.map(opt => (
+              <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name={meta.id}
+                  value={opt}
+                  checked={state?.value === opt}
+                  onChange={(e) => updateValue(meta.id, e.target.value)}
+                />
+                <span style={{ textTransform: 'capitalize' }}>{opt}</span>
+              </label>
+            ))}
+          </div>
         </SettingItem>
       );
     case 'multiline':

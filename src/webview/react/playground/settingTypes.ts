@@ -1,7 +1,7 @@
 // Shared types for settings-driven environment editor
 // Extracted to allow reuse in MXSettingItem and other components.
 
-export type SettingType = 'string' | 'number' | 'password' | 'boolean' | 'multiline' | 'select';
+export type SettingType = 'string' | 'number' | 'password' | 'boolean' | 'multiline' | 'select' | 'radio';
 
 export interface SettingMetaBase {
   id: string;
@@ -25,8 +25,9 @@ export interface PasswordSettingMeta extends SettingMetaBase { type: 'password';
 export interface StringSettingMeta extends SettingMetaBase { type: 'string' | 'multiline'; }
 export interface NumberSettingMeta extends SettingMetaBase { type: 'number'; }
 export interface SelectSettingMeta extends SettingMetaBase { type: 'select'; options: string[]; allowCustom?: boolean; }
+export interface RadioSettingMeta extends SettingMetaBase { type: 'radio'; options: string[]; }
 
-export type SettingMeta = BooleanSettingMeta | PasswordSettingMeta | StringSettingMeta | NumberSettingMeta | SelectSettingMeta;
+export type SettingMeta = BooleanSettingMeta | PasswordSettingMeta | StringSettingMeta | NumberSettingMeta | SelectSettingMeta | RadioSettingMeta;
 
 export interface GroupMeta {
   id: string;

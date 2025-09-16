@@ -67,11 +67,32 @@ export class EnvironmentEditorPanel {
                 switch (message.type) {
                     case 'save':
                         if (this._onSave) {
-                            // If editing, maintain the ID
-                            if (this._environment && this._environment.id) {
-                                message.environment.id = this._environment.id;
+                            const incoming = message.environment || {};
+                            // Preserve existing id if editing
+                            if (this._environment?.id) {
+                                incoming.id = this._environment.id;
                             }
-                            this._onSave(message.environment);
+                            // Normalize / ensure expected properties exist. We do a full replace style merge.
+                            const normalized: MaximoEnvironment = {
+                                id: incoming.id || (this._environment?.id) || '',
+                                name: incoming.name || this._environment?.name || 'Unnamed Environment',
+                                hostname: incoming.hostname || this._environment?.hostname || '',
+                                port: Number(incoming.port ?? this._environment?.port ?? (incoming.httpProtocol === 'https' ? 443 : 9080)),
+                                httpProtocol: incoming.httpProtocol || this._environment?.httpProtocol || 'https',
+                                authenticationType: incoming.authenticationType || this._environment?.authenticationType || 'internal',
+                                username: incoming.username ?? this._environment?.username ?? '',
+                                password: incoming.password ?? this._environment?.password ?? '',
+                                apikey: incoming.apikey ?? this._environment?.apikey ?? '',
+                                objectStructure: incoming.objectStructure || this._environment?.objectStructure || 'MXSCRIPT',
+                                appxml_objectStructure: incoming.appxml_objectStructure || this._environment?.appxml_objectStructure || 'MXL_APPS',
+                                logLevel: incoming.logLevel || this._environment?.logLevel || 'INFO',
+                                createPythonFileForJythonScripts: !!(incoming.createPythonFileForJythonScripts ?? this._environment?.createPythonFileForJythonScripts ?? true),
+                                ignoreSslErrors: !!(incoming.ignoreSslErrors ?? this._environment?.ignoreSslErrors ?? true),
+                                formatXmlOnDownloadAndCompare: !!(incoming.formatXmlOnDownloadAndCompare ?? this._environment?.formatXmlOnDownloadAndCompare ?? true),
+                                scope: incoming.scope || this._environment?.scope || 'global',
+                                sslcertificate: incoming.sslcertificate || this._environment?.sslcertificate || ''
+                            };
+                            this._onSave(normalized);
                         }
                         this._panel.dispose();
                         break;
@@ -176,504 +197,44 @@ export class EnvironmentEditorPanel {
     }
 
     private _getHtmlForWebview(): string {
+        const webview = this._panel.webview;
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'environmentEditor.js'));
+        const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
+        const nonce = this._nonce();
+        const bootstrap = {
+            mode: this._environment ? 'edit' : 'add',
+            environment: this._environment || null
+        };
+        const bootstrapStr = JSON.stringify(bootstrap).replace(/</g, '\\u003c');
         return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Maximo Environment</title>
-            <style>
-                body {
-                    font-family: var(--vscode-font-family);
-                    color: var(--vscode-foreground);
-                    background-color: var(--vscode-editor-background);
-                    padding: 20px;
-                    max-width: 800px;
-                    margin: 0 auto;
-                }
-                .form-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 16px;
-                }
-                .form-group {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                .form-row {
-                    display: flex;
-                    gap: 16px;
-                }
-                .form-row .form-group {
-                    flex: 1;
-                }
-                input, select {
-                    background-color: var(--vscode-input-background);
-                    color: var(--vscode-input-foreground);
-                    border: 1px solid var(--vscode-input-border);
-                    padding: 8px;
-                    border-radius: 4px;
-                }
-                input.required {
-                    border-left: 3px solid var(--vscode-editorError-foreground);
-                }
-                input.required-valid {
-                    border-left: 3px solid var(--vscode-editor-background);
-                    border: 1px solid var(--vscode-input-border);
-                }
-                .checkbox-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .radio-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-bottom: 8px;
-                }
-                .password-field {
-                    position: relative;
-                }
-                .password-toggle {
-                    position: absolute;
-                    right: 8px;
-                    top: 8px;
-                    cursor: pointer;
-                    user-select: none;
-                }
-                button {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                }
-                button:hover {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
-                .button-container {
-                    display: flex;
-                    justify-content: flex-end;
-                    gap: 8px;
-                    margin-top: 16px;
-                }
-                h2 {
-                    margin-top: 0;
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                    padding-bottom: 8px;
-                }
-                .required-label::after {
-                    content: " *";
-                    color: var(--vscode-editorError-foreground);
-                }
-                /* Fix for radio button alignment */
-                .radio-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                .radio-group input[type="radio"] {
-                    margin: 0;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="form-container">
-                <h2>${this._environment ? 'Edit Maximo Environment' : 'Add New Maximo Environment'}</h2>
-                <div style="margin-bottom:10px;">
-                    <button id="openPlaygroundBtn" style="background-color:var(--vscode-button-secondaryBackground);color:var(--vscode-button-foreground);">Open React Playground (Experimental)</button>
-                </div>
-                
-                <div class="form-group">
-                    <label for="envName" class="required-label">Environment Name</label>
-                    <input type="text" id="envName" class="required" placeholder="Production, Development, etc." value="${this._environment?.name || ''}">
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="hostname" class="required-label">Hostname / IP</label>
-                        <input type="text" id="hostname" class="required" placeholder="10.10.12.12 or www.example.com" value="${this._environment?.hostname || ''}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="port">Port</label>
-                        <input type="number" id="port" placeholder="443" value="${this._environment ? this._environment.port : '443'}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="httpProtocol">HTTP Protocol</label>
-                        <select id="httpProtocol">
-                            <option value="http" ${this._environment?.httpProtocol === 'http' ? 'selected' : ''}>HTTP</option>
-                            <option value="https" ${!this._environment || this._environment?.httpProtocol === 'https' ? 'selected' : ''}>HTTPS</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="authType">Authentication Type</label>
-                    <select id="authType">
-                        <option value="apikey" ${this._environment?.authenticationType === 'apikey' || !this._environment ? 'selected' : ''}>API Key</option>
-                        <option value="internal" ${this._environment?.authenticationType === 'internal' ? 'selected' : ''}>Internal</option>
-                        <option value="ldap" ${this._environment?.authenticationType === 'ldap' ? 'selected' : ''}>LDAP</option>
-                    </select>
-                </div>
-                
-                <div id="credentialsContainer" style="${this._environment?.authenticationType === 'apikey' ? 'display: none;' : ''}">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="username" class="username-label">Username</label>
-                            <input type="text" id="username" class="username-input" placeholder="maxadmin" value="${this._environment?.username || ''}">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="password" class="password-label">Password</label>
-                            <div class="password-field">
-                                <input type="password" id="password" class="password-input" placeholder="maxadmin" value="${this._environment?.password || ''}">
-                                <span class="password-toggle" id="passwordToggle">👁️</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="apikeyContainer" class="form-group" style="${this._environment?.authenticationType !== 'apikey' ? 'display: none;' : ''}">
-                    <label for="apikey" class="apikey-label">API Key</label>
-                    <input type="text" id="apikey" class="apikey-input" placeholder="Your API Key" value="${this._environment?.apikey || ''}">
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="objectStructure">Script Object Structure</label>
-                        <input type="text" id="objectStructure" placeholder="MXSCRIPT" value="${this._environment ? this._environment.objectStructure : 'MXSCRIPT'}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="appxmlObjectStructure">App XML Object Structure</label>
-                        <input type="text" id="appxmlObjectStructure" placeholder="MXL_APPS" value="${this._environment ? this._environment.appxml_objectStructure : 'MXL_APPS'}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="logLevel">Log Level</label>
-                        <select id="logLevel">
-                            <option value="DEBUG" ${this._environment?.logLevel === 'DEBUG' ? 'selected' : ''}>DEBUG</option>
-                            <option value="INFO" ${this._environment?.logLevel === 'INFO' ? 'selected' : ''}>INFO</option>
-                            <option value="WARN" ${this._environment?.logLevel === 'WARN' ? 'selected' : ''}>WARN</option>
-                            <option value="ERROR" ${this._environment?.logLevel === 'ERROR' ? 'selected' : ''}>ERROR</option>
-                            <option value="FATAL" ${this._environment?.logLevel === 'FATAL' ? 'selected' : ''}>FATAL</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="createPythonFile" ${this._environment ? this._environment.createPythonFileForJythonScripts ? 'checked' : '' : 'checked'}>
-                        <label for="createPythonFile">Create Python file for Jython scripts</label>
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="ignoreSsl" ${this._environment ? this._environment.ignoreSslErrors ? 'checked' : '' : 'checked'}>
-                        <label for="ignoreSsl">Ignore SSL errors</label>
-                    </div>
-                    
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="formatXmlOnDownload" ${this._environment ? (this._environment.formatXmlOnDownloadAndCompare !== false ? 'checked' : '') : 'checked'}>
-                        <label for="formatXmlOnDownload">Format XML on download and compare</label>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="sslcertificate">SSL Certificate (PEM format)</label>
-                    <textarea id="sslcertificate" rows="3" style="resize:vertical; overflow:auto;" placeholder="Paste PEM certificate here">${this._environment?.sslcertificate || ''}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Environment Scope</label>
-                    <div class="radio-group">
-                        <input type="radio" id="scopeGlobal" name="scope" value="global" ${!this._environment || this._environment.scope === 'global' ? 'checked' : ''}>
-                        <label for="scopeGlobal">Global (Available in all workspaces)</label>
-                    </div>
-                    <div class="radio-group">
-                        <input type="radio" id="scopeWorkspace" name="scope" value="workspace" ${this._environment?.scope === 'workspace' ? 'checked' : ''}>
-                        <label for="scopeWorkspace">Workspace (Only in this workspace)</label>
-                    </div>
-                </div>
-                
-                <div class="button-container">
-                    <div id="verificationResultDisplay" style="margin-right: auto; padding-top: 8px;"></div>
-                    <button id="cancelBtn">Cancel</button>
-                    <button id="verifyBtn">Verify Settings</button>
-                    <button id="saveBtn">Save</button>
-                </div>
-            </div>
-            
-            <script>
-                (function() {
-                    const vscode = acquireVsCodeApi();
-                    
-                    // DOM Elements
-                    const authType = document.getElementById('authType');
-                    const credentialsContainer = document.getElementById('credentialsContainer');
-                    const apikeyContainer = document.getElementById('apikeyContainer');
-                    const passwordToggle = document.getElementById('passwordToggle');
-                    const passwordField = document.getElementById('password');
-                    const saveBtn = document.getElementById('saveBtn');
-                    const verifyBtn = document.getElementById('verifyBtn'); // New button
-                    const verificationResultDisplay = document.getElementById('verificationResultDisplay'); // Display area
-                    const cancelBtn = document.getElementById('cancelBtn');
-                    const envName = document.getElementById('envName');
-                    const hostname = document.getElementById('hostname');
-                    const username = document.getElementById('username');
-                    const apikey = document.getElementById('apikey');
-                    const openPlaygroundBtn = document.getElementById('openPlaygroundBtn');
-                    
-                    // Event Listeners
-                    authType.addEventListener('change', toggleAuthFields);
-                    saveBtn.addEventListener('click', saveEnvironment);
-                    verifyBtn.addEventListener('click', verifyCurrentSettings); // Listener for new button
-                    cancelBtn.addEventListener('click', () => {
-                        vscode.postMessage({ type: 'cancel' });
-                    });
-                    openPlaygroundBtn.addEventListener('click', () => {
-                        vscode.postMessage({ type: 'executeCommand', command: 'mxscript.openPlayground' });
-                    });
-                    
-                    // Add input validation on keyup events
-                    envName.addEventListener('input', validateField);
-                    hostname.addEventListener('input', validateField);
-                    username?.addEventListener('input', validateField);
-                    passwordField?.addEventListener('input', validateField);
-                    apikey?.addEventListener('input', validateField);
-                    
-                    // Run validation on load to set initial state
-                    validateAllFields();
-                    
-                    if (passwordToggle) {
-                        passwordToggle.addEventListener('click', () => {
-                            if (passwordField.type === 'password') {
-                                passwordField.type = 'text';
-                                passwordToggle.textContent = '🔒';
-                            } else {
-                                passwordField.type = 'password';
-                                passwordToggle.textContent = '👁️';
-                            }
-                        });
-                    }
-
-                    // Listen for messages from the extension
-                    window.addEventListener('message', event => {
-                        const message = event.data;
-                        if (message.type === 'verificationResult') {
-                            verificationResultDisplay.textContent = message.message;
-                            if (message.success === true) {
-                                verificationResultDisplay.style.color = 'var(--vscode-terminal-ansiGreen)';
-                            } else if (message.success === false) {
-                                verificationResultDisplay.style.color = 'var(--vscode-terminal-ansiRed)';
-                            } else { // Still processing
-                                verificationResultDisplay.style.color = 'var(--vscode-foreground)';
-                            }
-                        }
-                    });
-
-                    
-                    function toggleAuthFields() {
-                        const authTypeValue = document.getElementById('authType').value;
-                        
-                        if (authTypeValue === 'apikey') {
-                            credentialsContainer.style.display = 'none';
-                            apikeyContainer.style.display = 'block';
-                            
-                            // Make API key required and reset credentials
-                            document.querySelector('.apikey-label').classList.add('required-label');
-                            document.querySelector('.apikey-input').classList.add(apikey.value ? 'required-valid' : 'required');
-                            
-                            document.querySelector('.username-label')?.classList.remove('required-label');
-                            document.querySelector('.username-input')?.classList.remove('required');
-                            document.querySelector('.username-input')?.classList.remove('required-valid');
-                            document.querySelector('.password-label')?.classList.remove('required-label');
-                            document.querySelector('.password-input')?.classList.remove('required');
-                            document.querySelector('.password-input')?.classList.remove('required-valid');
-                        } else {
-                            credentialsContainer.style.display = 'block';
-                            apikeyContainer.style.display = 'none';
-                            
-                            // Make username and password required, reset API key
-                            document.querySelector('.username-label').classList.add('required-label');
-                            document.querySelector('.username-input').classList.add(username.value ? 'required-valid' : 'required');
-                            document.querySelector('.password-label').classList.add('required-label');
-                            document.querySelector('.password-input').classList.add(passwordField.value ? 'required-valid' : 'required');
-                            
-                            document.querySelector('.apikey-label')?.classList.remove('required-label');
-                            document.querySelector('.apikey-input')?.classList.remove('required');
-                            document.querySelector('.apikey-input')?.classList.remove('required-valid');
-                        }
-                        
-                        validateAllFields();
-                    }
-                    
-                    function validateField(event) {
-                        const input = event.target;
-                        if (input.classList.contains('required') || input.classList.contains('required-valid')) {
-                            if (input.value) {
-                                input.classList.remove('required');
-                                input.classList.add('required-valid');
-                            } else {
-                                input.classList.remove('required-valid');
-                                input.classList.add('required');
-                            }
-                        }
-                    }
-                    
-                    function validateAllFields() {
-                        // Check environment name
-                        if (envName.value) {
-                            envName.classList.remove('required');
-                            envName.classList.add('required-valid');
-                        } else {
-                            envName.classList.remove('required-valid');
-                            envName.classList.add('required');
-                        }
-                        
-                        // Check hostname
-                        if (hostname.value) {
-                            hostname.classList.remove('required');
-                            hostname.classList.add('required-valid');
-                        } else {
-                            hostname.classList.remove('required-valid');
-                            hostname.classList.add('required');
-                        }
-                        
-                        // Check auth type specific fields
-                        const authTypeValue = authType.value;
-                        
-                        if (authTypeValue === 'apikey') {
-                            if (apikey.value) {
-                                apikey.classList.remove('required');
-                                apikey.classList.add('required-valid');
-                            } else {
-                                apikey.classList.remove('required-valid');
-                                apikey.classList.add('required');
-                            }
-                        } else {
-                            if (username.value) {
-                                username.classList.remove('required');
-                                username.classList.add('required-valid');
-                            } else {
-                                username.classList.remove('required-valid');
-                                username.classList.add('required');
-                            }
-                            
-                            if (passwordField.value) {
-                                passwordField.classList.remove('required');
-                                passwordField.classList.add('required-valid');
-                            } else {
-                                passwordField.classList.remove('required-valid');
-                                passwordField.classList.add('required');
-                            }
-                        }
-                    }
-
-                    function getFormData() {
-                        return {
-                            name: document.getElementById('envName').value,
-                            hostname: document.getElementById('hostname').value,
-                            port: parseInt(document.getElementById('port').value, 10) || 0,
-                            httpProtocol: document.getElementById('httpProtocol').value,
-                            authenticationType: document.getElementById('authType').value,
-                            username: document.getElementById('username')?.value || '',
-                            password: document.getElementById('password')?.value || '',
-                            apikey: document.getElementById('apikey')?.value || '',
-                            objectStructure: document.getElementById('objectStructure').value,
-                            appxml_objectStructure: document.getElementById('appxmlObjectStructure').value,
-                            logLevel: document.getElementById('logLevel').value,
-                            createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
-                            ignoreSslErrors: document.getElementById('ignoreSsl').checked,
-                            formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
-                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global',
-                            sslcertificate: document.getElementById('sslcertificate')?.value || ''
-                        };
-                    }
-
-                    function verifyCurrentSettings() {
-                        vscode.postMessage({ type: 'verifySettings', environment: getFormData() });
-                    }
-                    
-                    function saveEnvironment() {
-                        const environment = {
-                            name: document.getElementById('envName').value,
-                            hostname: document.getElementById('hostname').value,
-                            port: parseInt(document.getElementById('port').value, 10),
-                            httpProtocol: document.getElementById('httpProtocol').value,
-                            authenticationType: document.getElementById('authType').value,
-                            username: document.getElementById('username')?.value || '',
-                            password: document.getElementById('password')?.value || '',
-                            apikey: document.getElementById('apikey')?.value || '',
-                            objectStructure: document.getElementById('objectStructure').value,
-                            appxml_objectStructure: document.getElementById('appxmlObjectStructure').value,
-                            logLevel: document.getElementById('logLevel').value,
-                            createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
-                            ignoreSslErrors: document.getElementById('ignoreSsl').checked,
-                            formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
-                            scope: document.querySelector('input[name="scope"]:checked')?.value || 'global',
-                            sslcertificate: document.getElementById('sslcertificate')?.value || ''
-                        };
-                        
-                        // Validate required fields
-                        if (!environment.name) {
-                            vscode.postMessage({ 
-                                type: 'showError', 
-                                message: 'Environment name is required'
-                            });
-                            return;
-                        }
-                        
-                        if (!environment.hostname) {
-                            vscode.postMessage({ 
-                                type: 'showError', 
-                                message: 'Hostname is required'
-                            });
-                            return;
-                        }
-                        
-                        // Validate auth-specific fields
-                        if (environment.authenticationType === 'apikey') {
-                            if (!environment.apikey) {
-                                vscode.postMessage({ 
-                                    type: 'showError', 
-                                    message: 'API key is required when using API key authentication'
-                                });
-                                return;
-                            }
-                        } else {
-                            if (!environment.username) {
-                                vscode.postMessage({ 
-                                    type: 'showError', 
-                                    message: 'Username is required'
-                                });
-                                return;
-                            }
-                            
-                            if (!environment.password) {
-                                vscode.postMessage({ 
-                                    type: 'showError', 
-                                    message: 'Password is required'
-                                });
-                                return;
-                            }
-                        }
-                        
-                        vscode.postMessage({ 
-                            type: 'save', 
-                            environment: environment
-                        });
-                    }
-                    
-                    // Initialize form state
-                    toggleAuthFields();
-                })();
-            </script>
-        </body>
-        </html>`;
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="${codiconUri}" rel="stylesheet" />
+  <title>${this._environment ? 'Edit Environment' : 'Add Environment'}</title>
+  <style>
+    body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); padding: 0 12px 24px; }
+    #root { max-width: 960px; margin: 0 auto; }
+    button { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border:none; padding:6px 12px; border-radius:4px; cursor:pointer; }
+    button:hover { background: var(--vscode-button-hoverBackground); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script nonce="${nonce}">window.__ENV_EDITOR_BOOTSTRAP__ = ${bootstrapStr};</script>
+  <script nonce="${nonce}" src="${scriptUri}"></script>
+</body>
+</html>`;
+    }
+    
+    private _nonce(): string {
+        let text = '';
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        for (let i = 0; i < 32; i++) {
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return text;
     }
 }
