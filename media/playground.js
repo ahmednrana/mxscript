@@ -37808,7 +37808,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "connection", title: "Connection", icon: "plug", description: "Base connection details", order: 1 },
     { id: "auth", title: "Authentication", icon: "lock", description: "Credentials & authentication mode", order: 2 },
     { id: "behavior", title: "Behavior", icon: "gear", description: "Operational preferences and client behavior", order: 3 },
-    { id: "advanced", title: "Advanced", icon: "settings-gear", description: "Less frequently adjusted / advanced options", order: 4 }
+    { id: "advanced", title: "Advanced", icon: "server-process", description: "Less frequently adjusted / advanced options", order: 4 }
   ];
   var SETTINGS = [
     // Connection
@@ -37830,17 +37830,19 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "username", label: "Username", group: "auth", order: 3, type: "string", placeholder: "maxadmin", description: "Username for internal/LDAP authentication." },
     { id: "password", label: "Password", group: "auth", order: 4, type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
     // Behavior
-    { id: "ignoreSslErrors", label: "Ignore SSL Errors", group: "behavior", type: "boolean", defaultValue: true, description: "When enabled, SSL certificate errors will be ignored. Not recommended for production." },
-    { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXSCRIPT2", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts.", badges: [{ text: "Experimental", variant: "warning", title: "Experimental setting" }] },
+    { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXAPIAUTOSCRIPT", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts.", badges: [{ text: "Experimental", variant: "warning", title: "Experimental setting" }] },
     { id: "appxmlObjectStructure", label: "App XML Object Structure", group: "behavior", type: "select", placeholder: "MXL_APPS", defaultValue: "MXL_APPS", allowCustom: true, options: ["MXL_APPS", "MXL_APPS2"], description: "Object Structure used for App XML operations." },
     { id: "logLevel", label: "Log Level", group: "behavior", type: "select", defaultValue: "INFO", options: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"], description: "Controls the verbosity of logs produced by operations." },
     // Advanced
+    { id: "ignoreSslErrors", label: "Ignore SSL Errors", group: "advanced", type: "boolean", defaultValue: true, description: "When enabled, SSL certificate errors will be ignored. Not recommended for production." },
     { id: "sslcertificate", label: "SSL Certificate (PEM)", group: "advanced", type: "multiline", placeholder: "Paste PEM certificate here", description: "Optional custom CA certificate in PEM format." }
   ];
-  var sortByOrder = (arr) => [...arr].sort((a3, b3) => {
-    var _a6, _b2;
-    return ((_a6 = a3.order) != null ? _a6 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
-  });
+  var sortByOrder = (arr) => [...arr].sort(
+    (a3, b3) => {
+      var _a6, _b2;
+      return ((_a6 = a3.order) != null ? _a6 : Number.MAX_SAFE_INTEGER) - ((_b2 = b3.order) != null ? _b2 : Number.MAX_SAFE_INTEGER) || a3.id.localeCompare(b3.id);
+    }
+  );
   var buildInitialState = () => {
     var _a6;
     const state = {};
@@ -37857,6 +37859,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const [selectedId, setSelectedId] = (0, import_react76.useState)(null);
     const [saveStatus, setSaveStatus] = (0, import_react76.useState)("idle");
     const [lastError, setLastError] = (0, import_react76.useState)();
+    const [reveal, setReveal] = (0, import_react76.useState)({});
     const validateField = (0, import_react76.useCallback)((meta, value) => {
       if (meta.validate) return meta.validate(value);
       if (meta.required && (value === void 0 || value === null || value === "")) return `${meta.label} is required`;
@@ -37882,12 +37885,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       });
     }, [search, showOnlyInvalid, form, validateField]);
     const grouped = (0, import_react76.useMemo)(() => {
+      var _a7;
       const map = {};
       for (const s8 of filteredSettings) {
-        if (!map[s8.group]) map[s8.group] = [];
-        map[s8.group].push(s8);
+        (map[_a7 = s8.group] || (map[_a7] = [])).push(s8);
       }
-      for (const g2 of Object.keys(map)) map[g2] = sortByOrder(map[g2]);
       return map;
     }, [filteredSettings]);
     const groupsOrdered = (0, import_react76.useMemo)(() => sortByOrder(GROUPS), []);
@@ -38009,7 +38011,26 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
                 setSelectedId(meta.id);
                 focusControl(meta.id);
               },
-              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(VscodeTextfield_default, { type: "password", ...common })
+              children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                VscodeTextfield_default,
+                {
+                  type: reveal[meta.id] ? "text" : "password",
+                  ...common,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
+                    VscodeIcon_default,
+                    {
+                      slot: "content-after",
+                      name: reveal[meta.id] ? "eye-closed" : "eye",
+                      "action-icon": true,
+                      title: reveal[meta.id] ? "Hide value" : "Show value",
+                      onClick: (e12) => {
+                        e12.stopPropagation();
+                        setReveal((r8) => ({ ...r8, [meta.id]: !r8[meta.id] }));
+                      }
+                    }
+                  )
+                }
+              )
             },
             meta.id
           );
@@ -38212,6 +38233,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     .settings-label .label-help { font-size:12px; opacity:0.7; }
     .settings-control { display:flex; align-items:center; }
         @media (max-width: 640px){ .settings-grid { grid-template-columns: 1fr; } }
+        /* Optional: ensure icon is clickable */
+        vscode-textfield [action-icon] { cursor: pointer; }
       ` })
     ] });
   };

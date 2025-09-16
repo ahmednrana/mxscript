@@ -52,7 +52,7 @@ const GROUPS: GroupMeta[] = [
   { id: 'connection', title: 'Connection', icon: 'plug', description: 'Base connection details', order: 1 },
   { id: 'auth', title: 'Authentication', icon: 'lock', description: 'Credentials & authentication mode', order: 2 },
   { id: 'behavior', title: 'Behavior', icon: 'gear', description: 'Operational preferences and client behavior', order: 3 },
-  { id: 'advanced', title: 'Advanced', icon: 'settings-gear', description: 'Less frequently adjusted / advanced options', order: 4 }
+  { id: 'advanced', title: 'Advanced', icon: 'server-process', description: 'Less frequently adjusted / advanced options', order: 4 }
 ];
 
 const SETTINGS: SettingMeta[] = [
@@ -71,17 +71,21 @@ const SETTINGS: SettingMeta[] = [
   { id: 'username', label: 'Username', group: 'auth', order: 3, type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
   { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
   // Behavior
-  { id: 'ignoreSslErrors', label: 'Ignore SSL Errors', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
-  { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT','MXSCRIPT2','MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
+  { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT','MXAPIAUTOSCRIPT','MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
   { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS','MXL_APPS2'], description: 'Object Structure used for App XML operations.' },
   { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG','INFO','WARN','ERROR','FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
   // Advanced
+  { id: 'ignoreSslErrors', label: 'Ignore SSL Errors', group: 'advanced', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
   { id: 'sslcertificate', label: 'SSL Certificate (PEM)', group: 'advanced', type: 'multiline', placeholder: 'Paste PEM certificate here', description: 'Optional custom CA certificate in PEM format.' },
 ];
 
 // UI helper: filter & order
+// Only used for GROUP ordering. Individual settings keep declaration order.
 const sortByOrder = <T extends { order?: number; id: string }>(arr: T[]) =>
-  [...arr].sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) || a.id.localeCompare(b.id));
+  [...arr].sort((a, b) =>
+    (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) ||
+    a.id.localeCompare(b.id)
+  );
 
 interface FieldState {
   value: any;
@@ -107,6 +111,8 @@ export const EnvironmentEditor: React.FC = () => {
   // single layout (sections) only – tree view removed
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastError, setLastError] = useState<string | undefined>();
+  // Track reveal state per secret field (apiKey, password, etc.)
+  const [reveal, setReveal] = useState<Record<string, boolean>>({});
 
   // Derive validation on-demand
   const validateField = useCallback((meta: SettingMeta, value: any): string | undefined => {
@@ -137,12 +143,11 @@ export const EnvironmentEditor: React.FC = () => {
   }, [search, showOnlyInvalid, form, validateField]);
 
   const grouped = useMemo(() => {
+    // Preserve original declaration order from SETTINGS (after filtering)
     const map: Record<string, SettingMeta[]> = {};
     for (const s of filteredSettings) {
-      if (!map[s.group]) map[s.group] = [];
-      map[s.group].push(s);
+      (map[s.group] ||= []).push(s);
     }
-    for (const g of Object.keys(map)) map[g] = sortByOrder(map[g]);
     return map;
   }, [filteredSettings]);
 
@@ -268,7 +273,21 @@ export const EnvironmentEditor: React.FC = () => {
             error={invalid ? err : undefined}
             onSelect={() => { setSelectedId(meta.id); focusControl(meta.id); }}
           >
-            <VscodeTextfield type="password" {...common as any}></VscodeTextfield>
+            <VscodeTextfield
+              type={reveal[meta.id] ? 'text' : 'password'}
+              {...common as any}
+            >
+              <VscodeIcon
+                slot="content-after"
+                name={reveal[meta.id] ? 'eye-closed' : 'eye'}
+                action-icon
+                title={reveal[meta.id] ? 'Hide value' : 'Show value'}
+                onClick={(e: any) => {
+                  e.stopPropagation();
+                  setReveal(r => ({ ...r, [meta.id]: !r[meta.id] }));
+                }}
+              ></VscodeIcon>
+            </VscodeTextfield>
           </SettingItem>
         );
       case 'number':
@@ -466,6 +485,8 @@ export const EnvironmentEditor: React.FC = () => {
     .settings-label .label-help { font-size:12px; opacity:0.7; }
     .settings-control { display:flex; align-items:center; }
         @media (max-width: 640px){ .settings-grid { grid-template-columns: 1fr; } }
+        /* Optional: ensure icon is clickable */
+        vscode-textfield [action-icon] { cursor: pointer; }
       `}</style>
     </div>
   );
