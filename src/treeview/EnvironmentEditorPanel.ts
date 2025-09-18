@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { MaximoEnvironment } from '../webview/EnvironmentManager';
-import { MaximoClient, MaximoClientConfig, AuthType, LogLevel } from 'maximo-api-client'; // Added
-import { convertAuthType, getLogLevel } from '../utils/utils'; // Added
+import { verifyEnvironment } from '../service/Verification/verifyEnvironment';
 
 /**
  * WebView panel for adding/editing environments in the main editor area
@@ -159,41 +158,7 @@ export class EnvironmentEditorPanel {
     }
 
     private async _verifySettings(environmentData: MaximoEnvironment): Promise<{ success: boolean, message: string }> {
-        try {
-            const clientConfig: MaximoClientConfig = {
-                baseUrl: environmentData.hostname,
-                port: Number(environmentData.port),
-                ssl: environmentData.httpProtocol === 'https',
-                authType: convertAuthType(environmentData.authenticationType),
-                userName: environmentData.username,
-                password: environmentData.password,
-                apiKey: environmentData.apikey,
-                logLevel: getLogLevel(environmentData.logLevel),
-                leanMode: true,
-                autoAuthenticate: true,
-                rejectUnauthorized: !environmentData.ignoreSslErrors,
-                autoscriptObjectStructure: environmentData.objectStructure,
-                ca: environmentData.sslcertificate ? environmentData.sslcertificate : undefined,
-            };
-
-            const client = new MaximoClient(clientConfig);
-            // Attempt to get whoami info, which also implies successful authentication
-            const whoamiResponse = await client.oslcInfoService.getWhoAmI();
-
-            return {
-                success: true,
-                message: `Verification successful. Connected as: ${whoamiResponse.displayName || whoamiResponse.loginID}`
-            };
-        } catch (error: any) {
-            let errorMessage = 'Verification failed.';
-            if (error.message) {
-                errorMessage = `Verification failed: ${error.message}`;
-            }
-            else if (error.code) {
-                errorMessage = `Verification failed: ${error.code}`;
-            }
-            return { success: false, message: errorMessage };
-        }
+        return verifyEnvironment(environmentData);
     }
 
     private _getHtmlForWebview(): string {

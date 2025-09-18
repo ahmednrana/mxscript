@@ -10,8 +10,7 @@ import {
   VscodeDivider,
   VscodeTree
 } from '@vscode-elements/react-elements';
-import SettingItem from '../components/SettingItem';
-import MXSettingItem from './MXSettingItem';
+import MXSettingItem from '../components/MXSettingItem';
 import { SettingMeta, GroupMeta, FormState } from './settingTypes';
 
 // Architectural model: metadata drives layout & validation
@@ -32,17 +31,17 @@ const SETTINGS: SettingMeta[] = [
     validate: v => !v ? 'Hostname is required' : undefined
   },
   { id: 'port', label: 'Port', group: 'connection', type: 'number', placeholder: '443', defaultValue: 443, description: 'Port to connect to the Maximo server (usually 443 for HTTPS).' },
-  { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http','https'], description: 'Choose HTTPS for secure connections when supported.' },
-  { id: 'scope', label: 'Scope', group: 'connection', type: 'radio', defaultValue: 'global', options: ['global','workspace'], description: 'Whether this environment is stored globally or only for this workspace.' },
+  { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http', 'https'], description: 'Choose HTTPS for secure connections when supported.' },
+  { id: 'scope', label: 'Scope', group: 'connection', type: 'radio', defaultValue: 'global', options: ['global', 'workspace'], description: 'Whether this environment is stored globally or only for this workspace.' },
   // Auth
-  { id: 'authType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey','internal','ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
+  { id: 'authType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey', 'internal', 'ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
   { id: 'apikey', label: 'API Key', group: 'auth', order: 2, type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
   { id: 'username', label: 'Username', group: 'auth', order: 3, type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
   { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
   // Behavior
-  { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT','MXAPIAUTOSCRIPT','MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
-  { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS','MXL_APPS2'], description: 'Object Structure used for App XML operations.' },
-  { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG','INFO','WARN','ERROR','FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
+  { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT', 'MXAPIAUTOSCRIPT', 'MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts.', badges: [{ text: 'Experimental', variant: 'warning', title: 'Experimental setting' }] },
+  { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS', 'MXL_APPS2'], description: 'Object Structure used for App XML operations.' },
+  { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
   { id: 'createPythonFile', label: 'Create Python File for Jython Scripts', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, a Python file will be created for Jython scripts if necessary.' },
   { id: 'formatXmlOnDownload', label: 'Format XML on Download/Compare', group: 'behavior', type: 'boolean', defaultValue: true, description: 'Automatically format XML when downloading or comparing.' },
   // Advanced
@@ -91,6 +90,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   // single layout (sections) only – tree view removed
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastError, setLastError] = useState<string | undefined>();
+  const [verifying, setVerifying] = useState(false);
+  const [verifyResult, setVerifyResult] = useState<{ success: boolean | null; message: string } | null>(null);
   // Track reveal state per secret field (apiKey, password, etc.)
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
 
@@ -120,7 +121,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       if (!term) return true;
       return s.label.toLowerCase().includes(term) || s.id.toLowerCase().includes(term) || (s.description?.toLowerCase().includes(term));
     });
-  }, [search, showOnlyInvalid, form, validateField]);  const grouped = useMemo(() => {
+  }, [search, showOnlyInvalid, form, validateField]); const grouped = useMemo(() => {
     // Preserve original declaration order from SETTINGS (after filtering)
     const map: Record<string, SettingMeta[]> = {};
     for (const s of filteredSettings) {
@@ -209,7 +210,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
         await onSaveExternal(values, mode);
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 1200);
-      } catch (e:any) {
+      } catch (e: any) {
         setSaveStatus('error');
         setLastError(e?.message || 'Save failed');
       }
@@ -221,7 +222,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       await new Promise(r => setTimeout(r, 400));
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 1200);
-    } catch (e:any) {
+    } catch (e: any) {
       setSaveStatus('error');
       setLastError(e.message || 'Save failed');
     }
@@ -234,16 +235,16 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       setTimeout(() => {
         setForm(prev => {
           const next: FormState = { ...prev };
-            for (const s of SETTINGS) {
-              if (initialValues[s.id] !== undefined) {
-                next[s.id] = {
-                  ...next[s.id],
-                  value: initialValues[s.id],
-                  touched: false,
-                  error: validateField(s, initialValues[s.id])
-                };
-              }
+          for (const s of SETTINGS) {
+            if (initialValues[s.id] !== undefined) {
+              next[s.id] = {
+                ...next[s.id],
+                value: initialValues[s.id],
+                touched: false,
+                error: validateField(s, initialValues[s.id])
+              };
             }
+          }
           return next;
         });
       }, 0);
@@ -252,7 +253,96 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
     }
     setSaveStatus('idle');
     setLastError(undefined);
+    setVerifyResult(null);
   };
+
+  // Map current form state to environment object expected by extension host
+  const mapToEnvironmentPayload = () => {
+    const v = collectValues();
+    return {
+      // align with EnvironmentEditorPanel expectations
+      name: v.envName,
+      hostname: v.hostname,
+      port: v.port || (v.httpProtocol === 'https' ? 443 : 9080),
+      httpProtocol: v.httpProtocol,
+      authenticationType: v.authType,
+      username: v.username,
+      password: v.password,
+      apikey: v.apikey,
+      objectStructure: v.objectStructure,
+      appxml_objectStructure: v.appxmlObjectStructure,
+      logLevel: v.logLevel,
+      createPythonFileForJythonScripts: !!v.createPythonFile,
+      ignoreSslErrors: !!v.ignoreSsl,
+      formatXmlOnDownloadAndCompare: !!v.formatXmlOnDownload,
+      scope: v.scope,
+      sslcertificate: v.sslcertificate
+    };
+  };
+
+  // VS Code messaging helper (lazy acquisition + dev fallback)
+  const [vscodeApi, setVscodeApi] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (vscodeApi) return; // already set
+    try {
+      const api = (typeof window !== 'undefined' && (window as any).acquireVsCodeApi)
+        ? (window as any).acquireVsCodeApi()
+        : null;
+      if (api) {
+        setVscodeApi(api);
+      } else {
+        // Provide a lightweight dev stub so local preview doesn't crash
+        const devStub = {
+          postMessage: (msg: any) => console.log('[DEV][webview stub] postMessage ->', msg),
+          setState: (_: any) => { /* noop */ },
+          getState: () => undefined
+        };
+        setVscodeApi(devStub);
+        console.warn('[EnvironmentEditor] VS Code webview API not available – using dev stub. Running outside real VS Code webview?');
+      }
+    } catch (e) {
+      console.warn('[EnvironmentEditor] Failed to acquire VS Code API', e);
+    }
+  }, [vscodeApi]);
+
+  const cancel = () => {
+    vscodeApi?.postMessage({ type: 'cancel' });
+    // Optionally could clear form/local state
+  };
+
+  const verify = () => {
+    if (verifying) return;
+    setVerifying(true);
+    // Clear previous result until we get response
+    setVerifyResult({ success: null, message: 'Verifying settings...' });
+    vscodeApi?.postMessage({ type: 'verifySettings', environment: mapToEnvironmentPayload() });
+    // If using dev stub (not a real VS Code webview), surface info message
+    if (vscodeApi && !('acquireVsCodeApi' in window) && !(window as any).acquireVsCodeApi) {
+      setTimeout(() => {
+        setVerifying(false);
+        setVerifyResult({ success: false, message: 'Dev preview: verification requires running inside VS Code webview.' });
+      }, 400);
+    }
+  };
+
+  // Listen for verification results from extension host
+  useEffect(() => {
+    if (!vscodeApi) return; // wait until api (or stub) ready
+    const handler = (event: MessageEvent) => {
+      const msg = event.data;
+      if (msg?.type === 'verificationResult') {
+        setVerifying(false);
+        setVerifyResult({ success: msg.success, message: msg.message });
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [vscodeApi]);
+
+
+  // NOTE: Local verifySettings implementation removed to prevent duplication and heavy deps.
+  // Verification is performed by the extension host using the shared verifyEnvironment() service.
 
   const renderField = (meta: SettingMeta) => (
     <MXSettingItem
@@ -273,7 +363,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
 
   return (
     <div className="env-editor-root">
-  <h1 className="page-heading">{heading || (mode === 'edit' ? 'Edit Environment' : 'Add New Environment')}</h1>
+      <h1 className="page-heading">{heading || (mode === 'edit' ? 'Edit Environment' : 'Add New Environment')}</h1>
       <div className="toolbar-row">
         <div className="left">
           <VscodeTextfield placeholder="Search settings" value={search} onInput={(e: any) => setSearch(e.target.value)}>
@@ -283,22 +373,13 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
           </VscodeTextfield>
           <VscodeCheckbox checked={showOnlyInvalid} onInput={(e: any) => setShowOnlyInvalid(e.target.checked)}>Only invalid</VscodeCheckbox>
         </div>
-        <div className="right actions">
-          <VscodeButton onClick={reset}>
-            <VscodeIcon name="discard" slot="content-before"></VscodeIcon>Reset
-          </VscodeButton>
-          <VscodeButton onClick={onSave} disabled={saveStatus === 'saving'}>
-            <VscodeIcon name={saveStatus === 'saving' ? 'loading~spin' : saveStatus === 'saved' ? 'pass-filled' : 'save'} slot="content-before"></VscodeIcon>
-            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
-          </VscodeButton>
-        </div>
       </div>
       <div className="summary-row">
         <VscodeBadge variant={invalidCount ? 'counter' : 'default'}>{invalidCount} Invalid</VscodeBadge>
         {lastError && <span className="status-error"><VscodeIcon name="error" /> {lastError}</span>}
       </div>
       <div className="settings-like-layout">
-        {groupsOrdered.filter(g => (grouped[g.id]||[]).length).map((group, idx) => (
+        {groupsOrdered.filter(g => (grouped[g.id] || []).length).map((group, idx) => (
           <section key={group.id} className="settings-section">
             <h2 className="settings-subheading">
               {group.icon && (
@@ -330,7 +411,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
                 }
               }}
             >
-              {(grouped[group.id]||[]).map(m => (
+              {(grouped[group.id] || []).map(m => (
                 renderField(m)
               ))}
             </div>
@@ -338,8 +419,34 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
           </section>
         ))}
       </div>
+      <div className="action-row">
+        <div className="left">
+          <VscodeButton className="secondary-btn" onClick={cancel}>
+            <VscodeIcon name="close" slot="content-before"></VscodeIcon>Cancel
+          </VscodeButton>
+          <VscodeButton className="secondary-btn" onClick={reset}>
+            <VscodeIcon name="discard" slot="content-before"></VscodeIcon>Reset
+          </VscodeButton>
+          <VscodeButton className="secondary-btn" onClick={verify} disabled={verifying}>
+            <VscodeIcon name={verifying ? 'loading~spin' : (verifyResult?.success === true ? 'pass-filled' : verifyResult?.success === false ? 'error' : 'beaker')} slot="content-before"></VscodeIcon>
+            {verifying ? 'Verifying...' : 'Verify Settings'}
+          </VscodeButton>
+        </div>
+        <div className="right">
+          <VscodeButton onClick={onSave} disabled={saveStatus === 'saving'}>
+            <VscodeIcon name={saveStatus === 'saving' ? 'loading~spin' : saveStatus === 'saved' ? 'pass-filled' : 'save'} slot="content-before"></VscodeIcon>
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'saved' ? 'Saved' : 'Save'}
+          </VscodeButton>
+        </div>
+      </div>
+      {verifyResult && (
+        <div className={`verify-status ${verifyResult.success === true ? 'ok' : verifyResult.success === false ? 'fail' : 'pending'}`}>
+          <VscodeIcon name={verifyResult.success === true ? 'pass-filled' : verifyResult.success === false ? 'error' : 'loading~spin'} />
+          <span>{verifyResult.message}</span>
+        </div>
+      )}
       <style>{`
-        .env-editor-root { display:flex; flex-direction:column; gap:12px; font-size:13px; }
+        .env-editor-root { display:flex; flex-direction:column; gap:12px; font-size:13px; padding:16px 20px 28px 20px; box-sizing:border-box; }
         .page-heading { font-size:18px; font-weight:600; margin:6px 0 2px; }
         .toolbar-row { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
         .toolbar-row .left { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
@@ -373,7 +480,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
         /* (Removed native select override) */
     /* Settings-like */
     .settings-like-layout { display:flex; flex-direction:column; gap:24px; }
-    .settings-section { display:flex; flex-direction:column; gap:8px; }
+  .settings-section { display:flex; flex-direction:column; gap:8px; padding:12px 14px 16px; border-radius:6px; }
+  .settings-section:hover { background: var(--vscode-sideBarSectionHeader-background, transparent); }
     .settings-subheading { font-size:14px; font-weight:600; margin:0; display:flex; align-items:center; gap: 6px; }
   .settings-list { display:flex; flex-direction:column; gap:8px; outline: none; }
   .settings-row { display:grid; grid-template-columns: minmax(220px, 30%) 1fr; gap:16px; align-items:flex-start; padding:8px 6px; border-radius:4px; }
@@ -386,11 +494,25 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   .settings-list:focus .settings-row.is-selected .label-text { color: var(--vscode-list-activeSelectionForeground, inherit); }
     .settings-label { display:flex; flex-direction:column; gap:4px; }
     .settings-label .label-text { font-weight:500; }
+  .settings-label .setting-label-text { display:inline-flex; align-items:center; gap:4px; }
+  .req-indicator { color: var(--vscode-testing-iconFailed, var(--vscode-errorForeground)); font-weight:600; margin-left:2px; }
+  /* Provide tooltip for required fields via title attribute if needed */
+  .req-indicator::after { content:''; }
     .settings-label .label-help { font-size:12px; opacity:0.7; }
     .settings-control { display:flex; align-items:center; }
         @media (max-width: 640px){ .settings-grid { grid-template-columns: 1fr; } }
         /* Optional: ensure icon is clickable */
         vscode-textfield [action-icon] { cursor: pointer; }
+        .action-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--vscode-panel-border, rgba(255,255,255,0.1)); flex-wrap:wrap; gap:12px; }
+        .action-row .left, .action-row .right { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .verify-status { display:flex; align-items:center; gap:6px; font-size:12px; padding:4px 6px; border-radius:4px; background: var(--vscode-editorWidget-background); border:1px solid var(--vscode-editorWidget-border); }
+        .verify-status.ok { border-color: var(--vscode-testing-iconPassed, #3fb950); }
+        .verify-status.fail { border-color: var(--vscode-testing-iconFailed, var(--vscode-errorForeground)); }
+        .verify-status.pending { opacity:0.85; }
+        /* Secondary button styling mimic */
+        .secondary-btn { --btn-bg: var(--vscode-button-secondaryBackground, var(--vscode-button-background)); background: var(--btn-bg); }
+        .secondary-btn:hover { background: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground)); }
+        
       `}</style>
     </div>
   );
