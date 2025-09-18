@@ -95,12 +95,39 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   // Track reveal state per secret field (apiKey, password, etc.)
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
 
-  // Derive validation on-demand
-  const validateField = useCallback((meta: SettingMeta, value: any): string | undefined => {
+  // Derive validation on-demand (conditional required based on authType)
+  const validateField = useCallback((meta: SettingMeta, value: any, state?: FormState): string | undefined => {
+    const curr = state ?? form;
+    const authType = curr['authType']?.value || 'internal';
+
+    // Visibility helper mirrors UI visibility logic
+    const isVisible = (id: string) => {
+      if (id === 'apikey') return authType === 'apikey';
+      if (id === 'username' || id === 'password') return authType !== 'apikey';
+      return true;
+    };
+
+    // Specific conditional required rules
+    if (meta.id === 'apikey') {
+      if (authType === 'apikey' && (value === undefined || value === null || value === '')) {
+        return 'API Key is required';
+      }
+    }
+    if (meta.id === 'username' || meta.id === 'password') {
+      if (authType !== 'apikey' && (value === undefined || value === null || value === '')) {
+        return `${meta.label} is required`;
+      }
+    }
+
+    // Custom validator takes precedence
     if (meta.validate) return meta.validate(value);
-    if (meta.required && (value === undefined || value === null || value === '')) return `${meta.label} is required`;
+
+    // Base required when visible
+    if (meta.required && isVisible(meta.id) && (value === undefined || value === null || value === '')) {
+      return `${meta.label} is required`;
+    }
     return undefined;
-  }, []);
+  }, [form]);
 
   const invalidCount = useMemo(() => SETTINGS.reduce((acc, s) => {
     const err = validateField(s, form[s.id]?.value);
@@ -113,7 +140,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
 
     return SETTINGS.filter(s => {
       // Conditional visibility based on authentication type
-      if (s.id === 'authType') return true; // always show selector (was 'authenticationType')
+      if (s.id === 'authType') return !showOnlyInvalid; // hide authType when filtering invalid only
       if (s.id === 'apikey' && authType !== 'apikey') return false;
       if ((s.id === 'username' || s.id === 'password') && authType === 'apikey') return false;
 
@@ -371,7 +398,13 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
             {!!search && <VscodeIcon slot="content-after" name="close" action-icon onClick={() => setSearch('')}></VscodeIcon>}
             {search && <VscodeBadge slot="content-after" variant="counter">{filteredSettings.length}</VscodeBadge>}
           </VscodeTextfield>
-          <VscodeCheckbox checked={showOnlyInvalid} onInput={(e: any) => setShowOnlyInvalid(e.target.checked)}>Only invalid</VscodeCheckbox>
+          <VscodeCheckbox
+            checked={showOnlyInvalid}
+            onInput={(e: any) => setShowOnlyInvalid(!!e.target.checked)}
+            onChange={(e: any) => setShowOnlyInvalid(!!e.target.checked)}
+          >
+            Only invalid
+          </VscodeCheckbox>
         </div>
       </div>
       <div className="summary-row">

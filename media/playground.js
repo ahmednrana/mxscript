@@ -38121,11 +38121,31 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const [verifying, setVerifying] = (0, import_react76.useState)(false);
     const [verifyResult, setVerifyResult] = (0, import_react76.useState)(null);
     const [reveal, setReveal] = (0, import_react76.useState)({});
-    const validateField = (0, import_react76.useCallback)((meta, value) => {
+    const validateField = (0, import_react76.useCallback)((meta, value, state) => {
+      var _a7;
+      const curr = state != null ? state : form;
+      const authType = ((_a7 = curr["authType"]) == null ? void 0 : _a7.value) || "internal";
+      const isVisible = (id) => {
+        if (id === "apikey") return authType === "apikey";
+        if (id === "username" || id === "password") return authType !== "apikey";
+        return true;
+      };
+      if (meta.id === "apikey") {
+        if (authType === "apikey" && (value === void 0 || value === null || value === "")) {
+          return "API Key is required";
+        }
+      }
+      if (meta.id === "username" || meta.id === "password") {
+        if (authType !== "apikey" && (value === void 0 || value === null || value === "")) {
+          return `${meta.label} is required`;
+        }
+      }
       if (meta.validate) return meta.validate(value);
-      if (meta.required && (value === void 0 || value === null || value === "")) return `${meta.label} is required`;
+      if (meta.required && isVisible(meta.id) && (value === void 0 || value === null || value === "")) {
+        return `${meta.label} is required`;
+      }
       return void 0;
-    }, []);
+    }, [form]);
     const invalidCount = (0, import_react76.useMemo)(() => SETTINGS.reduce((acc, s8) => {
       var _a7;
       const err = validateField(s8, (_a7 = form[s8.id]) == null ? void 0 : _a7.value);
@@ -38137,7 +38157,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const authType = ((_a7 = form["authType"]) == null ? void 0 : _a7.value) || "internal";
       return SETTINGS.filter((s8) => {
         var _a8;
-        if (s8.id === "authType") return true;
+        if (s8.id === "authType") return !showOnlyInvalid;
         if (s8.id === "apikey" && authType !== "apikey") return false;
         if ((s8.id === "username" || s8.id === "password") && authType === "apikey") return false;
         if (showOnlyInvalid && !validateField(s8, form[s8.id].value)) return false;
@@ -38356,7 +38376,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           !!search && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeIcon_default, { slot: "content-after", name: "close", "action-icon": true, onClick: () => setSearch("") }),
           search && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeBadge_default, { slot: "content-after", variant: "counter", children: filteredSettings.length })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(VscodeCheckbox_default, { checked: showOnlyInvalid, onInput: (e12) => setShowOnlyInvalid(e12.target.checked), children: "Only invalid" })
+        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          VscodeCheckbox_default,
+          {
+            checked: showOnlyInvalid,
+            onInput: (e12) => setShowOnlyInvalid(!!e12.target.checked),
+            onChange: (e12) => setShowOnlyInvalid(!!e12.target.checked),
+            children: "Only invalid"
+          }
+        )
       ] }) }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "summary-row", children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(VscodeBadge_default, { variant: invalidCount ? "counter" : "default", children: [
