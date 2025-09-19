@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { VscodeCheckbox, VscodeIcon, VscodeTextfield, VscodeTextarea } from '@vscode-elements/react-elements';
 import SettingItem from './SettingItem';
 import { SettingMeta, FormState } from '../playground/settingTypes';
@@ -43,24 +43,25 @@ export const MXSettingItem: React.FC<MXSettingItemProps> = ({
     onInput: (e: any) => updateValue(meta.id, e.target.value)
   };
 
+  const selectElRef = useRef<any>(null);
+  useEffect(() => {
+    const el = selectElRef.current;
+    if (el) {
+      const handleChange = (e: any) => updateValue(meta.id, e.target.value);
+      el.addEventListener('change', handleChange);
+      el.addEventListener('vsc-change', handleChange);
+      return () => {
+        el.removeEventListener('change', handleChange);
+        el.removeEventListener('vsc-change', handleChange);
+      };
+    }
+  }, [meta.id, updateValue]);
+
   const selectElement = (
     <vscode-single-select
       value={state?.value}
       data-allow-custom={meta.allowCustom || undefined}
-      onInput={(e: any) => updateValue(meta.id, e.target.value)}
-      onChange={(e: any) => updateValue(meta.id, e.target.value)}
-      onSelect={(e: any) => updateValue(meta.id, e.target.value)}
-      ref={(el: any) => {
-        if (el) {
-          const handleChange = (e: any) => updateValue(meta.id, e.target.value);
-          el.addEventListener('change', handleChange);
-          el.addEventListener('vsc-change', handleChange);
-          return () => {
-            el.removeEventListener('change', handleChange);
-            el.removeEventListener('vsc-change', handleChange);
-          };
-        }
-      }}
+      ref={selectElRef}
     >
       {meta.options?.map(opt => (
         <vscode-option key={opt} value={opt}>{opt}</vscode-option>

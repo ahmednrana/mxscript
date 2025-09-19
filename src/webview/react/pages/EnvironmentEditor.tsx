@@ -11,7 +11,7 @@ import {
   VscodeTree
 } from '@vscode-elements/react-elements';
 import MXSettingItem from '../components/MXSettingItem';
-import { SettingMeta, GroupMeta, FormState } from './settingTypes';
+import { SettingMeta, GroupMeta, FormState } from '../playground/settingTypes';
 
 // Architectural model: metadata drives layout & validation
 const GROUPS: GroupMeta[] = [
@@ -156,11 +156,16 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   const groupsOrdered = useMemo(() => sortByOrder(GROUPS), []);
 
   const updateValue = (id: string, value: any) => {
+    console.log(`[updateValue] id: ${id}, value:`, value);
     setForm(f => {
       const newFormState = { ...f, [id]: { ...f[id], value, touched: true } };
       const meta = SETTINGS.find(s => s.id === id)!;
       const error = validateFieldWithState(meta, value, newFormState);
       newFormState[id].error = error;
+
+      console.log(`[updateValue:setForm] id: ${id}, old value:`, f[id]?.value, `new value:`, value);
+      console.log(`[updateValue:setForm] id: ${id}, new field state:`, newFormState[id]);
+
       return newFormState;
     });
   };
@@ -185,21 +190,20 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   // Rehydrate form when initialValues provided / changed (edit mode typically)
   useEffect(() => {
     if (!initialValues) return;
-
-    const rehydratedState = buildInitialState();
-    for (const s of SETTINGS) {
-      if (initialValues[s.id] !== undefined) {
-        rehydratedState[s.id] = {
-          ...rehydratedState[s.id],
-          value: initialValues[s.id],
-        };
+    setForm(prev => {
+      const next: FormState = { ...prev };
+      for (const s of SETTINGS) {
+        if (initialValues[s.id] !== undefined) {
+          next[s.id] = {
+            ...next[s.id],
+            value: initialValues[s.id],
+            // don't mark as touched yet
+            error: validateFieldWithState(s, initialValues[s.id], next) // Pass explicit state snapshot
+          };
+        }
       }
-    }
-    for (const s of SETTINGS) {
-        rehydratedState[s.id].error = validateFieldWithState(s, rehydratedState[s.id].value, rehydratedState);
-    }
-
-    setForm(rehydratedState);
+      return next;
+    });
   }, [initialValues, validateFieldWithState]);
 
   const collectValues = () => {
@@ -303,29 +307,27 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   const [vscodeApi, setVscodeApi] = useState<any | null>(null);
 
   useEffect(() => {
-    // This effect should only run once on mount to acquire the vscode api.
-    let api: any;
+    if (vscodeApi) return; // already set
     try {
-      api = (typeof window !== 'undefined' && (window as any).acquireVsCodeApi)
+      const api = (typeof window !== 'undefined' && (window as any).acquireVsCodeApi)
         ? (window as any).acquireVsCodeApi()
         : null;
+      if (api) {
+        setVscodeApi(api);
+      } else {
+        // Provide a lightweight dev stub so local preview doesn't crash
+        const devStub = {
+          postMessage: (msg: any) => console.log('[DEV][webview stub] postMessage ->', msg),
+          setState: (_: any) => { /* noop */ },
+          getState: () => undefined
+        };
+        setVscodeApi(devStub);
+        console.warn('[EnvironmentEditor] VS Code webview API not available – using dev stub. Running outside real VS Code webview?');
+      }
     } catch (e) {
-      console.warn('[EnvironmentEditor] Could not acquire VSCode API', e);
-      api = null;
+      console.warn('[EnvironmentEditor] Failed to acquire VS Code API', e);
     }
-
-    if (api) {
-      setVscodeApi(api);
-    } else {
-      const devStub = {
-        postMessage: (msg: any) => console.log('[DEV][webview stub] postMessage ->', msg),
-        setState: (_: any) => { /* noop */ },
-        getState: () => undefined
-      };
-      setVscodeApi(devStub);
-      console.warn('[EnvironmentEditor] VS Code webview API not available – using dev stub.');
-    }
-  }, []);
+  }, [vscodeApi]);
 
   const cancel = () => {
     vscodeApi?.postMessage({ type: 'cancel' });

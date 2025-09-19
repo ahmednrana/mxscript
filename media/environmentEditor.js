@@ -1093,11 +1093,11 @@
             var dispatcher = resolveDispatcher();
             return dispatcher.useReducer(reducer, initialArg, init);
           }
-          function useRef(initialValue) {
+          function useRef2(initialValue) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useRef(initialValue);
           }
-          function useEffect3(create, deps) {
+          function useEffect4(create, deps) {
             var dispatcher = resolveDispatcher();
             return dispatcher.useEffect(create, deps);
           }
@@ -1880,14 +1880,14 @@
           exports.useContext = useContext;
           exports.useDebugValue = useDebugValue;
           exports.useDeferredValue = useDeferredValue;
-          exports.useEffect = useEffect3;
+          exports.useEffect = useEffect4;
           exports.useId = useId;
           exports.useImperativeHandle = useImperativeHandle;
           exports.useInsertionEffect = useInsertionEffect;
           exports.useLayoutEffect = useLayoutEffect;
           exports.useMemo = useMemo2;
           exports.useReducer = useReducer;
-          exports.useRef = useRef;
+          exports.useRef = useRef2;
           exports.useState = useState2;
           exports.useSyncExternalStore = useSyncExternalStore;
           exports.useTransition = useTransition;
@@ -2384,9 +2384,9 @@
           if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
             __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
           }
-          var React39 = require_react();
+          var React40 = require_react();
           var Scheduler = require_scheduler();
-          var ReactSharedInternals = React39.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React40.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           var suppressWarning = false;
           function setSuppressWarning(newSuppressWarning) {
             {
@@ -3993,7 +3993,7 @@
             {
               if (props.value == null) {
                 if (typeof props.children === "object" && props.children !== null) {
-                  React39.Children.forEach(props.children, function(child) {
+                  React40.Children.forEach(props.children, function(child) {
                     if (child == null) {
                       return;
                     }
@@ -23589,7 +23589,7 @@
       if (true) {
         (function() {
           "use strict";
-          var React39 = require_react();
+          var React40 = require_react();
           var REACT_ELEMENT_TYPE = Symbol.for("react.element");
           var REACT_PORTAL_TYPE = Symbol.for("react.portal");
           var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -23615,7 +23615,7 @@
             }
             return null;
           }
-          var ReactSharedInternals = React39.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+          var ReactSharedInternals = React40.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
           function error(format) {
             {
               {
@@ -24491,7 +24491,7 @@
   var import_client = __toESM(require_client());
 
   // src/webview/react/playground/EnvironmentEditor.tsx
-  var import_react76 = __toESM(require_react());
+  var import_react77 = __toESM(require_react());
 
   // src/webview/react/hooks/useSyncSelectValue.ts
   var import_react = __toESM(require_react());
@@ -35710,6 +35710,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     displayName: "VscodeTreeItem"
   });
 
+  // src/webview/react/components/MXSettingItem.tsx
+  var import_react76 = __toESM(require_react());
+
   // src/webview/react/components/SettingItem.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime());
   var SettingItem = ({
@@ -35839,25 +35842,25 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       value: state == null ? void 0 : state.value,
       onInput: (e12) => updateValue(meta.id, e12.target.value)
     };
+    const selectElRef = (0, import_react76.useRef)(null);
+    (0, import_react76.useEffect)(() => {
+      const el = selectElRef.current;
+      if (el) {
+        const handleChange = (e12) => updateValue(meta.id, e12.target.value);
+        el.addEventListener("change", handleChange);
+        el.addEventListener("vsc-change", handleChange);
+        return () => {
+          el.removeEventListener("change", handleChange);
+          el.removeEventListener("vsc-change", handleChange);
+        };
+      }
+    }, [meta.id, updateValue]);
     const selectElement = /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(
       "vscode-single-select",
       {
         value: state == null ? void 0 : state.value,
         "data-allow-custom": meta.allowCustom || void 0,
-        onInput: (e12) => updateValue(meta.id, e12.target.value),
-        onChange: (e12) => updateValue(meta.id, e12.target.value),
-        onSelect: (e12) => updateValue(meta.id, e12.target.value),
-        ref: (el) => {
-          if (el) {
-            const handleChange = (e12) => updateValue(meta.id, e12.target.value);
-            el.addEventListener("change", handleChange);
-            el.addEventListener("vsc-change", handleChange);
-            return () => {
-              el.removeEventListener("change", handleChange);
-              el.removeEventListener("vsc-change", handleChange);
-            };
-          }
-        },
+        ref: selectElRef,
         children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
       }
     );
@@ -36125,19 +36128,19 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     heading
   }) => {
     var _a6;
-    const [form, setForm] = (0, import_react76.useState)(() => buildInitialState());
-    const [search, setSearch] = (0, import_react76.useState)("");
-    const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react76.useState)(false);
-    const [selectedId, setSelectedId] = (0, import_react76.useState)(null);
-    const [saveStatus, setSaveStatus] = (0, import_react76.useState)("idle");
-    const [lastError, setLastError] = (0, import_react76.useState)();
-    const [verifying, setVerifying] = (0, import_react76.useState)(false);
-    const [verifyResult, setVerifyResult] = (0, import_react76.useState)(null);
-    const [reveal, setReveal] = (0, import_react76.useState)({});
-    const validateField = (0, import_react76.useCallback)((meta, value, state) => {
+    console.log("[render] EnvironmentEditor rendering...");
+    const [form, setForm] = (0, import_react77.useState)(() => buildInitialState());
+    const [search, setSearch] = (0, import_react77.useState)("");
+    const [showOnlyInvalid, setShowOnlyInvalid] = (0, import_react77.useState)(false);
+    const [selectedId, setSelectedId] = (0, import_react77.useState)(null);
+    const [saveStatus, setSaveStatus] = (0, import_react77.useState)("idle");
+    const [lastError, setLastError] = (0, import_react77.useState)();
+    const [verifying, setVerifying] = (0, import_react77.useState)(false);
+    const [verifyResult, setVerifyResult] = (0, import_react77.useState)(null);
+    const [reveal, setReveal] = (0, import_react77.useState)({});
+    const validateFieldWithState = (0, import_react77.useCallback)((meta, value, snapshot) => {
       var _a7;
-      const curr = state != null ? state : form;
-      const authType = ((_a7 = curr["authType"]) == null ? void 0 : _a7.value) || "internal";
+      const authType = ((_a7 = snapshot["authType"]) == null ? void 0 : _a7.value) || "internal";
       const isVisible = (id) => {
         if (id === "apikey") return authType === "apikey";
         if (id === "username" || id === "password") return authType !== "apikey";
@@ -36158,13 +36161,14 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         return `${meta.label} is required`;
       }
       return void 0;
-    }, [form]);
-    const invalidCount = (0, import_react76.useMemo)(() => SETTINGS.reduce((acc, s8) => {
+    }, []);
+    const validateField = (0, import_react77.useCallback)((meta, value, state) => validateFieldWithState(meta, value, state != null ? state : form), [form, validateFieldWithState]);
+    const invalidCount = (0, import_react77.useMemo)(() => SETTINGS.reduce((acc, s8) => {
       var _a7;
       const err = validateField(s8, (_a7 = form[s8.id]) == null ? void 0 : _a7.value);
       return acc + (err ? 1 : 0);
     }, 0), [form, validateField]);
-    const filteredSettings = (0, import_react76.useMemo)(() => {
+    const filteredSettings = (0, import_react77.useMemo)(() => {
       var _a7;
       const term = search.trim().toLowerCase();
       const authType = ((_a7 = form["authType"]) == null ? void 0 : _a7.value) || "internal";
@@ -36178,7 +36182,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         return s8.label.toLowerCase().includes(term) || s8.id.toLowerCase().includes(term) || ((_a8 = s8.description) == null ? void 0 : _a8.toLowerCase().includes(term));
       });
     }, [search, showOnlyInvalid, form, validateField]);
-    const grouped = (0, import_react76.useMemo)(() => {
+    const grouped = (0, import_react77.useMemo)(() => {
       var _a7;
       const map = {};
       for (const s8 of filteredSettings) {
@@ -36186,14 +36190,17 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
       return map;
     }, [filteredSettings]);
-    const groupsOrdered = (0, import_react76.useMemo)(() => sortByOrder(GROUPS), []);
+    const groupsOrdered = (0, import_react77.useMemo)(() => sortByOrder(GROUPS), []);
     const updateValue = (id, value) => {
-      setForm((f3) => ({
-        ...f3,
-        [id]: { value, touched: true, error: validateField(SETTINGS.find((s8) => s8.id === id), value) }
-      }));
+      setForm((f3) => {
+        const newFormState = { ...f3, [id]: { ...f3[id], value, touched: true } };
+        const meta = SETTINGS.find((s8) => s8.id === id);
+        const error = validateFieldWithState(meta, value, newFormState);
+        newFormState[id].error = error;
+        return newFormState;
+      });
     };
-    (0, import_react76.useEffect)(() => {
+    (0, import_react77.useEffect)(() => {
       var _a7;
       if (selectedId && filteredSettings.some((s8) => s8.id === selectedId)) return;
       const firstGroup = groupsOrdered.find((g2) => (grouped[g2.id] || []).length);
@@ -36207,23 +36214,22 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const focusable = container.querySelector('input, textarea, select, button, vscode-textfield, vscode-text-area, vscode-single-select, [tabindex]:not([tabindex="-1"])');
       (_b2 = (_a7 = focusable || container).focus) == null ? void 0 : _b2.call(_a7);
     };
-    (0, import_react76.useEffect)(() => {
+    (0, import_react77.useEffect)(() => {
       if (!initialValues2) return;
-      setForm((prev) => {
-        const next = { ...prev };
-        for (const s8 of SETTINGS) {
-          if (initialValues2[s8.id] !== void 0) {
-            next[s8.id] = {
-              ...next[s8.id],
-              value: initialValues2[s8.id],
-              // don't mark as touched yet
-              error: validateField(s8, initialValues2[s8.id])
-            };
-          }
+      const rehydratedState = buildInitialState();
+      for (const s8 of SETTINGS) {
+        if (initialValues2[s8.id] !== void 0) {
+          rehydratedState[s8.id] = {
+            ...rehydratedState[s8.id],
+            value: initialValues2[s8.id]
+          };
         }
-        return next;
-      });
-    }, [initialValues2, validateField]);
+      }
+      for (const s8 of SETTINGS) {
+        rehydratedState[s8.id].error = validateFieldWithState(s8, rehydratedState[s8.id].value, rehydratedState);
+      }
+      setForm(rehydratedState);
+    }, [initialValues2, validateFieldWithState]);
     const collectValues = () => {
       var _a7;
       const result = {};
@@ -36271,27 +36277,20 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     };
     const reset = () => {
+      console.log("[reset] Resetting form...");
+      const initialState = buildInitialState();
       if (initialValues2) {
-        setForm(buildInitialState());
-        setTimeout(() => {
-          setForm((prev) => {
-            const next = { ...prev };
-            for (const s8 of SETTINGS) {
-              if (initialValues2[s8.id] !== void 0) {
-                next[s8.id] = {
-                  ...next[s8.id],
-                  value: initialValues2[s8.id],
-                  touched: false,
-                  error: validateField(s8, initialValues2[s8.id])
-                };
-              }
-            }
-            return next;
-          });
-        }, 0);
-      } else {
-        setForm(buildInitialState());
+        for (const s8 of SETTINGS) {
+          if (initialValues2[s8.id] !== void 0) {
+            initialState[s8.id] = {
+              value: initialValues2[s8.id],
+              touched: false,
+              error: validateFieldWithState(s8, initialValues2[s8.id], initialState)
+            };
+          }
+        }
       }
+      setForm(initialState);
       setSaveStatus("idle");
       setLastError(void 0);
       setVerifyResult(null);
@@ -36318,27 +36317,28 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         sslcertificate: v3.sslcertificate
       };
     };
-    const [vscodeApi, setVscodeApi] = (0, import_react76.useState)(null);
-    (0, import_react76.useEffect)(() => {
-      if (vscodeApi) return;
+    const [vscodeApi, setVscodeApi] = (0, import_react77.useState)(null);
+    (0, import_react77.useEffect)(() => {
+      let api;
       try {
-        const api = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
-        if (api) {
-          setVscodeApi(api);
-        } else {
-          const devStub = {
-            postMessage: (msg) => console.log("[DEV][webview stub] postMessage ->", msg),
-            setState: (_2) => {
-            },
-            getState: () => void 0
-          };
-          setVscodeApi(devStub);
-          console.warn("[EnvironmentEditor] VS Code webview API not available \u2013 using dev stub. Running outside real VS Code webview?");
-        }
+        api = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
       } catch (e12) {
-        console.warn("[EnvironmentEditor] Failed to acquire VS Code API", e12);
+        console.warn("[EnvironmentEditor] Could not acquire VSCode API", e12);
+        api = null;
       }
-    }, [vscodeApi]);
+      if (api) {
+        setVscodeApi(api);
+      } else {
+        const devStub = {
+          postMessage: (msg) => console.log("[DEV][webview stub] postMessage ->", msg),
+          setState: (_2) => {
+          },
+          getState: () => void 0
+        };
+        setVscodeApi(devStub);
+        console.warn("[EnvironmentEditor] VS Code webview API not available \u2013 using dev stub.");
+      }
+    }, []);
     const cancel = () => {
       vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "cancel" });
     };
@@ -36354,7 +36354,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }, 400);
       }
     };
-    (0, import_react76.useEffect)(() => {
+    (0, import_react77.useEffect)(() => {
       if (!vscodeApi) return;
       const handler = (event) => {
         const msg = event.data;
@@ -36393,7 +36393,6 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           VscodeCheckbox_default,
           {
             checked: showOnlyInvalid,
-            onInput: (e12) => setShowOnlyInvalid(!!e12.target.checked),
             onChange: (e12) => setShowOnlyInvalid(!!e12.target.checked),
             children: "Only invalid"
           }
