@@ -11,7 +11,7 @@ import {
   VscodeTree
 } from '@vscode-elements/react-elements';
 import MXSettingItem from '../components/MXSettingItem';
-import { SettingMeta, GroupMeta, FormState } from '../playground/settingTypes';
+import { SettingMeta, GroupMeta, FormState } from '../types/settingTypes';
 
 // Architectural model: metadata drives layout & validation
 const GROUPS: GroupMeta[] = [

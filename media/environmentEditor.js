@@ -24490,7 +24490,7 @@
   // src/webview/react/playground/environmentEditorEntry.tsx
   var import_client = __toESM(require_client());
 
-  // src/webview/react/playground/EnvironmentEditor.tsx
+  // src/webview/react/pages/EnvironmentEditor.tsx
   var import_react77 = __toESM(require_react());
 
   // src/webview/react/hooks/useSyncSelectValue.ts
@@ -36068,7 +36068,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   };
   var MXSettingItem_default = MXSettingItem;
 
-  // src/webview/react/playground/EnvironmentEditor.tsx
+  // src/webview/react/pages/EnvironmentEditor.tsx
   var import_jsx_runtime3 = __toESM(require_jsx_runtime());
   var GROUPS = [
     { id: "connection", title: "Connection", icon: "plug", description: "Base connection details", order: 1 },
@@ -36192,11 +36192,15 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }, [filteredSettings]);
     const groupsOrdered = (0, import_react77.useMemo)(() => sortByOrder(GROUPS), []);
     const updateValue = (id, value) => {
+      console.log(`[updateValue] id: ${id}, value:`, value);
       setForm((f3) => {
+        var _a7;
         const newFormState = { ...f3, [id]: { ...f3[id], value, touched: true } };
         const meta = SETTINGS.find((s8) => s8.id === id);
         const error = validateFieldWithState(meta, value, newFormState);
         newFormState[id].error = error;
+        console.log(`[updateValue:setForm] id: ${id}, old value:`, (_a7 = f3[id]) == null ? void 0 : _a7.value, `new value:`, value);
+        console.log(`[updateValue:setForm] id: ${id}, new field state:`, newFormState[id]);
         return newFormState;
       });
     };
@@ -36216,19 +36220,21 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     };
     (0, import_react77.useEffect)(() => {
       if (!initialValues2) return;
-      const rehydratedState = buildInitialState();
-      for (const s8 of SETTINGS) {
-        if (initialValues2[s8.id] !== void 0) {
-          rehydratedState[s8.id] = {
-            ...rehydratedState[s8.id],
-            value: initialValues2[s8.id]
-          };
+      setForm((prev) => {
+        const next = { ...prev };
+        for (const s8 of SETTINGS) {
+          if (initialValues2[s8.id] !== void 0) {
+            next[s8.id] = {
+              ...next[s8.id],
+              value: initialValues2[s8.id],
+              // don't mark as touched yet
+              error: validateFieldWithState(s8, initialValues2[s8.id], next)
+              // Pass explicit state snapshot
+            };
+          }
         }
-      }
-      for (const s8 of SETTINGS) {
-        rehydratedState[s8.id].error = validateFieldWithState(s8, rehydratedState[s8.id].value, rehydratedState);
-      }
-      setForm(rehydratedState);
+        return next;
+      });
     }, [initialValues2, validateFieldWithState]);
     const collectValues = () => {
       var _a7;
@@ -36319,26 +36325,25 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     };
     const [vscodeApi, setVscodeApi] = (0, import_react77.useState)(null);
     (0, import_react77.useEffect)(() => {
-      let api;
+      if (vscodeApi) return;
       try {
-        api = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
+        const api = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
+        if (api) {
+          setVscodeApi(api);
+        } else {
+          const devStub = {
+            postMessage: (msg) => console.log("[DEV][webview stub] postMessage ->", msg),
+            setState: (_2) => {
+            },
+            getState: () => void 0
+          };
+          setVscodeApi(devStub);
+          console.warn("[EnvironmentEditor] VS Code webview API not available \u2013 using dev stub. Running outside real VS Code webview?");
+        }
       } catch (e12) {
-        console.warn("[EnvironmentEditor] Could not acquire VSCode API", e12);
-        api = null;
+        console.warn("[EnvironmentEditor] Failed to acquire VS Code API", e12);
       }
-      if (api) {
-        setVscodeApi(api);
-      } else {
-        const devStub = {
-          postMessage: (msg) => console.log("[DEV][webview stub] postMessage ->", msg),
-          setState: (_2) => {
-          },
-          getState: () => void 0
-        };
-        setVscodeApi(devStub);
-        console.warn("[EnvironmentEditor] VS Code webview API not available \u2013 using dev stub.");
-      }
-    }, []);
+    }, [vscodeApi]);
     const cancel = () => {
       vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "cancel" });
     };

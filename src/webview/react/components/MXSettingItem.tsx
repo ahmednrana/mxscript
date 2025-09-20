@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { VscodeCheckbox, VscodeIcon, VscodeTextfield, VscodeTextarea } from '@vscode-elements/react-elements';
 import SettingItem from './SettingItem';
-import { SettingMeta, FormState } from '../playground/settingTypes';
+import { SettingMeta, FormState } from '../types/settingTypes';
 
 export interface MXSettingItemProps {
   meta: SettingMeta;
