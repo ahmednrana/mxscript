@@ -23,7 +23,7 @@
         },
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "^\\[mxscript\\] Webview playground watch started$",
+          "beginsPattern": "^\\[mxscript\\] Webview environment editor watch started$",
           "endsPattern": "^\\[watch\\] build finished, watching for changes...$"
         }
       }

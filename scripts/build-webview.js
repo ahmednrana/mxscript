@@ -1,4 +1,3 @@
-// Enhanced build script for React playground webview with optional watch mode
 const esbuild = require('esbuild');
 const path = require('path');
 const fs = require('fs');

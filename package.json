@@ -49,7 +49,6 @@
     "onCommand:mxscript.downloadall",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
-    "onCommand:mxscript.openPlayground",
     "onView:maximoEnvironments",
     "onCommand:mxscript.downloadallappxml"
   ],
@@ -120,12 +119,6 @@
         "title": "Set as Active Environment",
         "icon": "$(check)",
         "category": "Maximo [mxscript]"
-      },
-      {
-        "command": "mxscript.openPlayground",
-        "title": "Open React Playground (Experimental)",
-        "category": "Maximo [mxscript]",
-        "icon": "$(beaker)"
       }
     ],
     "configuration": {
@@ -270,11 +263,6 @@
           "command": "maximoEnvironments.addEnvironment",
           "when": "view == maximoEnvironments",
           "group": "navigation"
-        },
-        {
-          "command": "mxscript.openPlayground",
-          "when": "view == maximoEnvironments",
-          "group": "navigation@2"
         }
       ],
       "view/item/context": [

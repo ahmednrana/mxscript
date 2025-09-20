@@ -1,4 +1,3 @@
-// JSX intrinsic elements for VS Code custom elements we use in playground
 // Relaxed any typing for quick experimentation.
 import React from 'react';
 
