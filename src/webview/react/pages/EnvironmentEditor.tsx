@@ -5,12 +5,9 @@ import {
   VscodeBadge,
   VscodeIcon,
   VscodeCheckbox,
-  VscodeTextfield,
-  VscodeTextarea,
-  VscodeDivider,
-  VscodeTree
+  VscodeTextfield
 } from '@vscode-elements/react-elements';
-import MXSettingItem from '../components/MXSettingItem';
+import SettingsGroup from '../components/SettingsGroup';
 import { SettingMeta, GroupMeta, FormState } from '../types/settingTypes';
 
 // Architectural model: metadata drives layout & validation
@@ -364,87 +361,41 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   }, [vscodeApi]);
 
 
-  // NOTE: Local verifySettings implementation removed to prevent duplication and heavy deps.
-  // Verification is performed by the extension host using the shared verifyEnvironment() service.
-
-  const renderField = (meta: SettingMeta) => (
-    <MXSettingItem
-      key={meta.id}
-      meta={meta}
-      form={form}
-      selectedId={selectedId}
-      reveal={reveal}
-      onSelect={(id) => setSelectedId(id)}
-      updateValue={updateValue}
-      focusControl={focusControl}
-      setReveal={setReveal}
-    />
-  );
-
   // Sync custom select (authenticationType) with state reliably
   useSyncSelectValue('authType', form['authType']?.value, (val) => updateValue('authType', val));
 
   return (
     <div className="env-editor-root">
       <h1 className="page-heading">{heading || (mode === 'edit' ? 'Edit Environment' : 'Add New Environment')}</h1>
+
       <div className="toolbar-row">
         <div className="left">
           <VscodeTextfield placeholder="Search settings" value={search} onInput={(e: any) => setSearch(e.target.value)}>
             <VscodeIcon slot="content-before" name="search"></VscodeIcon>
             {!!search && <VscodeIcon slot="content-after" name="close" action-icon onClick={() => setSearch('')}></VscodeIcon>}
-            {search && <VscodeBadge slot="content-after" variant="counter">{filteredSettings.length}</VscodeBadge>}
           </VscodeTextfield>
-          <VscodeCheckbox
-            checked={showOnlyInvalid}
-            onChange={(e: any) => setShowOnlyInvalid(!!e.target.checked)}
-          >
-            Only invalid
+          <VscodeCheckbox checked={showOnlyInvalid} onChange={(e: any) => setShowOnlyInvalid(!!e.target.checked)}>
+            Show only invalid fields
           </VscodeCheckbox>
+          <VscodeBadge variant={invalidCount ? 'counter' : 'default'}>{invalidCount} Invalid</VscodeBadge>
         </div>
       </div>
-      <div className="summary-row">
-        <VscodeBadge variant={invalidCount ? 'counter' : 'default'}>{invalidCount} Invalid</VscodeBadge>
-        {lastError && <span className="status-error"><VscodeIcon name="error" /> {lastError}</span>}
-      </div>
+
       <div className="settings-like-layout">
         {groupsOrdered.filter(g => (grouped[g.id] || []).length).map((group, idx) => (
-          <section key={group.id} className="settings-section">
-            <h2 className="settings-subheading">
-              {group.icon && (
-                <VscodeIcon name={group.icon} />
-              )}
-              <span>{group.title}</span>
-            </h2>
-            {group.description && <div className="section-description">{group.description}</div>}
-            <div
-              className="settings-list"
-              role="list"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                const ids = (grouped[group.id] || []).map(s => s.id);
-                if (!ids.length) return;
-                let idxSel = selectedId ? ids.indexOf(selectedId) : -1;
-                if (idxSel === -1) idxSel = 0;
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  const next = Math.min(idxSel + 1, ids.length - 1);
-                  setSelectedId(ids[next]);
-                } else if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  const prev = Math.max(idxSel - 1, 0);
-                  setSelectedId(ids[prev]);
-                } else if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  if (selectedId && ids.includes(selectedId)) focusControl(selectedId);
-                }
-              }}
-            >
-              {(grouped[group.id] || []).map(m => (
-                renderField(m)
-              ))}
-            </div>
-            {idx < groupsOrdered.length - 1 && <VscodeDivider />}
-          </section>
+          <SettingsGroup
+            key={group.id}
+            group={group}
+            settings={grouped[group.id] || []}
+            isLast={idx === groupsOrdered.length - 1}
+            form={form}
+            selectedId={selectedId}
+            reveal={reveal}
+            onSelect={setSelectedId}
+            updateValue={updateValue}
+            focusControl={focusControl}
+            setReveal={setReveal}
+          />
         ))}
       </div>
       <div className="action-row">
@@ -460,6 +411,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
             {verifying ? 'Verifying...' : 'Verify Settings'}
           </VscodeButton>
         </div>
+        {lastError && <span className="status-error"><VscodeIcon name="error" /> {lastError}</span>}
         <div className="right">
           <VscodeButton onClick={onSave} disabled={saveStatus === 'saving'}>
             <VscodeIcon name={saveStatus === 'saving' ? 'loading~spin' : saveStatus === 'saved' ? 'pass-filled' : 'save'} slot="content-before"></VscodeIcon>
@@ -478,10 +430,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
         .page-heading { font-size:18px; font-weight:600; margin:6px 0 2px; }
         .toolbar-row { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
         .toolbar-row .left { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-        .toolbar-row .right { display:flex; gap:8px; }
-  /* view toggle removed */
-        .summary-row { display:flex; align-items:center; gap:12px; padding:4px 2px; }
-        .status-error { color: var(--vscode-errorForeground); display:flex; align-items:center; gap:4px; }
+        .toolbar-row .left vscode-checkbox { white-space: nowrap; }
+        .status-error { color: var(--vscode-errorForeground); display:flex; align-items:center; gap:4px; font-size: 12px; }
   /* grid layout removed */
   .setting-item { display:flex; flex-direction:column; gap:4px; position:relative; }
         .setting-item.invalid .field-label { color: var(--vscode-errorForeground); }
@@ -494,7 +444,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   /* Sections layout removed */
         .section-description { font-size:12px; opacity:0.7; }
   /* tree layout removed */
-        /* Helpers */
+        /* --- Helpers --- */
         .form-helper { font-size:11px; opacity:0.65; }
         /* Control sizing: make inputs and dropdowns match */
         vscode-single-select { width:100%; }
@@ -505,13 +455,11 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
           height:26px;
         }
         .select.setting-item { min-width:200px; }
-        /* (Removed native select override) */
-    /* Settings-like */
+    /* --- Settings-like Layout --- */
     .settings-like-layout { display:flex; flex-direction:column; gap:24px; }
-  .settings-section { display:flex; flex-direction:column; gap:8px; padding:12px 14px 16px; border-radius:6px; }
-  .settings-section:hover { background: var(--vscode-sideBarSectionHeader-background, transparent); }
+  .settings-section { display:flex; flex-direction:column; gap:8px; }
     .settings-subheading { font-size:14px; font-weight:600; margin:0; display:flex; align-items:center; gap: 6px; }
-  .settings-list { display:flex; flex-direction:column; gap:8px; outline: none; }
+  .settings-list { display:flex; flex-direction:column; gap:8px; outline: none; border-radius: 4px; }
   .settings-row { display:grid; grid-template-columns: minmax(220px, 30%) 1fr; gap:16px; align-items:flex-start; padding:8px 6px; border-radius:4px; }
   .settings-row:hover { background: var(--vscode-list-hoverBackground); }
   /* Inactive selection (list not focused) */
@@ -531,7 +479,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
         @media (max-width: 640px){ .settings-grid { grid-template-columns: 1fr; } }
         /* Optional: ensure icon is clickable */
         vscode-textfield [action-icon] { cursor: pointer; }
-        .action-row { display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--vscode-panel-border, rgba(255,255,255,0.1)); flex-wrap:wrap; gap:12px; }
+        .action-row { display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:1px solid var(--vscode-panel-border, rgba(255,255,255,0.1)); flex-wrap:wrap; gap:12px; }
         .action-row .left, .action-row .right { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
         .verify-status { display:flex; align-items:center; gap:6px; font-size:12px; padding:4px 6px; border-radius:4px; background: var(--vscode-editorWidget-background); border:1px solid var(--vscode-editorWidget-border); }
         .verify-status.ok { border-color: var(--vscode-testing-iconPassed, #3fb950); }

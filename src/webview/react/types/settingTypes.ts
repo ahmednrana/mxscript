@@ -3,11 +3,18 @@
 
 export type SettingType = 'string' | 'number' | 'password' | 'boolean' | 'multiline' | 'select' | 'radio';
 
+export type BadgeVariant = 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success';
+
+export interface Badge {
+  text: string;
+  variant?: BadgeVariant;
+  title?: string;
+}
 export interface SettingMetaBase {
   id: string;
   label: string;
   description?: string;
-  badges?: Array<{ text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }>;
+  badges?: Badge[];
   required?: boolean;
   placeholder?: string;
   group: string; // group id

@@ -1,5 +1,6 @@
 import React from 'react';
 import { VscodeBadge, VscodeButton, VscodeIcon } from '@vscode-elements/react-elements';
+import { Badge } from '../types/settingTypes';
 
 export interface SettingAction {
   id: string;
@@ -18,7 +19,7 @@ export interface SettingItemProps {
   hoverColor?: string; // CSS color or var
   selectedColor?: string; // CSS color or var
   helperText?: string;
-  badges?: Array<{ text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }>;
+  badges?: Badge[];
   error?: string;
   actions?: SettingAction[];
   onSelect?: (id: string) => void;
@@ -66,7 +67,7 @@ export const SettingItem: React.FC<SettingItemProps> = ({
           {label}
           {badges && badges.length > 0 && (
             <span className="badges">
-              {badges.map((b: { text: string; variant?: 'default' | 'counter' | 'info' | 'warning' | 'error' | 'success'; title?: string }, idx: number) => (
+              {badges.map((b, idx) => (
                 <VscodeBadge key={idx} variant={b.variant === 'counter' ? 'counter' : undefined} title={b.title}
                   className={b.variant && b.variant !== 'counter' && b.variant !== 'default' ? `badge-${b.variant}` : undefined}
                 >
