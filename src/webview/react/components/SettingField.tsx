@@ -45,6 +45,10 @@ export const SettingField: React.FC<SettingFieldProps> = ({
   };
 
   const selectElRef = useRef<any>(null);
+  
+  // Debug console.log for allowCustom value
+//   console.log(`[SettingField] Setting ID: ${meta.id}, allowCustom: ${meta.allowCustom}, should be creatable: ${!!meta.allowCustom}`);
+  
   useEffect(() => {
     const el = selectElRef.current;
     if (el) {
@@ -61,7 +65,8 @@ export const SettingField: React.FC<SettingFieldProps> = ({
   const selectElement = (
     <vscode-single-select
       value={state?.value}
-      data-allow-custom={meta.allowCustom || undefined}
+      combobox={meta.allowCustom || undefined}
+      creatable={meta.allowCustom || undefined}
       ref={selectElRef}
     >
       {meta.options?.map(opt => (

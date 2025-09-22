@@ -35858,7 +35858,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       "vscode-single-select",
       {
         value: state == null ? void 0 : state.value,
-        "data-allow-custom": meta.allowCustom || void 0,
+        combobox: meta.allowCustom || void 0,
+        creatable: meta.allowCustom || void 0,
         ref: selectElRef,
         children: (_a6 = meta.options) == null ? void 0 : _a6.map((opt) => /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("vscode-option", { value: opt, children: opt }, opt))
       }
@@ -36157,8 +36158,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "username", label: "Username", group: "auth", order: 3, type: "string", placeholder: "maxadmin", description: "Username for internal/LDAP authentication." },
     { id: "password", label: "Password", group: "auth", order: 4, type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
     // Behavior
-    { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXAPIAUTOSCRIPT", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts.", badges: [{ text: "Experimental", variant: "warning", title: "Experimental setting" }] },
-    { id: "appxmlObjectStructure", label: "App XML Object Structure", group: "behavior", type: "select", placeholder: "MXL_APPS", defaultValue: "MXL_APPS", allowCustom: true, options: ["MXL_APPS", "MXL_APPS2"], description: "Object Structure used for App XML operations." },
+    { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXAPIAUTOSCRIPT", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts. You can type any value here" },
+    { id: "appxmlObjectStructure", label: "App XML Object Structure", group: "behavior", type: "select", placeholder: "MXL_APPS", defaultValue: "MXL_APPS", allowCustom: true, options: ["MXL_APPS", "MXL_APPS2"], description: "Object Structure used for App XML operations. You can type any value here", badges: [{ text: "Upload not working", variant: "warning", title: "Upload not working yet" }] },
     { id: "logLevel", label: "Log Level", group: "behavior", type: "select", defaultValue: "INFO", options: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"], description: "Controls the verbosity of logs produced by operations." },
     { id: "createPythonFile", label: "Create Python File for Jython Scripts", group: "behavior", type: "boolean", defaultValue: true, description: "When enabled, a Python file will be created for Jython scripts if necessary." },
     { id: "formatXmlOnDownload", label: "Format XML on Download/Compare", group: "behavior", type: "boolean", defaultValue: true, description: "Automatically format XML when downloading or comparing." },
