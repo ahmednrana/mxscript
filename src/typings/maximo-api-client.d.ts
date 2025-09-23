@@ -1,4 +1,3 @@
-// Temporary ambient module declarations for maximo-api-client to satisfy TS compiler in playground integration.
 declare module 'maximo-api-client' {
   export interface MaximoClientConfig { [k: string]: any; }
   export interface ILogger { log: (...args: any[]) => void; info?: any; warn?: any; error?: any; }

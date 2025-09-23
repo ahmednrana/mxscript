@@ -13,7 +13,7 @@ For both Automation Scripts and Application XML, you can:
 
 1. [Update from Server](#download-update-script--xml-from-server)
 2. [Compare with Server](#compare-script--xml-with-server)
-3. [Upload to Server](#upload-to-server)
+3. [Upload to Server](#upload-to-server) *(only for Automation Scripts)*
 4. [Download All Scripts from Server](#download-all-scripts-from-server)
 5. [Download All Application's xml from Server](#download-all-applicationxml-from-server)
 6. [Delete Script from Server](#delete-script-from-server) *(only for Automation Scripts)*
@@ -58,7 +58,7 @@ Use the command palette and select this option.
 
 #### Functionality
 
-You must have a saved file open for this to work. This uploads the automation script or application XML from the opened tab to the server.
+You must have a saved file open for this to work. This uploads the automation script or application XML (application XML currently not working) from the opened tab to the server.
 
 ![Upload](./images/upload.gif)
 
@@ -199,22 +199,6 @@ This extension contributes the following settings:
 | Property Name                                              | Type    | Default  | Description                                                                                       |
 | --- | --- | --- | --- |
 | `mxscript.serverSettings.hostname`                         | string  |          | Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)                                  |
-
----
-
-## Experimental React Playground
-
-An experimental React + `@vscode-elements/react-elements` playground view has been added to prototype a future rewrite of the environment manager UI.
-
-How to use:
-
-1. Run `npm run build:webviews` (or rely on `vscode:prepublish`) to build the bundle under `media/playground.js`.
-2. Reload the extension (Developer: Reload Window).
-3. Run the command: `MxScript: Open React Playground (Experimental)` – it now opens in an editor tab instead of the Explorer sidebar.
-4. A minimal counter + ping demo with a prominent "Hello World" heading is shown. Use the button inside the Environment Editor panel ("Open React Playground (Experimental)") to open it directly while editing environments.
-
-This is intentionally isolated—no existing environment CRUD logic has been moved yet. Once satisfied, components from the playground can be ported into a React-based environment manager.
-
 | `mxscript.serverSettings.port`                             | number  |          | Maximo port                                                                                       |
 | `mxscript.authentication.username`                         | string  | maxadmin | Username for Maximo Authentication                                                                |
 | `mxscript.authentication.password`                         | string  | maxadmin | Password for Maximo Authentication                                                                |
