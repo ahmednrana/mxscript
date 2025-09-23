@@ -186,16 +186,18 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
 
   // Rehydrate form when initialValues provided / changed (edit mode typically)
   useEffect(() => {
-    if (!initialValues) return;
+    const valuesToUse = initialValues || (typeof window !== 'undefined' ? (window as any).initialValues : null);
+    if (!valuesToUse) return;
+    
     setForm(prev => {
       const next: FormState = { ...prev };
       for (const s of SETTINGS) {
-        if (initialValues[s.id] !== undefined) {
+        if (valuesToUse[s.id] !== undefined) {
           next[s.id] = {
             ...next[s.id],
-            value: initialValues[s.id],
+            value: valuesToUse[s.id],
             // don't mark as touched yet
-            error: validateFieldWithState(s, initialValues[s.id], next) // Pass explicit state snapshot
+            error: validateFieldWithState(s, valuesToUse[s.id], next) // Pass explicit state snapshot
           };
         }
       }
@@ -245,27 +247,42 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       return;
     }
 
-    // Fallback simulated save
-    try {
-      await new Promise(r => setTimeout(r, 400));
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 1200);
-    } catch (e: any) {
+    // Send save message to VS Code extension
+    if (vscodeApi) {
+      try {
+        const payload = mapToEnvironmentPayload();
+        vscodeApi.postMessage({ 
+          type: 'save', 
+          environment: payload 
+        });
+        
+        // For real VS Code webview, the extension will handle the save and close the panel
+        // For dev preview, simulate success
+        if (!('acquireVsCodeApi' in window)) {
+          setSaveStatus('saved');
+          setTimeout(() => setSaveStatus('idle'), 1200);
+        }
+      } catch (e: any) {
+        setSaveStatus('error');
+        setLastError(e?.message || 'Save failed');
+      }
+    } else {
       setSaveStatus('error');
-      setLastError(e.message || 'Save failed');
+      setLastError('VS Code API not available');
     }
   };
 
   const reset = () => {
     console.log('[reset] Resetting form...');
     const initialState = buildInitialState();
-    if (initialValues) { // Edit mode: re-apply initial values
+    const valuesToUse = initialValues || (typeof window !== 'undefined' ? (window as any).initialValues : null);
+    if (valuesToUse) { // Edit mode: re-apply initial values
       for (const s of SETTINGS) {
-        if (initialValues[s.id] !== undefined) {
+        if (valuesToUse[s.id] !== undefined) {
           initialState[s.id] = {
-            value: initialValues[s.id],
+            value: valuesToUse[s.id],
             touched: false,
-            error: validateFieldWithState(s, initialValues[s.id], initialState)
+            error: validateFieldWithState(s, valuesToUse[s.id], initialState)
           };
         }
       }

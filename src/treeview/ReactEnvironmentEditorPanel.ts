@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 import { MaximoEnvironment } from '../webview/EnvironmentManager';
 import { verifyEnvironment } from '../service/Verification/verifyEnvironment';
 
 /**
- * WebView panel for adding/editing environments in the main editor area
+ * React-based WebView panel for adding/editing environments in the main editor area
  */
-export class EnvironmentEditorPanel {
-    public static currentPanel: EnvironmentEditorPanel | undefined;
+export class ReactEnvironmentEditorPanel {
+    public static currentPanel: ReactEnvironmentEditorPanel | undefined;
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
 
@@ -23,16 +21,16 @@ export class EnvironmentEditorPanel {
             : undefined;
 
         // If we already have a panel, show it
-        if (EnvironmentEditorPanel.currentPanel) {
-            EnvironmentEditorPanel.currentPanel._panel.reveal(column);
-            EnvironmentEditorPanel.currentPanel.update(environment);
-            EnvironmentEditorPanel.currentPanel._onSave = onSave;
+        if (ReactEnvironmentEditorPanel.currentPanel) {
+            ReactEnvironmentEditorPanel.currentPanel._panel.reveal(column);
+            ReactEnvironmentEditorPanel.currentPanel.update(environment);
+            ReactEnvironmentEditorPanel.currentPanel._onSave = onSave;
             return;
         }
 
         // Otherwise, create a new panel
         const panel = vscode.window.createWebviewPanel(
-            'maximoEnvironmentEditor',
+            'reactMaximoEnvironmentEditor',
             environment ? `Edit Environment: ${environment.name}` : 'Add New Maximo Environment',
             column || vscode.ViewColumn.One,
             {
@@ -42,7 +40,7 @@ export class EnvironmentEditorPanel {
             }
         );
 
-        EnvironmentEditorPanel.currentPanel = new EnvironmentEditorPanel(panel, extensionUri, context, environment, onSave);
+        ReactEnvironmentEditorPanel.currentPanel = new ReactEnvironmentEditorPanel(panel, extensionUri, context, environment, onSave);
     }
 
     private constructor(
@@ -113,8 +111,12 @@ export class EnvironmentEditorPanel {
                                 type: 'verificationResult',
                                 ...result
                             });
-                        }).catch(error => { // Should not happen if _verifySettings handles its errors
-                            vscode.window.showErrorMessage(`Unexpected error during verification: ${error.message}`);
+                        }).catch(error => { 
+                            this._panel.webview.postMessage({
+                                type: 'verificationResult',
+                                success: false,
+                                message: `Verification error: ${error.message}`
+                            });
                         });
                         break;
                     case 'executeCommand':
@@ -122,7 +124,6 @@ export class EnvironmentEditorPanel {
                             vscode.commands.executeCommand(message.command);
                         }
                         break;
-
                 }
             },
             null,
@@ -131,7 +132,7 @@ export class EnvironmentEditorPanel {
     }
 
     public dispose() {
-        EnvironmentEditorPanel.currentPanel = undefined;
+        ReactEnvironmentEditorPanel.currentPanel = undefined;
 
         // Clean up resources
         this._panel.dispose();
@@ -163,33 +164,71 @@ export class EnvironmentEditorPanel {
 
     private _getHtmlForWebview(): string {
         const webview = this._panel.webview;
+        
+        // Use the React build output instead of the old environmentEditor.js
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'environmentEditor.js'));
-    const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.css'));
+        const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.css'));
+        
         const nonce = this._nonce();
+        
+        // Map environment data to React component format
+        const initialValues = this._environment ? {
+            envName: this._environment.name,
+            hostname: this._environment.hostname,
+            port: this._environment.port,
+            httpProtocol: this._environment.httpProtocol,
+            authType: this._environment.authenticationType,
+            username: this._environment.username,
+            password: this._environment.password,
+            apikey: this._environment.apikey,
+            objectStructure: this._environment.objectStructure,
+            appxmlObjectStructure: this._environment.appxml_objectStructure,
+            logLevel: this._environment.logLevel,
+            createPythonFile: this._environment.createPythonFileForJythonScripts,
+            ignoreSsl: this._environment.ignoreSslErrors,
+            formatXmlOnDownload: this._environment.formatXmlOnDownloadAndCompare,
+            scope: this._environment.scope,
+            sslcertificate: this._environment.sslcertificate
+        } : null;
+
         const bootstrap = {
             mode: this._environment ? 'edit' : 'add',
-            environment: this._environment || null
+            initialValues: initialValues
         };
+
         const bootstrapStr = JSON.stringify(bootstrap).replace(/</g, '\\u003c');
+
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; style-src ${webview.cspSource} 'unsafe-inline'; font-src ${webview.cspSource}; script-src 'nonce-${nonce}';" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link id="vscode-codicon-stylesheet" href="${codiconUri}" rel="stylesheet" />
-  <title>${this._environment ? 'Edit Environment' : 'Add Environment'}</title>
-  <style>
-    body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); padding: 0 12px 24px; }
-    #root { max-width: 960px; margin: 0 auto; }
-    button { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border:none; padding:6px 12px; border-radius:4px; cursor:pointer; }
-    button:hover { background: var(--vscode-button-hoverBackground); }
-  </style>
+    <title>${this._environment ? 'Edit Environment' : 'Add Environment'}</title>
+    <style>
+        body { 
+            font-family: var(--vscode-font-family); 
+            color: var(--vscode-foreground); 
+            background: var(--vscode-editor-background); 
+            padding: 0 12px 24px; 
+            margin: 0;
+        }
+        #root { 
+            max-width: 960px; 
+            margin: 0 auto; 
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script nonce="${nonce}">window.__ENV_EDITOR_BOOTSTRAP__ = ${bootstrapStr};</script>
-  <script nonce="${nonce}" src="${scriptUri}"></script>
+    <div id="root"></div>
+    <script nonce="${nonce}">
+        // Make bootstrap data available to React component
+        window.__ENV_EDITOR_BOOTSTRAP__ = ${bootstrapStr};
+        window.initialValues = ${JSON.stringify(initialValues)};
+        window.mode = '${this._environment ? 'edit' : 'add'}';
+    </script>
+    <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
     }
