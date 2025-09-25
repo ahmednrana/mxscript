@@ -84,7 +84,7 @@ export function showWarning(message: string): void {
     let configService = new ConfigService();
     const logger = Logger.getInstance();
     vscode.window.showWarningMessage(message);
-    logger.warn(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
+    logger.warn(`${message} [Environment: ${configService.getActiveEnvironmentName()} [${configService.getUrl()}]]`);
 
 }
 
@@ -92,7 +92,7 @@ export function showInformation(message: string): void {
     let configService = new ConfigService();
     const logger = Logger.getInstance();
     vscode.window.showInformationMessage(message);
-    logger.info(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
+    logger.info(`${message} [Environment: ${configService.getActiveEnvironmentName()} [${configService.getUrl()}]]`);
 
 }
 
@@ -100,6 +100,6 @@ export function showError(message: string): void {
     let configService = new ConfigService();
     const logger = Logger.getInstance();
     vscode.window.showErrorMessage(message);
-    logger.error(`${message} [Environment: ${configService.getActiveEnvironmentName() || configService.getUrl()}]`);
+    logger.error(`${message} [Environment: ${configService.getActiveEnvironmentName()} [${configService.getUrl()}]]`);
 
 }

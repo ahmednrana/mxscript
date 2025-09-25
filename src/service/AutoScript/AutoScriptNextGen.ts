@@ -34,7 +34,7 @@ export class AutoScriptNextGen implements SimpleOSService {
             const fileName = getFilename();
             const sourceFromServer = await this.getMaximoClient().autoScript.downloadScriptSource(fileName);
             if (!sourceFromServer) {
-                showWarning(`No script source found for the script ${fileName} on ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                showWarning(`No script source found for the script ${fileName} on ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -51,7 +51,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 edit.replace(document.uri, fullRange, sourceFromServer);
                 const success = await vscode.workspace.applyEdit(edit);
                 if (success) {
-                    showInformation(`Script ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                    showInformation(`Script ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 } else {
                     showError(`Failed to apply edits to the document.`);
                 }
@@ -108,7 +108,7 @@ export class AutoScriptNextGen implements SimpleOSService {
             // Show progress bar
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: `Downloading Scripts from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`,
+                title: `Downloading Scripts from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
                 cancellable: false,
             }, async (progress) => {
                 // Step 1: Start downloading scripts
@@ -172,17 +172,17 @@ export class AutoScriptNextGen implements SimpleOSService {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                    showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
                 }
                 else {
-                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.data}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
                 }
             }
             else {
-                showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
             showError(`Failed to upload script: ${(error as Error).message}`);
@@ -196,7 +196,7 @@ export class AutoScriptNextGen implements SimpleOSService {
             const sourceFromServer = await this.getMaximoClient().autoScript.downloadScriptSource(scriptName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No script source found for the script ${scriptName}`);
-                this.logger.warn(`No script source found for the script ${scriptName} from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                this.logger.warn(`No script source found for the script ${scriptName} from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 return;
             }
             // Create a virtual document URI for the server script content
@@ -207,7 +207,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 const { document } = activeTextEditor;
                 let original = document.uri;
                 if (original !== null) {
-                    let title: string = `Local: ${scriptName} ↔ Server (${this.configService.getActiveEnvironmentName() || this.configService.getUrl()})`;
+                    let title: string = `Local: ${scriptName} ↔ Server (${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}])`;
                     vscode.commands.executeCommand('vscode.diff', original, serverScript, title);
                 } else {
                     showError("No active text editor found to compare the script.");

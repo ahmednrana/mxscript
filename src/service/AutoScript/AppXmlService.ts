@@ -36,7 +36,7 @@ export class AppXmlService implements SimpleOSService {
 
             let xmlFromServer = await this.getMaximoClient().getMaxAppService().getAppPresentation(fileName);
             if (!xmlFromServer) {
-                showWarning(`No application xml found for the ${fileName} on ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                showWarning(`No application xml found for the ${fileName} on ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -56,7 +56,7 @@ export class AppXmlService implements SimpleOSService {
                 edit.replace(document.uri, fullRange, xmlFromServer);
                 const success = await vscode.workspace.applyEdit(edit);
                 if (success) {
-                    showInformation(`Xml ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                    showInformation(`Xml ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 } else {
                     showError(`Failed to apply edits to the document.`);
                 }
@@ -113,7 +113,7 @@ export class AppXmlService implements SimpleOSService {
             // Show progress bar
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
-                title: `Downloading app xmls from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`,
+                title: `Downloading app xmls from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
                 cancellable: false,
             }, async (progress) => {
                 // Step 1: Start downloading application xmls
@@ -175,17 +175,17 @@ export class AppXmlService implements SimpleOSService {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    showInformation(`${appxml.app}.xml uploaded successfully to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                    showInformation(`${appxml.app}.xml uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
                 }
                 else {
-                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.data}`);
+                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
                 }
             }
             else {
-                showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
             showError(`Failed to upload application xml: ${(error as Error).message}`);
@@ -199,7 +199,7 @@ export class AppXmlService implements SimpleOSService {
             let sourceFromServer = await this.getMaximoClient().getMaxAppService().getAppPresentation(appName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No application xml source found for the app ${appName}`);
-                this.logger.warn(`No application xml found for the app ${appName} from ${this.configService.getActiveEnvironmentName() || this.configService.getUrl()}`);
+                this.logger.warn(`No application xml found for the app ${appName} from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
                 return;
             }
 
@@ -216,7 +216,7 @@ export class AppXmlService implements SimpleOSService {
                 const serverXml = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
                 const localXml = vscode.Uri.parse('mxscript:' + encodeURIComponent(localContent));
 
-                let title: string = `Local: ${appName} ↔ Server (${this.configService.getActiveEnvironmentName() || this.configService.getUrl()})`;
+                let title: string = `Local: ${appName} ↔ Server (${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}])`;
 
                 // Execute diff command
                 vscode.commands.executeCommand('vscode.diff', localXml, serverXml, title);
