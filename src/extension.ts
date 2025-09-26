@@ -3,15 +3,21 @@ import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoClientProvider } from './client/client';
 import { ConfigService } from './service/Config/ConfigService';
 import { EnvironmentManagerWebviewProvider, MaximoEnvironment } from './webview/EnvironmentManager';
-import { MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
+import { MaximoEnvironmentTreeItem, MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
 import { ReactEnvironmentEditorPanel } from './treeview/ReactEnvironmentEditorPanel';
 import { Logger, LogLevel } from './service/Logger/Logger';
 import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
-import { getFileExtension, getFilename, showError } from "./utils/utils";
+import { getFileExtension, getFilename, showError, showInformation, showWarning } from "./utils/utils";
 import { AppXmlService } from "./service/AutoScript/AppXmlService";
+import { MaximoLoggingService } from "./service/AutoScript/LogService";
+import { EnvironmentLogHighlighter } from "./service/Logger/LogHighlighter";
+import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
 
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
+let fetchLogsStatusBarItem: vscode.StatusBarItem;
+
+
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -33,6 +39,13 @@ export function activate(context: vscode.ExtensionContext) {
     }
   };
 
+  const logContentProvider = new EnvironmentLogContentProvider();
+  context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mxscript-log', logContentProvider));
+  context.subscriptions.push(logContentProvider);
+
+  const logHighlighter = new EnvironmentLogHighlighter(logContentProvider);
+  context.subscriptions.push(logHighlighter);
+
 
   // Create status bar item
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -41,6 +54,13 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.tooltip = "Click to manage Maximo environments";
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
+
+  fetchLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
+  fetchLogsStatusBarItem.text = "$(output) Fetch Log";
+  fetchLogsStatusBarItem.command = "mxscript.fetchLogs";
+  fetchLogsStatusBarItem.tooltip = "Fetch logs from the active Maximo environment";
+  fetchLogsStatusBarItem.hide();
+  context.subscriptions.push(fetchLogsStatusBarItem);
 
   // Create the tree view provider
   const maximoEnvironmentTreeProvider = new MaximoEnvironmentTreeProvider(context);
@@ -310,6 +330,29 @@ export function activate(context: vscode.ExtensionContext) {
     appservice.downloadAll();
   });
 
+  let fetchLogs = vscode.commands.registerCommand("mxscript.fetchLogs", async (item?: MaximoEnvironmentTreeItem | MaximoEnvironment) => {
+    const environmentFromItem = extractEnvironmentFromItem(item);
+
+    if (environmentFromItem) {
+      const logService = new MaximoLoggingService(new ConfigService());
+      await logService.fetchEnvironmentLogs(environmentFromItem, logContentProvider);
+      return;
+    }
+
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) {
+      return;
+    }
+
+    const activeEnvironment = getActiveEnvironment(context);
+    if (!activeEnvironment) {
+      showWarning("No active environment set. Please select an environment before fetching logs.");
+      return;
+    }
+
+    const logService = new MaximoLoggingService(new ConfigService());
+    await logService.fetchCurrentEnvironmentLogs(logContentProvider);
+  });
+
 
 
   vscode.workspace.onDidChangeConfiguration(event => {
@@ -452,6 +495,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteScript);
   context.subscriptions.push(downloadallappxml);
+  context.subscriptions.push(fetchLogs);
 
   // Initialize status bar with current environment
   updateStatusBar(context);
@@ -459,23 +503,58 @@ export function activate(context: vscode.ExtensionContext) {
 
 // Function to update status bar with current environment
 export function updateStatusBar(context: vscode.ExtensionContext) {
-  const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
-  const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
-  const environments = [...globalEnvs, ...workspaceEnvs];
-  const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+  const activeEnv = getActiveEnvironment(context);
 
-  if (activeEnvId && environments.length > 0) {
-    const activeEnv = environments.find(env => env.id === activeEnvId);
-    if (activeEnv) {
-      statusBarItem.text = `$(globe) Maximo: ${activeEnv.name}`;
-      statusBarItem.tooltip = `Connected to ${activeEnv.name} (${activeEnv.hostname}:${activeEnv.port})`;
-      return;
+  if (activeEnv) {
+    statusBarItem.text = `$(globe) Maximo: ${activeEnv.name}`;
+    statusBarItem.tooltip = `Connected to ${activeEnv.name} (${activeEnv.hostname}:${activeEnv.port})`;
+    if (fetchLogsStatusBarItem) {
+      fetchLogsStatusBarItem.text = "$(output) Fetch Log";
+      fetchLogsStatusBarItem.tooltip = `Fetch logs for ${activeEnv.name}`;
+      fetchLogsStatusBarItem.show();
     }
+    return;
   }
 
   // No active environment found
   statusBarItem.text = "$(globe) Maximo: No Environment";
   statusBarItem.tooltip = "Click to manage Maximo environments";
+  if (fetchLogsStatusBarItem) {
+    fetchLogsStatusBarItem.hide();
+  }
+}
+
+function getAllEnvironments(context: vscode.ExtensionContext): MaximoEnvironment[] {
+  const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+  const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
+  return [...globalEnvs, ...workspaceEnvs];
+}
+
+function getActiveEnvironment(context: vscode.ExtensionContext): MaximoEnvironment | undefined {
+  const environments = getAllEnvironments(context);
+  const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+  if (!activeEnvId) {
+    return undefined;
+  }
+  return environments.find(env => env.id === activeEnvId);
+}
+
+function extractEnvironmentFromItem(item?: MaximoEnvironmentTreeItem | MaximoEnvironment): MaximoEnvironment | undefined {
+  if (!item) {
+    return undefined;
+  }
+
+  const possibleTreeItem = item as MaximoEnvironmentTreeItem;
+  if (possibleTreeItem && typeof possibleTreeItem === 'object' && 'environment' in possibleTreeItem) {
+    return possibleTreeItem.environment;
+  }
+
+  const maybeEnvironment = item as MaximoEnvironment;
+  if (maybeEnvironment && typeof maybeEnvironment === 'object' && 'id' in maybeEnvironment && 'hostname' in maybeEnvironment) {
+    return maybeEnvironment;
+  }
+
+  return undefined;
 }
 
 /**

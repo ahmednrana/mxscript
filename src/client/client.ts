@@ -1,4 +1,5 @@
-import { AuthType, LogLevel, MaximoClient, MaximoClientConfig } from "maximo-api-client";
+import type { AuthType, MaximoClientConfig } from "maximo-api-client";
+import { LogLevel, MaximoClient } from "maximo-api-client";
 import IConfigService from "../service/Config/IConfigService";
 import * as vscode from 'vscode';
 import { Logger } from "../service/Logger/Logger";
@@ -182,5 +183,28 @@ export class MaximoClientProvider {
 
         this.logger.info('Creating new MaximoClient instance with updated configuration');
         this.maximoClient = new MaximoClient(newConfig);
+    }
+
+    /** Can create MaximoClient from MaximoEnvironment */
+    public static createClientFromEnvironment(environment: MaximoEnvironment, logger?: Logger): MaximoClient {
+        const config: MaximoClientConfig = {
+            baseUrl: environment.hostname,
+            port: Number(environment.port),
+            ssl: environment.httpProtocol === 'https',
+            authType: convertAuthType(environment.authenticationType),
+            userName: environment.username,
+            password: environment.password,
+            apiKey: environment.apikey,
+            autoscriptObjectStructure: environment.objectStructure,
+            maxAppObjectStructure: environment.appxml_objectStructure,
+            logLevel: getLogLevel(environment.logLevel || 'info'),
+            leanMode: true,
+            autoAuthenticate: true,
+            logger: logger ? logger : Logger.getInstance(),
+            rejectUnauthorized: !environment.ignoreSslErrors,
+            ca: environment.sslcertificate ? environment.sslcertificate : undefined
+        };
+
+        return new MaximoClient(config);
     }
 }

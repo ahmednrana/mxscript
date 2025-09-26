@@ -1,3 +1,5 @@
+// import { LoggingService } from "maximo-api-client";
+
 declare module 'maximo-api-client' {
   export interface MaximoClientConfig { [k: string]: any; }
   export interface ILogger { log: (...args: any[]) => void; info?: any; warn?: any; error?: any; }
@@ -27,6 +29,7 @@ declare module 'maximo-api-client' {
     autoScript: AutoScriptApi;
     appXml: AppXmlApi;
     getMaxAppService(): MaxAppService;
+    getLoggingService(): LoggingService;
   }
 
   // Placeholder export to satisfy existing imports

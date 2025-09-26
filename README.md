@@ -17,6 +17,7 @@ For both Automation Scripts and Application XML, you can:
 4. [Download All Scripts from Server](#download-all-scripts-from-server)
 5. [Download All Application's xml from Server](#download-all-applicationxml-from-server)
 6. [Delete Script from Server](#delete-script-from-server) *(only for Automation Scripts)*
+7. [Fetch Logs from Server](#fetch-logs-from-server)
 
 ---
 
@@ -101,6 +102,18 @@ Use the command palette and select this option.
 #### Functionality
 
 This deletes the automation script on the server.
+
+[Back to Top](#mxscript)
+
+### Fetch Logs from Server
+
+#### Activate
+
+Use the command palette or click the "Fetch Log" status bar button next to the active environment name.
+
+#### Functionality
+
+Displays live progress while the extension downloads the latest Manage logs via the Maximo logging service. When complete, a dedicated editor tab opens (and is reused per environment) titled with the environment name so you can inspect the log output immediately.
 
 [Back to Top](#mxscript)
 
@@ -221,6 +234,10 @@ Double check the authentication type, user/pass or the api key provided.
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 1.3.4
+
+- Added a Fetch Logs command with a status bar shortcut that opens an environment-specific log viewer tab.
 
 ### 1.2.5
 
