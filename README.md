@@ -17,7 +17,7 @@ For both Automation Scripts and Application XML, you can:
 4. [Download All Scripts from Server](#download-all-scripts-from-server)
 5. [Download All Application's xml from Server](#download-all-applicationxml-from-server)
 6. [Delete Script from Server](#delete-script-from-server) *(only for Automation Scripts)*
-7. [Fetch Logs from Server](#fetch-logs-from-server)
+7. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
 
 ---
 
@@ -48,6 +48,18 @@ Use the command palette and select this option.
 You must have a saved file open for this to work. This downloads the updated automation script or application XML for the opened tab and compares it.
 
 ![Compare](./images/compare.gif)
+
+[Back to Top](#mxscript)
+
+### Compare Script / XML with Another Environment
+
+#### Activate
+
+Click the compare button ($(compare-changes) icon) next to any environment in the Maximo Environments tree view.
+
+#### Functionality
+
+You must have a saved file open for this to work. This downloads the automation script or application XML from the selected environment and compares it with your local file. Useful for comparing the same script/XML across different environments (dev, test, prod).
 
 [Back to Top](#mxscript)
 
@@ -234,6 +246,10 @@ Double check the authentication type, user/pass or the api key provided.
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 1.3.5
+
+- Added compare with environment feature - click the compare button next to any environment in the tree view to compare your local script/XML with that environment
 
 ### 1.3.4
 

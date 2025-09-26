@@ -246,6 +246,78 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('maximoEnvironments.setActiveEnvironment', setActiveEnvironmentCommandHandler)
   );
 
+  // Command registration for maximoEnvironments.compareWithEnvironment
+  const compareWithEnvironmentCommandHandler = (item?: any) => {
+    if (item && item.environment) {
+      // Called from the tree view with an item
+      const fileName = getFilename();
+      if (!fileName) {
+        showError("No valid file is open");
+        return;
+      }
+      
+      const fileExtension = getFileExtension();
+      if (!fileExtension) {
+        showError("Could not determine file extension");
+        return;
+      }
+      
+      let config = new ConfigService();
+      if (fileExtension === 'xml') {
+        let appservice = new AppXmlService(context, config);
+        appservice.compareWithEnvironment(item.environment);
+      } else {
+        let as = new AutoScriptNextGen(context, config);
+        as.compareWithEnvironment(item.environment);
+      }
+    } else {
+      // Called from command palette without an item
+      // Show a quick pick of available environments
+      const environments = maximoEnvironmentTreeProvider.getEnvironments();
+      if (environments.length === 0) {
+        vscode.window.showInformationMessage("No environments found to compare with.");
+        return;
+      }
+
+      const environmentItems = environments.map(env => ({
+        label: env.name,
+        description: `${env.hostname}:${env.port}`,
+        environment: env
+      }));
+
+      vscode.window.showQuickPick(environmentItems, {
+        placeHolder: "Select an environment to compare with"
+      }).then(selectedItem => {
+        if (selectedItem) {
+          const fileName = getFilename();
+          if (!fileName) {
+            showError("No valid file is open");
+            return;
+          }
+          
+          const fileExtension = getFileExtension();
+          if (!fileExtension) {
+            showError("Could not determine file extension");
+            return;
+          }
+          
+          let config = new ConfigService();
+          if (fileExtension === 'xml') {
+            let appservice = new AppXmlService(context, config);
+            appservice.compareWithEnvironment(selectedItem.environment);
+          } else {
+            let as = new AutoScriptNextGen(context, config);
+            as.compareWithEnvironment(selectedItem.environment);
+          }
+        }
+      });
+    }
+  };
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maximoEnvironments.compareWithEnvironment', compareWithEnvironmentCommandHandler)
+  );
+
   let upload = vscode.commands.registerCommand("mxscript.upload", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
@@ -288,6 +360,48 @@ export function activate(context: vscode.ExtensionContext) {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.compareWithServer();
     }
+  });
+
+  let compareWithEnvironment = vscode.commands.registerCommand("mxscript.compareWithEnvironment", async () => {
+    const fileName = getFilename();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+
+    // Show a quick pick of available environments
+    const environments = maximoEnvironmentTreeProvider.getEnvironments();
+    if (environments.length === 0) {
+      vscode.window.showInformationMessage("No environments found to compare with.");
+      return;
+    }
+
+    const environmentItems = environments.map(env => ({
+      label: env.name,
+      description: `${env.hostname}:${env.port}`,
+      environment: env
+    }));
+
+    vscode.window.showQuickPick(environmentItems, {
+      placeHolder: "Select an environment to compare with"
+    }).then(selectedItem => {
+      if (selectedItem) {
+        let config = new ConfigService();
+        if (fileExtension === 'xml') {
+          let appservice = new AppXmlService(context, config);
+          appservice.compareWithEnvironment(selectedItem.environment);
+        } else {
+          let as = new AutoScriptNextGen(context, config);
+          as.compareWithEnvironment(selectedItem.environment);
+        }
+      }
+    });
   });
 
   let update = vscode.commands.registerCommand("mxscript.update", async () => {

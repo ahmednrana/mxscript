@@ -4,3 +4,4 @@ azuretoken
 src/test/testwp/
 out/
 out
+*.tgz

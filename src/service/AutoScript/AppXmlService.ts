@@ -4,6 +4,7 @@ import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
 import { getFilename, showError, showInformation, showWarning } from '../../utils/utils';
+import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { MaxPresentation } from 'maximo-api-client/dist/model/maxpresentation';
 // import * as xmlFormatter from 'xml-formatter';
 import xmlFormat from 'xml-formatter';
@@ -228,6 +229,48 @@ export class AppXmlService implements SimpleOSService {
             showError(`Failed to download application xml: ${(error as Error).message}`);
         }
 
+    }
+
+    async compareWithEnvironment(environment: MaximoEnvironment): Promise<void> {
+        try {
+            this.logger.debug('Comparing application xml with environment...');
+            const appName = getFilename();
+            
+            // Create client for the target environment
+            const { MaximoClientProvider } = await import('../../client/client');
+            const targetClient = MaximoClientProvider.createClientFromEnvironment(environment, this.logger);
+            
+            let sourceFromServer = await targetClient.getMaxAppService().getAppPresentation(appName);
+            if (!sourceFromServer) {
+                vscode.window.showWarningMessage(`No application xml source found for the app ${appName}`);
+                this.logger.warn(`No application xml found for the app ${appName} from ${environment.name} [${environment.hostname}:${environment.port}]`);
+                return;
+            }
+
+            const { activeTextEditor } = vscode.window;
+
+            if (activeTextEditor) {
+                const { document } = activeTextEditor;
+
+                let localContent = document.getText();
+                if (this.configService.getFormatXmlOnDownloadAndCompare()) {
+                    localContent = await this.formatXmlContent(localContent);
+                    sourceFromServer = await this.formatXmlContent(sourceFromServer);
+                }
+                const serverXml = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
+                const localXml = vscode.Uri.parse('mxscript:' + encodeURIComponent(localContent));
+
+                let title: string = `Local: ${appName} ↔ ${environment.name} (${environment.hostname}:${environment.port})`;
+
+                // Execute diff command
+                vscode.commands.executeCommand('vscode.diff', localXml, serverXml, title);
+
+            } else {
+                showError("No active text editor found to compare the application xml.");
+            }
+        } catch (error) {
+            showError(`Failed to download application xml: ${(error as Error).message}`);
+        }
     }
 
     async delete(): Promise<void> {

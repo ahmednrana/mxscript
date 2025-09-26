@@ -58,7 +58,7 @@ export class MaximoLoggingService {
 
             showInformation(`Logs fetched for ${this.configService.getActiveEnvironmentName()}.`);
         } catch (error) {
-            showError(`Failed to fetch logs: ${(error as Error).message}`);
+            showError(`Failed to fetch logs: ${(error as Error).message}. Logs are supported for Manage only`);
         }
     };
 
@@ -97,7 +97,7 @@ export class MaximoLoggingService {
 
             showInformation(`Logs fetched for ${environment.name}.`);
         } catch (error) {
-            showError(`Failed to fetch logs for ${environment.name}: ${(error as Error).message}`);
+            showError(`Failed to fetch logs for ${environment.name}: ${(error as Error).message}. Logs are supported for Manage only`);
         }
     }
 
@@ -126,7 +126,8 @@ export class MaximoLoggingService {
             };
         } catch (error) {
             this.logger.error('Error fetching logs from Maximo Manage logging service', error);
-            throw new Error('Error fetching logs from Maximo Manage logging service');
+            const errorMessage = (typeof error === 'object' && error !== null && 'message' in error) ? (error as { message?: string }).message : undefined;
+            throw new Error(errorMessage || 'Error fetching logs from Maximo Manage logging service');
         }
     }
 
@@ -168,4 +169,3 @@ export class MaximoLoggingService {
 
 
 }
-

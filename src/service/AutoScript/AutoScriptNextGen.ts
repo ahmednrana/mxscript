@@ -4,6 +4,7 @@ import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
 import { getFilename, getLanguageFromExtension, showError, showInformation, showWarning } from '../../utils/utils';
+import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 
 import { AutoScript } from 'maximo-api-client';
 
@@ -219,6 +220,43 @@ export class AutoScriptNextGen implements SimpleOSService {
             showError(`Failed to download script: ${(error as Error).message}`);
         }
 
+    }
+
+    async compareWithEnvironment(environment: MaximoEnvironment): Promise<void> {
+        try {
+            this.logger.debug('Comparing script with environment...');
+            const scriptName = getFilename();
+            
+            // Create client for the target environment
+            const { MaximoClientProvider } = await import('../../client/client');
+            const targetClient = MaximoClientProvider.createClientFromEnvironment(environment, this.logger);
+            
+            const sourceFromServer = await targetClient.autoScript.downloadScriptSource(scriptName);
+            if (!sourceFromServer) {
+                vscode.window.showWarningMessage(`No script source found for the script ${scriptName}`);
+                this.logger.warn(`No script source found for the script ${scriptName} from ${environment.name} [${environment.hostname}:${environment.port}]`);
+                return;
+            }
+            
+            // Create a virtual document URI for the server script content
+            let serverScript = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
+            const { activeTextEditor } = vscode.window;
+
+            if (activeTextEditor) {
+                const { document } = activeTextEditor;
+                let original = document.uri;
+                if (original !== null) {
+                    let title: string = `Local: ${scriptName} ↔ ${environment.name} (${environment.hostname}:${environment.port})`;
+                    vscode.commands.executeCommand('vscode.diff', original, serverScript, title);
+                } else {
+                    showError("No active text editor found to compare the script.");
+                }
+            } else {
+                showError("No active text editor found to compare the script.");
+            }
+        } catch (error) {
+            showError(`Failed to download script: ${(error as Error).message}`);
+        }
     }
     async delete(): Promise<void> {
         try {
