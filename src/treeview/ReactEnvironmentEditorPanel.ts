@@ -87,7 +87,7 @@ export class ReactEnvironmentEditorPanel {
                                 ignoreSslErrors: !!(incoming.ignoreSslErrors ?? this._environment?.ignoreSslErrors ?? true),
                                 formatXmlOnDownloadAndCompare: !!(incoming.formatXmlOnDownloadAndCompare ?? this._environment?.formatXmlOnDownloadAndCompare ?? true),
                                 scope: incoming.scope || this._environment?.scope || 'global',
-                                sslcertificate: incoming.sslcertificate || this._environment?.sslcertificate || ''
+                                sslcertificate: incoming.sslcertificate ?? this._environment?.sslcertificate ?? ''
                             };
                             this._onSave(normalized);
                         }
