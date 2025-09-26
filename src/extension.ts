@@ -227,7 +227,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   let upload = vscode.commands.registerCommand("mxscript.upload", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
     if (!fileName) {
@@ -249,7 +249,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   let compare = vscode.commands.registerCommand("mxscript.compare", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
     if (!fileName) {
@@ -268,11 +268,10 @@ export function activate(context: vscode.ExtensionContext) {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.compareWithServer();
     }
-
   });
 
   let update = vscode.commands.registerCommand("mxscript.update", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
     if (!fileName) {
@@ -294,19 +293,19 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   let downloadall = vscode.commands.registerCommand("mxscript.downloadall", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     let as: SimpleOSService = new AutoScriptNextGen(context, new ConfigService());
     as.downloadAll();
   });
 
   let deleteScript = vscode.commands.registerCommand("mxscript.delete", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     let as: SimpleOSService = new AutoScriptNextGen(context, new ConfigService());
     as.delete();
   });
 
   let downloadallappxml = vscode.commands.registerCommand("mxscript.downloadallappxml", async () => {
-    await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider);
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     let appservice: SimpleOSService = new AppXmlService(context, new ConfigService());
     appservice.downloadAll();
   });
@@ -485,27 +484,49 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
  * globally active environment.
  * @param context The extension context.
  * @param treeProvider The instance of the environment tree provider.
+ * @returns True if the workspace is configured and the command can proceed; false otherwise.
  */
 async function ensureWorkspaceConfigured(
   context: vscode.ExtensionContext,
   treeProvider: MaximoEnvironmentTreeProvider
-): Promise<void> {
+): Promise<boolean> {
   const config = vscode.workspace.getConfiguration('mxscript');
   const hostname = config.get<string>('serverSettings.hostname');
+  const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+
+  // Get all environments to find the active one
+  const globalEnvs = context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
+  const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
+  const environments = [...globalEnvs, ...workspaceEnvs];
+  const activeEnv = environments.find(env => env.id === activeEnvId);
 
   // If hostname is missing, we assume the workspace is not configured.
   if (!hostname) {
-    const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
     if (activeEnvId) {
       // A globally active environment exists, so apply its settings to this workspace silently.
       console.log('MXScript: Workspace not configured. Applying active environment settings.');
       treeProvider.setActiveEnvironment(activeEnvId, true); // Use the silent flag
+      return true; // Proceed after applying settings
     } else {
       // No active environment is set globally
       vscode.window.showWarningMessage('No active Maximo environment. Please set one from the Maximo Environments view.');
       vscode.commands.executeCommand('workbench.view.extension.mxscript-sidebar');
+      return false; // Do not proceed
     }
+  } else if (activeEnv && activeEnv.hostname !== hostname) {
+    // Hostname mismatch: active environment hostname doesn't match config hostname
+    vscode.window.showWarningMessage(
+      `The active Maximo environment hostname (${activeEnv.hostname}) does not match the configured hostname in settings (${hostname}). Please update your settings or set the correct active environment.`,
+      'Manage Environments'
+    ).then(selection => {
+      if (selection === 'Manage Environments') {
+        vscode.commands.executeCommand('mxscript.manageEnvironments');
+      }
+    });
+    return false; // Do not proceed due to mismatch
   }
+
+  return true; // All checks passed, proceed
 }
 
 export function deactivate() { Logger.getInstance().dispose() }
