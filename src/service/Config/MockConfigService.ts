@@ -62,6 +62,9 @@ export class MockConfigService implements IConfigService {
   public getAppxmlOs(): string {
     return this.appxmlOs;
   }
+  public getConditionOs(): string {
+    return 'MXL_CONDITION';
+  }
   public ignoreSslError(): boolean {
     return this.ignoreSsl;
   }

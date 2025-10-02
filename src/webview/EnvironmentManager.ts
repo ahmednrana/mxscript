@@ -18,6 +18,7 @@ export interface MaximoEnvironment {
     scope: 'global' | 'workspace'; 
     formatXmlOnDownloadAndCompare: boolean;
     appxml_objectStructure: string;
+    condition_objectStructure: string;
 }
 
 export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProvider {
@@ -216,6 +217,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         config.update('serverSettings.activeEnvironmentName', activeEnv.name, vscode.ConfigurationTarget.Workspace);
         config.update('appxml.formatOnDownloadAndCompare', activeEnv.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace);
         config.update('appxml.objectStructure', activeEnv.appxml_objectStructure, vscode.ConfigurationTarget.Workspace);
+        config.update('condition.objectStructure', activeEnv.condition_objectStructure, vscode.ConfigurationTarget.Workspace);
 
         vscode.window.showInformationMessage(`Switched to Maximo environment: ${activeEnv.name}`);
     }

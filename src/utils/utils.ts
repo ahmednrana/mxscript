@@ -1,6 +1,7 @@
 import { Constants } from "../Constants";
 import IConfigService from "../service/Config/IConfigService";
-import { AuthType, LogLevel } from "maximo-api-client";
+import { AuthType } from "maximo-api-client";
+import { LogLevel } from "maximo-api-client";
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigService } from "../service/Config/ConfigService";
@@ -52,7 +53,7 @@ export function getLanguageFromExtension(configService: IConfigService): string 
  * @param authType - The string representation of the authentication type.
  * @returns The corresponding AuthType enum value.
  */
-export function convertAuthType(authType: string): AuthType {
+export function convertAuthType(authType: string) {
     switch (authType) {
         case 'internal':
             return AuthType.MAXIMO_NATIVE;

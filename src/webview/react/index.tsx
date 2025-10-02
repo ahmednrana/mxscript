@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { VscodeButton } from '@vscode-elements/react-elements';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import { EnvironmentEditor } from './pages/EnvironmentEditor';
 
 // Acquire VS Code API
@@ -22,6 +21,7 @@ const mapInitialValues = (env:any) => env ? {
   apikey: env.apikey,
   objectStructure: env.objectStructure,
   appxmlObjectStructure: env.appxml_objectStructure,
+	conditionObjectStructure: env.condition_objectStructure,
   logLevel: env.logLevel,
   createPythonFile: env.createPythonFileForJythonScripts,
   ignoreSsl: env.ignoreSslErrors,

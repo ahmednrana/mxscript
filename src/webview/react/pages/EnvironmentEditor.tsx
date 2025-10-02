@@ -37,7 +37,8 @@ const SETTINGS: SettingMeta[] = [
   { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
   // Behavior
   { id: 'objectStructure', label: 'Script Object Structure', group: 'behavior', type: 'select', placeholder: 'MXSCRIPT', defaultValue: 'MXSCRIPT', allowCustom: true, options: ['MXSCRIPT', 'MXAPIAUTOSCRIPT', 'MXCUSTSCR'], description: 'Object Structure used for uploading/downloading scripts. You can type any value here' },
-  { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS', 'MXL_APPS2'], description: 'Object Structure used for App XML operations. You can type any value here', badges: [{ text: 'Upload not working', variant: 'warning', title: 'Upload not working yet' }] },
+  { id: 'appxmlObjectStructure', label: 'App XML Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_APPS', defaultValue: 'MXL_APPS', allowCustom: true, options: ['MXL_APPS'], description: 'Object Structure used for App XML operations. You can type any value here', badges: [{ text: 'Upload not working', variant: 'warning', title: 'Upload not working yet' }] },
+  { id: 'conditionObjectStructure', label: 'Condition Object Structure', group: 'behavior', type: 'select', placeholder: 'MXL_CONDITION', defaultValue: 'MXL_CONDITION', allowCustom: true, options: ['MXL_CONDITION'], description: 'Object Structure used for Condition operations. You can type any value here' },
   { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
   { id: 'createPythonFile', label: 'Create Python File for Jython Scripts', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, a Python file will be created for Jython scripts if necessary.' },
   { id: 'formatXmlOnDownload', label: 'Format XML on Download/Compare', group: 'behavior', type: 'boolean', defaultValue: true, description: 'Automatically format XML when downloading or comparing.' },
@@ -97,6 +98,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   // pulling from a changing closure. Useful during rehydration.
   const validateFieldWithState = useCallback((meta: SettingMeta, value: any, snapshot: FormState): string | undefined => {
     const authType = snapshot['authType']?.value || 'internal';
+    debugger;
     const isVisible = (id: string) => {
       if (id === 'apikey') return authType === 'apikey';
       if (id === 'username' || id === 'password') return authType !== 'apikey';
@@ -308,6 +310,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       apikey: v.apikey,
       objectStructure: v.objectStructure,
       appxml_objectStructure: v.appxmlObjectStructure,
+      condition_objectStructure: v.conditionObjectStructure,
       logLevel: v.logLevel,
       createPythonFileForJythonScripts: !!v.createPythonFile,
       ignoreSslErrors: !!v.ignoreSsl,

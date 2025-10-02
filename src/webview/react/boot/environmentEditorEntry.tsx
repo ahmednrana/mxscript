@@ -2,13 +2,14 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { EnvironmentEditor } from '../pages/EnvironmentEditor';
 
-declare global { interface Window { __ENV_EDITOR_BOOTSTRAP__?: any; } }
+declare global { interface Window { __ENV_EDITOR_BOOTSTRAP__?: any; initialValues?: any; mode?: string; } }
 
-const bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: 'add', environment: null };
+const bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: 'add', initialValues: undefined as any, environment: null };
 
-// Map environment from extension to editor initialValues
+// Prefer initialValues provided by the extension bootstrap (or window.initialValues)
+// Fallback to mapping from env if older bootstrap shape is present
 const env = bootstrap.environment;
-const initialValues = env ? {
+const mappedFromEnv = env ? {
 	envName: env.name,
 	hostname: env.hostname,
 	port: env.port,
@@ -19,6 +20,7 @@ const initialValues = env ? {
 	apikey: env.apikey,
 	objectStructure: env.objectStructure,
 	appxmlObjectStructure: env.appxml_objectStructure,
+	conditionObjectStructure: env.condition_objectStructure,
 	logLevel: env.logLevel,
 	createPythonFile: env.createPythonFileForJythonScripts,
 	ignoreSsl: env.ignoreSslErrors,
@@ -27,9 +29,12 @@ const initialValues = env ? {
 	sslcertificate: env.sslcertificate
 } : undefined;
 
+const initialValues = bootstrap.initialValues || window.initialValues || mappedFromEnv;
+const mode = bootstrap.mode || window.mode || 'add';
+
 createRoot(document.getElementById('root')!).render(
 	<EnvironmentEditor
-		mode={bootstrap.mode}
+		mode={mode}
 		initialValues={initialValues}
 	/>
 );

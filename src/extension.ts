@@ -1,17 +1,18 @@
 import * as vscode from "vscode";
-import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoClientProvider } from './client/client';
+import { AppXmlService } from "./service/AutoScript/AppXmlService";
+import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
+import { ConditionService } from "./service/AutoScript/ConditionService";
+import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
+import { MaximoLoggingService } from "./service/AutoScript/LogService";
 import { ConfigService } from './service/Config/ConfigService';
-import { EnvironmentManagerWebviewProvider, MaximoEnvironment } from './webview/EnvironmentManager';
+import { Logger } from './service/Logger/Logger';
+import { EnvironmentLogHighlighter } from "./service/Logger/LogHighlighter";
 import { MaximoEnvironmentTreeItem, MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
 import { ReactEnvironmentEditorPanel } from './treeview/ReactEnvironmentEditorPanel';
-import { Logger, LogLevel } from './service/Logger/Logger';
-import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
-import { getFileExtension, getFilename, showError, showInformation, showWarning } from "./utils/utils";
-import { AppXmlService } from "./service/AutoScript/AppXmlService";
-import { MaximoLoggingService } from "./service/AutoScript/LogService";
-import { EnvironmentLogHighlighter } from "./service/Logger/LogHighlighter";
+import { getFileExtension, getFilename, showError, showWarning } from "./utils/utils";
 import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
+import { MaximoEnvironment } from './webview/EnvironmentManager';
 
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
@@ -30,6 +31,31 @@ export function activate(context: vscode.ExtensionContext) {
   // Initialize the client wrapper (once, at startup)
   MaximoClientProvider.initialize(context, configService);
   logger.info('MxScript extension activated');
+
+  // Backfill migration: ensure stored environments include condition_objectStructure
+  (async () => {
+    try {
+      const backfillStore = async (store: vscode.Memento) => {
+        const envs = store.get<MaximoEnvironment[]>('mxscript.environments', []);
+        if (!envs || envs.length === 0) return;
+        let changed = false;
+        const next = envs.map(e => {
+          if (!('condition_objectStructure' in e) || !e.condition_objectStructure) {
+            changed = true;
+            return { ...e, condition_objectStructure: 'MXL_CONDITION' } as MaximoEnvironment;
+          }
+          return e;
+        });
+        if (changed) {
+          await store.update('mxscript.environments', next);
+          logger.info('[migration] Backfilled condition_objectStructure for stored environments');
+        }
+      };
+      await Promise.all([backfillStore(context.globalState), backfillStore(context.workspaceState)]);
+    } catch (err) {
+      logger.warn(`Migration/backfill skipped or failed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  })();
 
 
   const MxScriptScheme = 'mxscript';
@@ -255,17 +281,20 @@ export function activate(context: vscode.ExtensionContext) {
         showError("No valid file is open");
         return;
       }
-      
+
       const fileExtension = getFileExtension();
       if (!fileExtension) {
         showError("Could not determine file extension");
         return;
       }
-      
+
       let config = new ConfigService();
       if (fileExtension === 'xml') {
         let appservice = new AppXmlService(context, config);
         appservice.compareWithEnvironment(item.environment);
+      } else if (fileExtension === 'sql') {
+        let ce = new ConditionService(context, config);
+        ce.compareWithEnvironment(item.environment);
       } else {
         let as = new AutoScriptNextGen(context, config);
         as.compareWithEnvironment(item.environment);
@@ -294,17 +323,20 @@ export function activate(context: vscode.ExtensionContext) {
             showError("No valid file is open");
             return;
           }
-          
+
           const fileExtension = getFileExtension();
           if (!fileExtension) {
             showError("Could not determine file extension");
             return;
           }
-          
+
           let config = new ConfigService();
           if (fileExtension === 'xml') {
             let appservice = new AppXmlService(context, config);
             appservice.compareWithEnvironment(selectedItem.environment);
+          } else if (fileExtension === 'sql') {
+            let ce = new ConditionService(context, config);
+            ce.compareWithEnvironment(selectedItem.environment);
           } else {
             let as = new AutoScriptNextGen(context, config);
             as.compareWithEnvironment(selectedItem.environment);
@@ -334,6 +366,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (fileExtension === 'xml') {
       let appservice = new AppXmlService(context, config);
       appservice.upload();
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      ce.upload();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.upload();
@@ -356,6 +391,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (fileExtension === 'xml') {
       let appservice = new AppXmlService(context, config);
       appservice.compareWithServer();
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      ce.compareWithServer();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.compareWithServer();
@@ -368,7 +406,7 @@ export function activate(context: vscode.ExtensionContext) {
       showError("No valid file is open");
       return;
     }
-    
+
     const fileExtension = getFileExtension();
     if (!fileExtension) {
       showError("Could not determine file extension");
@@ -420,6 +458,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (fileExtension === 'xml') {
       let appservice = new AppXmlService(context, config);
       appservice.update();
+    } else if (fileExtension == 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      ce.update();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.update();
@@ -432,16 +473,41 @@ export function activate(context: vscode.ExtensionContext) {
     as.downloadAll();
   });
 
-  let deleteScript = vscode.commands.registerCommand("mxscript.delete", async () => {
+  let deleteItem = vscode.commands.registerCommand("mxscript.delete", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
-    let as: SimpleOSService = new AutoScriptNextGen(context, new ConfigService());
-    as.delete();
+    const fileName = getFilename();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    let config = new ConfigService();
+    if (fileExtension === 'xml') {
+      let appservice = new AppXmlService(context, config);
+      appservice.delete();
+    } else if (fileExtension == 'sql') {
+      let cs: SimpleOSService = new ConditionService(context, config);
+      cs.delete();
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      as.delete();
+    }
   });
 
   let downloadallappxml = vscode.commands.registerCommand("mxscript.downloadallappxml", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     let appservice: SimpleOSService = new AppXmlService(context, new ConfigService());
     appservice.downloadAll();
+  });
+
+  let downloadallcondition = vscode.commands.registerCommand("mxscript.downloadallcondition", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    let conditionService: SimpleOSService = new ConditionService(context, new ConfigService());
+    conditionService.downloadAll();
   });
 
   let fetchLogs = vscode.commands.registerCommand("mxscript.fetchLogs", async (item?: MaximoEnvironmentTreeItem | MaximoEnvironment) => {
@@ -607,8 +673,9 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
   context.subscriptions.push(manageEnvironments);
-  context.subscriptions.push(deleteScript);
+  context.subscriptions.push(deleteItem);
   context.subscriptions.push(downloadallappxml);
+  context.subscriptions.push(downloadallcondition);
   context.subscriptions.push(fetchLogs);
 
   // Initialize status bar with current environment

@@ -36,7 +36,7 @@
     "watch:ts": "tsc -watch -p ./",
     "watch": "npm run watch:all",
     "test": "npm run compile && node ./node_modules/vscode/bin/test",
-    "build": "npm run build:webviews && tsc -p ./",    
+    "build": "npm run build:webviews && tsc -p ./",
     "clean:webviews": "npx rimraf ./media",
     "build:webviews": "npm run clean:webviews && node ./scripts/build-webview.js",
     "package": "vsce package",
@@ -66,12 +66,12 @@
       },
       {
         "command": "mxscript.update",
-        "title": "Download (Update) Script / XML from Server",
+        "title": "Download (Update) from Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.compare",
-        "title": "Compare Script / XML with current Environment",
+        "title": "Compare with current Environment",
         "category": "Maximo [mxscript]"
       },
       {
@@ -85,6 +85,11 @@
         "category": "Maximo [mxscript]"
       },
       {
+        "command": "mxscript.downloadallcondition",
+        "title": "Download All Conditions from Server",
+        "category": "Maximo [mxscript]"
+      },
+      {
         "command": "mxscript.fetchLogs",
         "title": "Fetch Logs from Server",
         "category": "Maximo [mxscript]",
@@ -92,7 +97,7 @@
       },
       {
         "command": "mxscript.delete",
-        "title": "Delete Script from Server",
+        "title": "Delete this file from Server",
         "category": "Maximo [mxscript]"
       },
       {
@@ -188,6 +193,11 @@
           "type": "string",
           "default": "MXL_APPS",
           "description": "Object Structure to be used for App XML uploading / downloading"
+        },
+        "mxscript.condition.objectStructure": {
+          "type": "string",
+          "default": "MXL_CONDITION",
+          "description": "Object Structure to be used for Condition uploading / downloading"
         },
         "mxscript.serverSettings.httpProtocol": {
           "type": "string",

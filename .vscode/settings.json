@@ -16,5 +16,20 @@
             "packageManager": "ms-python.python:pip"
         }
     ],
+    "mxscript.serverSettings.hostname": "maximoacc.ad.sfppn.com",
+    "mxscript.serverSettings.port": 443,
+    "mxscript.authentication.username": "trinmax@sfppn.com",
+    "mxscript.authentication.password": "M@xnTri*$",
+    "mxscript.authentication.apikey": "",
+    "mxscript.authentication.authenticationType": "ldap",
+    "mxscript.serverSettings.objectStructure": "MXSCRIPT",
+    "mxscript.serverSettings.httpProtocol": "https",
+    "mxscript.scriptSettings.createPythonFileForJythonScripts": true,
+    "mxscript.scriptSettings.logLevel": "DEBUG",
+    "mxscript.scriptSettings.ignoresslerrors": true,
+    "mxscript.serverSettings.activeEnvironmentName": "sfppn_acc",
+    "mxscript.appxml.formatOnDownloadAndCompare": true,
+    "mxscript.scriptSettings.sslcertificate": "",
+    "mxscript.appxml.objectStructure": "MXL_APPS",
     
 }

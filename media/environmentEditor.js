@@ -17092,18 +17092,18 @@
             }
           }
           function mountSuspensePrimaryChildren(workInProgress2, primaryChildren, renderLanes2) {
-            var mode = workInProgress2.mode;
+            var mode2 = workInProgress2.mode;
             var primaryChildProps = {
               mode: "visible",
               children: primaryChildren
             };
-            var primaryChildFragment = mountWorkInProgressOffscreenFiber(primaryChildProps, mode);
+            var primaryChildFragment = mountWorkInProgressOffscreenFiber(primaryChildProps, mode2);
             primaryChildFragment.return = workInProgress2;
             workInProgress2.child = primaryChildFragment;
             return primaryChildFragment;
           }
           function mountSuspenseFallbackChildren(workInProgress2, primaryChildren, fallbackChildren, renderLanes2) {
-            var mode = workInProgress2.mode;
+            var mode2 = workInProgress2.mode;
             var progressedPrimaryFragment = workInProgress2.child;
             var primaryChildProps = {
               mode: "hidden",
@@ -17111,7 +17111,7 @@
             };
             var primaryChildFragment;
             var fallbackChildFragment;
-            if ((mode & ConcurrentMode) === NoMode && progressedPrimaryFragment !== null) {
+            if ((mode2 & ConcurrentMode) === NoMode && progressedPrimaryFragment !== null) {
               primaryChildFragment = progressedPrimaryFragment;
               primaryChildFragment.childLanes = NoLanes;
               primaryChildFragment.pendingProps = primaryChildProps;
@@ -17121,10 +17121,10 @@
                 primaryChildFragment.selfBaseDuration = 0;
                 primaryChildFragment.treeBaseDuration = 0;
               }
-              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode, renderLanes2, null);
+              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode2, renderLanes2, null);
             } else {
-              primaryChildFragment = mountWorkInProgressOffscreenFiber(primaryChildProps, mode);
-              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode, renderLanes2, null);
+              primaryChildFragment = mountWorkInProgressOffscreenFiber(primaryChildProps, mode2);
+              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode2, renderLanes2, null);
             }
             primaryChildFragment.return = workInProgress2;
             fallbackChildFragment.return = workInProgress2;
@@ -17132,8 +17132,8 @@
             workInProgress2.child = primaryChildFragment;
             return fallbackChildFragment;
           }
-          function mountWorkInProgressOffscreenFiber(offscreenProps, mode, renderLanes2) {
-            return createFiberFromOffscreen(offscreenProps, mode, NoLanes, null);
+          function mountWorkInProgressOffscreenFiber(offscreenProps, mode2, renderLanes2) {
+            return createFiberFromOffscreen(offscreenProps, mode2, NoLanes, null);
           }
           function updateWorkInProgressOffscreenFiber(current2, offscreenProps) {
             return createWorkInProgress(current2, offscreenProps);
@@ -17163,7 +17163,7 @@
             return primaryChildFragment;
           }
           function updateSuspenseFallbackChildren(current2, workInProgress2, primaryChildren, fallbackChildren, renderLanes2) {
-            var mode = workInProgress2.mode;
+            var mode2 = workInProgress2.mode;
             var currentPrimaryChildFragment = current2.child;
             var currentFallbackChildFragment = currentPrimaryChildFragment.sibling;
             var primaryChildProps = {
@@ -17174,7 +17174,7 @@
             if (
               // In legacy mode, we commit the primary tree as if it successfully
               // completed, even though it's in an inconsistent state.
-              (mode & ConcurrentMode) === NoMode && // Make sure we're on the second pass, i.e. the primary child fragment was
+              (mode2 & ConcurrentMode) === NoMode && // Make sure we're on the second pass, i.e. the primary child fragment was
               // already cloned. In legacy mode, the only case where this isn't true is
               // when DevTools forces us to display a fallback; we skip the first render
               // pass entirely and go straight to rendering the fallback. (In Concurrent
@@ -17201,7 +17201,7 @@
             if (currentFallbackChildFragment !== null) {
               fallbackChildFragment = createWorkInProgress(currentFallbackChildFragment, fallbackChildren);
             } else {
-              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode, renderLanes2, null);
+              fallbackChildFragment = createFiberFromFragment(fallbackChildren, mode2, renderLanes2, null);
               fallbackChildFragment.flags |= Placement;
             }
             fallbackChildFragment.return = workInProgress2;
@@ -20452,8 +20452,8 @@
             return currentEventTime;
           }
           function requestUpdateLane(fiber) {
-            var mode = fiber.mode;
-            if ((mode & ConcurrentMode) === NoMode) {
+            var mode2 = fiber.mode;
+            if ((mode2 & ConcurrentMode) === NoMode) {
               return SyncLane;
             } else if ((executionContext & RenderContext) !== NoContext && workInProgressRootRenderLanes !== NoLanes) {
               return pickArbitraryLane(workInProgressRootRenderLanes);
@@ -20480,8 +20480,8 @@
             return eventLane;
           }
           function requestRetryLane(fiber) {
-            var mode = fiber.mode;
-            if ((mode & ConcurrentMode) === NoMode) {
+            var mode2 = fiber.mode;
+            if ((mode2 & ConcurrentMode) === NoMode) {
               return SyncLane;
             }
             return claimNextRetryLane();
@@ -22139,7 +22139,7 @@
               hasBadMapPolyfill = true;
             }
           }
-          function FiberNode(tag, pendingProps, key, mode) {
+          function FiberNode(tag, pendingProps, key, mode2) {
             this.tag = tag;
             this.key = key;
             this.elementType = null;
@@ -22155,7 +22155,7 @@
             this.updateQueue = null;
             this.memoizedState = null;
             this.dependencies = null;
-            this.mode = mode;
+            this.mode = mode2;
             this.flags = NoFlags;
             this.subtreeFlags = NoFlags;
             this.deletions = null;
@@ -22182,8 +22182,8 @@
               }
             }
           }
-          var createFiber = function(tag, pendingProps, key, mode) {
-            return new FiberNode(tag, pendingProps, key, mode);
+          var createFiber = function(tag, pendingProps, key, mode2) {
+            return new FiberNode(tag, pendingProps, key, mode2);
           };
           function shouldConstruct$1(Component) {
             var prototype = Component.prototype;
@@ -22308,24 +22308,24 @@
             return workInProgress2;
           }
           function createHostRootFiber(tag, isStrictMode, concurrentUpdatesByDefaultOverride) {
-            var mode;
+            var mode2;
             if (tag === ConcurrentRoot) {
-              mode = ConcurrentMode;
+              mode2 = ConcurrentMode;
               if (isStrictMode === true) {
-                mode |= StrictLegacyMode;
+                mode2 |= StrictLegacyMode;
                 {
-                  mode |= StrictEffectsMode;
+                  mode2 |= StrictEffectsMode;
                 }
               }
             } else {
-              mode = NoMode;
+              mode2 = NoMode;
             }
             if (isDevToolsPresent) {
-              mode |= ProfileMode;
+              mode2 |= ProfileMode;
             }
-            return createFiber(HostRoot, null, null, mode);
+            return createFiber(HostRoot, null, null, mode2);
           }
-          function createFiberFromTypeAndProps(type, key, pendingProps, owner, mode, lanes) {
+          function createFiberFromTypeAndProps(type, key, pendingProps, owner, mode2, lanes) {
             var fiberTag = IndeterminateComponent;
             var resolvedType = type;
             if (typeof type === "function") {
@@ -22344,22 +22344,22 @@
             } else {
               getTag: switch (type) {
                 case REACT_FRAGMENT_TYPE:
-                  return createFiberFromFragment(pendingProps.children, mode, lanes, key);
+                  return createFiberFromFragment(pendingProps.children, mode2, lanes, key);
                 case REACT_STRICT_MODE_TYPE:
                   fiberTag = Mode;
-                  mode |= StrictLegacyMode;
-                  if ((mode & ConcurrentMode) !== NoMode) {
-                    mode |= StrictEffectsMode;
+                  mode2 |= StrictLegacyMode;
+                  if ((mode2 & ConcurrentMode) !== NoMode) {
+                    mode2 |= StrictEffectsMode;
                   }
                   break;
                 case REACT_PROFILER_TYPE:
-                  return createFiberFromProfiler(pendingProps, mode, lanes, key);
+                  return createFiberFromProfiler(pendingProps, mode2, lanes, key);
                 case REACT_SUSPENSE_TYPE:
-                  return createFiberFromSuspense(pendingProps, mode, lanes, key);
+                  return createFiberFromSuspense(pendingProps, mode2, lanes, key);
                 case REACT_SUSPENSE_LIST_TYPE:
-                  return createFiberFromSuspenseList(pendingProps, mode, lanes, key);
+                  return createFiberFromSuspenseList(pendingProps, mode2, lanes, key);
                 case REACT_OFFSCREEN_TYPE:
-                  return createFiberFromOffscreen(pendingProps, mode, lanes, key);
+                  return createFiberFromOffscreen(pendingProps, mode2, lanes, key);
                 case REACT_LEGACY_HIDDEN_TYPE:
                 // eslint-disable-next-line no-fallthrough
                 case REACT_SCOPE_TYPE:
@@ -22408,7 +22408,7 @@
                 }
               }
             }
-            var fiber = createFiber(fiberTag, pendingProps, key, mode);
+            var fiber = createFiber(fiberTag, pendingProps, key, mode2);
             fiber.elementType = type;
             fiber.type = resolvedType;
             fiber.lanes = lanes;
@@ -22417,7 +22417,7 @@
             }
             return fiber;
           }
-          function createFiberFromElement(element, mode, lanes) {
+          function createFiberFromElement(element, mode2, lanes) {
             var owner = null;
             {
               owner = element._owner;
@@ -22425,25 +22425,25 @@
             var type = element.type;
             var key = element.key;
             var pendingProps = element.props;
-            var fiber = createFiberFromTypeAndProps(type, key, pendingProps, owner, mode, lanes);
+            var fiber = createFiberFromTypeAndProps(type, key, pendingProps, owner, mode2, lanes);
             {
               fiber._debugSource = element._source;
               fiber._debugOwner = element._owner;
             }
             return fiber;
           }
-          function createFiberFromFragment(elements, mode, lanes, key) {
-            var fiber = createFiber(Fragment, elements, key, mode);
+          function createFiberFromFragment(elements, mode2, lanes, key) {
+            var fiber = createFiber(Fragment, elements, key, mode2);
             fiber.lanes = lanes;
             return fiber;
           }
-          function createFiberFromProfiler(pendingProps, mode, lanes, key) {
+          function createFiberFromProfiler(pendingProps, mode2, lanes, key) {
             {
               if (typeof pendingProps.id !== "string") {
                 error('Profiler must specify an "id" of type `string` as a prop. Received the type `%s` instead.', typeof pendingProps.id);
               }
             }
-            var fiber = createFiber(Profiler, pendingProps, key, mode | ProfileMode);
+            var fiber = createFiber(Profiler, pendingProps, key, mode2 | ProfileMode);
             fiber.elementType = REACT_PROFILER_TYPE;
             fiber.lanes = lanes;
             {
@@ -22454,20 +22454,20 @@
             }
             return fiber;
           }
-          function createFiberFromSuspense(pendingProps, mode, lanes, key) {
-            var fiber = createFiber(SuspenseComponent, pendingProps, key, mode);
+          function createFiberFromSuspense(pendingProps, mode2, lanes, key) {
+            var fiber = createFiber(SuspenseComponent, pendingProps, key, mode2);
             fiber.elementType = REACT_SUSPENSE_TYPE;
             fiber.lanes = lanes;
             return fiber;
           }
-          function createFiberFromSuspenseList(pendingProps, mode, lanes, key) {
-            var fiber = createFiber(SuspenseListComponent, pendingProps, key, mode);
+          function createFiberFromSuspenseList(pendingProps, mode2, lanes, key) {
+            var fiber = createFiber(SuspenseListComponent, pendingProps, key, mode2);
             fiber.elementType = REACT_SUSPENSE_LIST_TYPE;
             fiber.lanes = lanes;
             return fiber;
           }
-          function createFiberFromOffscreen(pendingProps, mode, lanes, key) {
-            var fiber = createFiber(OffscreenComponent, pendingProps, key, mode);
+          function createFiberFromOffscreen(pendingProps, mode2, lanes, key) {
+            var fiber = createFiber(OffscreenComponent, pendingProps, key, mode2);
             fiber.elementType = REACT_OFFSCREEN_TYPE;
             fiber.lanes = lanes;
             var primaryChildInstance = {
@@ -22476,8 +22476,8 @@
             fiber.stateNode = primaryChildInstance;
             return fiber;
           }
-          function createFiberFromText(content, mode, lanes) {
-            var fiber = createFiber(HostText, content, null, mode);
+          function createFiberFromText(content, mode2, lanes) {
+            var fiber = createFiber(HostText, content, null, mode2);
             fiber.lanes = lanes;
             return fiber;
           }
@@ -22491,9 +22491,9 @@
             fiber.stateNode = dehydratedNode;
             return fiber;
           }
-          function createFiberFromPortal(portal, mode, lanes) {
+          function createFiberFromPortal(portal, mode2, lanes) {
             var pendingProps = portal.children !== null ? portal.children : [];
-            var fiber = createFiber(HostPortal, pendingProps, portal.key, mode);
+            var fiber = createFiber(HostPortal, pendingProps, portal.key, mode2);
             fiber.lanes = lanes;
             fiber.stateNode = {
               containerInfo: portal.containerInfo,
@@ -36159,7 +36159,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "password", label: "Password", group: "auth", order: 4, type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
     // Behavior
     { id: "objectStructure", label: "Script Object Structure", group: "behavior", type: "select", placeholder: "MXSCRIPT", defaultValue: "MXSCRIPT", allowCustom: true, options: ["MXSCRIPT", "MXAPIAUTOSCRIPT", "MXCUSTSCR"], description: "Object Structure used for uploading/downloading scripts. You can type any value here" },
-    { id: "appxmlObjectStructure", label: "App XML Object Structure", group: "behavior", type: "select", placeholder: "MXL_APPS", defaultValue: "MXL_APPS", allowCustom: true, options: ["MXL_APPS", "MXL_APPS2"], description: "Object Structure used for App XML operations. You can type any value here", badges: [{ text: "Upload not working", variant: "warning", title: "Upload not working yet" }] },
+    { id: "appxmlObjectStructure", label: "App XML Object Structure", group: "behavior", type: "select", placeholder: "MXL_APPS", defaultValue: "MXL_APPS", allowCustom: true, options: ["MXL_APPS"], description: "Object Structure used for App XML operations. You can type any value here", badges: [{ text: "Upload not working", variant: "warning", title: "Upload not working yet" }] },
+    { id: "conditionObjectStructure", label: "Condition Object Structure", group: "behavior", type: "select", placeholder: "MXL_CONDITION", defaultValue: "MXL_CONDITION", allowCustom: true, options: ["MXL_CONDITION"], description: "Object Structure used for Condition operations. You can type any value here" },
     { id: "logLevel", label: "Log Level", group: "behavior", type: "select", defaultValue: "INFO", options: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"], description: "Controls the verbosity of logs produced by operations." },
     { id: "createPythonFile", label: "Create Python File for Jython Scripts", group: "behavior", type: "boolean", defaultValue: true, description: "When enabled, a Python file will be created for Jython scripts if necessary." },
     { id: "formatXmlOnDownload", label: "Format XML on Download/Compare", group: "behavior", type: "boolean", defaultValue: true, description: "Automatically format XML when downloading or comparing." },
@@ -36182,7 +36183,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     return state;
   };
   var EnvironmentEditor = ({
-    mode = "add",
+    mode: mode2 = "add",
     initialValues: initialValues2,
     onSave: onSaveExternal,
     heading
@@ -36201,6 +36202,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const validateFieldWithState = (0, import_react77.useCallback)((meta, value, snapshot) => {
       var _a7;
       const authType = ((_a7 = snapshot["authType"]) == null ? void 0 : _a7.value) || "internal";
+      debugger;
       const isVisible = (id) => {
         if (id === "apikey") return authType === "apikey";
         if (id === "username" || id === "password") return authType !== "apikey";
@@ -36325,7 +36327,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const values = collectValues();
       if (onSaveExternal) {
         try {
-          await onSaveExternal(values, mode);
+          await onSaveExternal(values, mode2);
           setSaveStatus("saved");
           setTimeout(() => setSaveStatus("idle"), 1200);
         } catch (e12) {
@@ -36388,6 +36390,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         apikey: v3.apikey,
         objectStructure: v3.objectStructure,
         appxml_objectStructure: v3.appxmlObjectStructure,
+        condition_objectStructure: v3.conditionObjectStructure,
         logLevel: v3.logLevel,
         createPythonFileForJythonScripts: !!v3.createPythonFile,
         ignoreSslErrors: !!v3.ignoreSsl,
@@ -36446,7 +36449,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }, [vscodeApi]);
     useSyncSelectValue("authType", (_a6 = form["authType"]) == null ? void 0 : _a6.value, (val) => updateValue("authType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "env-editor-root", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "page-heading", children: heading || (mode === "edit" ? "Edit Environment" : "Add New Environment") }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "page-heading", children: heading || (mode2 === "edit" ? "Edit Environment" : "Add New Environment") }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "toolbar-row", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "left", children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTextfield_default, { placeholder: "Search settings", value: search, onInput: (e12) => setSearch(e12.target.value), children: [
           /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeIcon_default, { slot: "content-before", name: "search" }),
@@ -36573,9 +36576,9 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
 
   // src/webview/react/boot/environmentEditorEntry.tsx
   var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-  var bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: "add", environment: null };
+  var bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: "add", initialValues: void 0, environment: null };
   var env = bootstrap.environment;
-  var initialValues = env ? {
+  var mappedFromEnv = env ? {
     envName: env.name,
     hostname: env.hostname,
     port: env.port,
@@ -36586,6 +36589,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     apikey: env.apikey,
     objectStructure: env.objectStructure,
     appxmlObjectStructure: env.appxml_objectStructure,
+    conditionObjectStructure: env.condition_objectStructure,
     logLevel: env.logLevel,
     createPythonFile: env.createPythonFileForJythonScripts,
     ignoreSsl: env.ignoreSslErrors,
@@ -36593,11 +36597,13 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     scope: env.scope,
     sslcertificate: env.sslcertificate
   } : void 0;
+  var initialValues = bootstrap.initialValues || window.initialValues || mappedFromEnv;
+  var mode = bootstrap.mode || window.mode || "add";
   (0, import_client.createRoot)(document.getElementById("root")).render(
     /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
       EnvironmentEditor,
       {
-        mode: bootstrap.mode,
+        mode,
         initialValues
       }
     )

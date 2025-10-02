@@ -25,5 +25,6 @@ export default interface IConfigService {
   getFormatXmlOnDownloadAndCompare(): boolean;
   toString(): string;
   getAppxmlOs: () => string;
+  getConditionOs: () => string;
   getIgnoreSslErrors: () => boolean;
 }

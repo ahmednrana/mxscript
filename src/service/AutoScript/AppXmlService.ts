@@ -274,7 +274,7 @@ export class AppXmlService implements SimpleOSService {
     }
 
     async delete(): Promise<void> {
-        //pass
+        showError("Delete operation is not supported for application xmls.");
     }
 
 

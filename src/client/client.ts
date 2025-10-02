@@ -32,7 +32,8 @@ export class MaximoClientProvider {
         'mxscript.scriptSettings.sslcertificate',
         'mxscript.serverSettings.activeEnvironmentName',
         'mxscript.appxml.formatOnDownloadAndCompare',
-        'mxscript.appxml.objectStructure'
+        'mxscript.appxml.objectStructure',
+        'mxscript.condition.objectStructure'
     ];
 
     /**
@@ -143,6 +144,7 @@ export class MaximoClientProvider {
             port: Number(this.configService.getPort()),
             autoscriptObjectStructure: this.configService.getOS(),
             maxAppObjectStructure: this.configService.getAppxmlOs(),
+            conditionObjectStructure: this.configService.getConditionOs(),
             logLevel: getLogLevel(this.configService.getLogLevel()),
             leanMode: true,
             autoAuthenticate: true,
@@ -164,6 +166,7 @@ export class MaximoClientProvider {
             port: Number(environment.port),
             autoscriptObjectStructure: environment.objectStructure,
             maxAppObjectStructure: this.configService.getAppxmlOs(),
+            conditionObjectStructure: environment.condition_objectStructure,
             logLevel: getLogLevel(environment.logLevel),
             autoAuthenticate: true,
             rejectUnauthorized: !environment.ignoreSslErrors,
@@ -197,6 +200,7 @@ export class MaximoClientProvider {
             apiKey: environment.apikey,
             autoscriptObjectStructure: environment.objectStructure,
             maxAppObjectStructure: environment.appxml_objectStructure,
+            conditionObjectStructure: environment.condition_objectStructure,
             logLevel: getLogLevel(environment.logLevel || 'info'),
             leanMode: true,
             autoAuthenticate: true,
