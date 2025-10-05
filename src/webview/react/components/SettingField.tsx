@@ -62,18 +62,27 @@ export const SettingField: React.FC<SettingFieldProps> = ({
     }
   }, [meta.id, updateValue]);
 
-  const selectElement = (
-    <vscode-single-select
-      value={state?.value}
-      combobox={meta.allowCustom || undefined}
-      creatable={meta.allowCustom || undefined}
-      ref={selectElRef}
-    >
-      {meta.options?.map(opt => (
-        <vscode-option key={opt} value={opt}>{opt}</vscode-option>
-      ))}
-    </vscode-single-select>
-  );
+  const selectElement = (() => {
+    const currentValue = state?.value;
+    const options = meta.options || [];
+    const hasCustomValue = currentValue && !options.includes(currentValue);
+
+    // If there's a custom value not in the options, add it so it displays correctly.
+    const displayOptions = hasCustomValue ? [...options, currentValue] : options;
+
+    return (
+      <vscode-single-select
+        value={currentValue}
+        combobox={meta.allowCustom || undefined}
+        creatable={meta.allowCustom || undefined}
+        ref={selectElRef}
+      >
+        {displayOptions.map(opt => (
+          <vscode-option key={opt} value={opt}>{opt}</vscode-option>
+        ))}
+      </vscode-single-select>
+    );
+  })();
 
   switch (meta.type) {
     case 'boolean':
