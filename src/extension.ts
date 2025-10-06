@@ -17,6 +17,9 @@ import { MaximoEnvironment } from './webview/EnvironmentManager';
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
 let fetchLogsStatusBarItem: vscode.StatusBarItem;
+let uploadStatusBarItem: vscode.StatusBarItem;
+let downloadStatusBarItem: vscode.StatusBarItem;
+let compareStatusBarItem: vscode.StatusBarItem;
 
 
 
@@ -73,20 +76,53 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(logHighlighter);
 
 
-  // Create status bar item
+  // Status bar item for the active environment
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBarItem.command = "mxscript.manageEnvironments";
   statusBarItem.text = "$(globe) Maximo: No Environment";
   statusBarItem.tooltip = "Click to manage Maximo environments";
   statusBarItem.show();
   context.subscriptions.push(statusBarItem);
-
+  // Status bar icon for fetching logs
   fetchLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
   fetchLogsStatusBarItem.text = "$(output) Fetch Log";
   fetchLogsStatusBarItem.command = "mxscript.fetchLogs";
   fetchLogsStatusBarItem.tooltip = "Fetch logs from the active Maximo environment";
   fetchLogsStatusBarItem.hide();
   context.subscriptions.push(fetchLogsStatusBarItem);
+
+  uploadStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98);
+  // pass an argument so the command knows it was invoked from the status bar
+  uploadStatusBarItem.command = {
+    command: "mxscript.upload",
+    title: "Upload",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  uploadStatusBarItem.text = "$(arrow-up)";
+  uploadStatusBarItem.tooltip = "Upload to active Maximo environment";
+  context.subscriptions.push(uploadStatusBarItem);
+
+  downloadStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 97);
+  // pass an argument so the command knows it was invoked from the status bar
+  downloadStatusBarItem.command = {
+    command: "mxscript.update",
+    title: "Download",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  downloadStatusBarItem.text = "$(arrow-down)";
+  downloadStatusBarItem.tooltip = "Download from active Maximo environment";
+  context.subscriptions.push(downloadStatusBarItem);
+
+  compareStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 96);
+  // pass an argument so the command knows it was invoked from the status bar
+  compareStatusBarItem.command = {
+    command: "mxscript.compare",
+    title: "Compare",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  compareStatusBarItem.text = "$(compare-changes)";
+  compareStatusBarItem.tooltip = "Compare with active Maximo environment";
+  context.subscriptions.push(compareStatusBarItem);
 
   // Create the tree view provider
   const maximoEnvironmentTreeProvider = new MaximoEnvironmentTreeProvider(context);
@@ -350,7 +386,10 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('maximoEnvironments.compareWithEnvironment', compareWithEnvironmentCommandHandler)
   );
 
-  let upload = vscode.commands.registerCommand("mxscript.upload", async () => {
+  // accept an optional argument to detect invocation source
+  let upload = vscode.commands.registerCommand("mxscript.upload", async (arg?: { source?: string }) => {
+    const invokedFromStatusBar = !!(arg && arg.source === 'statusbar');
+    // You can handle invokedFromStatusBar differently if needed
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
@@ -375,7 +414,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  let compare = vscode.commands.registerCommand("mxscript.compare", async () => {
+  // accept an optional argument to detect invocation source
+  let compare = vscode.commands.registerCommand("mxscript.compare", async (arg?: { source?: string }) => {
+    const invokedFromStatusBar = !!(arg && arg.source === 'statusbar');
+    // You can use invokedFromStatusBar to alter behavior or logging
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
@@ -442,7 +484,10 @@ export function activate(context: vscode.ExtensionContext) {
     });
   });
 
-  let update = vscode.commands.registerCommand("mxscript.update", async () => {
+  // accept an optional argument to detect invocation source
+  let update = vscode.commands.registerCommand("mxscript.update", async (arg?: { source?: string }) => {
+    const invokedFromStatusBar = !!(arg && arg.source === 'statusbar');
+    // You can use invokedFromStatusBar here if special handling is required
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
@@ -694,6 +739,9 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
       fetchLogsStatusBarItem.tooltip = `Fetch logs for ${activeEnv.name}`;
       fetchLogsStatusBarItem.show();
     }
+    uploadStatusBarItem.show();
+    downloadStatusBarItem.show();
+    compareStatusBarItem.show();
     return;
   }
 
@@ -703,6 +751,9 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
   if (fetchLogsStatusBarItem) {
     fetchLogsStatusBarItem.hide();
   }
+  uploadStatusBarItem.hide();
+  downloadStatusBarItem.hide();
+  compareStatusBarItem.hide();
 }
 
 function getAllEnvironments(context: vscode.ExtensionContext): MaximoEnvironment[] {
