@@ -159,7 +159,7 @@ export class ConditionService implements SimpleOSService {
             const conditionName = getFilename();
             const condition: ConditionExpression = {
                 conditionnum: conditionName,
-                source: source,
+                expression: source,
                 properties: 'condition,description,source'
             };
             const addUpdateBuilder = this.getMaximoClient().getConditionExpressionService().bulkOperation().addUpdate(condition);
@@ -190,17 +190,17 @@ export class ConditionService implements SimpleOSService {
             const conditionName = getFilename();
             const sourceFromServer = await this.getMaximoClient().getConditionExpressionService().downloadCondition(conditionName);
             if (!sourceFromServer) {
-                showWarning(`Condition compare not yet implemented for "${conditionName}"`);
+                showWarning(`No condition source found for the condition "${conditionName}"`);
                 return;
             }
 
             // Create a virtual document URI for the server condition content
-            let serverCondition = vscode.Uri.parse('mxcondition:' + encodeURIComponent(sourceFromServer));
+            let serverCondition = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
             const { activeTextEditor } = vscode.window;
 
             if (activeTextEditor) {
                 // Open diff view
-                vscode.commands.executeCommand('vscode.diff', serverCondition, activeTextEditor.document.uri, `${conditionName} (Server) ↔ ${conditionName} (Local)`);
+                vscode.commands.executeCommand('vscode.diff', activeTextEditor.document.uri, serverCondition, `${conditionName} (Local) ↔ ${conditionName} (Server)`);
             } else {
                 showWarning("No active text editor found");
             }
@@ -226,12 +226,12 @@ export class ConditionService implements SimpleOSService {
             }
 
             // Create a virtual document URI for the server condition content
-            let serverCondition = vscode.Uri.parse('mxcondition:' + encodeURIComponent(sourceFromServer));
+            let serverCondition = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
             const { activeTextEditor } = vscode.window;
 
             if (activeTextEditor) {
                 // Open diff view
-                vscode.commands.executeCommand('vscode.diff', serverCondition, activeTextEditor.document.uri, `${conditionName} (${environment.name}) ↔ ${conditionName} (Local)`);
+                vscode.commands.executeCommand('vscode.diff', activeTextEditor.document.uri, serverCondition, `${conditionName} (Local) ↔ ${environment.name}`);
             } else {
                 showWarning("No active text editor found");
             }

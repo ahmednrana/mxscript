@@ -20,6 +20,7 @@ let fetchLogsStatusBarItem: vscode.StatusBarItem;
 let uploadStatusBarItem: vscode.StatusBarItem;
 let downloadStatusBarItem: vscode.StatusBarItem;
 let compareStatusBarItem: vscode.StatusBarItem;
+let deleteStatusBarItem: vscode.StatusBarItem;
 
 
 
@@ -87,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
   fetchLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
   fetchLogsStatusBarItem.text = "$(output) Fetch Log";
   fetchLogsStatusBarItem.command = "mxscript.fetchLogs";
-  fetchLogsStatusBarItem.tooltip = "Fetch logs from the active Maximo environment";
+  fetchLogsStatusBarItem.tooltip = "Fetch logs from the active environment (Manage / MAS only; not supported on classic Maximo 7.6)";
   fetchLogsStatusBarItem.hide();
   context.subscriptions.push(fetchLogsStatusBarItem);
 
@@ -123,6 +124,19 @@ export function activate(context: vscode.ExtensionContext) {
   compareStatusBarItem.text = "$(compare-changes)";
   compareStatusBarItem.tooltip = "Compare with active Maximo environment";
   context.subscriptions.push(compareStatusBarItem);
+
+  // Status bar icon for delete
+  deleteStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 95);
+  // pass an argument so the command knows it was invoked from the status bar
+  deleteStatusBarItem.command = {
+    command: "mxscript.delete",
+    title: "Delete",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  deleteStatusBarItem.text = "$(trash)";
+  deleteStatusBarItem.tooltip = "Delete from active Maximo environment";
+  deleteStatusBarItem.hide();
+  context.subscriptions.push(deleteStatusBarItem);
 
   // Create the tree view provider
   const maximoEnvironmentTreeProvider = new MaximoEnvironmentTreeProvider(context);
@@ -730,30 +744,76 @@ export function activate(context: vscode.ExtensionContext) {
 // Function to update status bar with current environment
 export function updateStatusBar(context: vscode.ExtensionContext) {
   const activeEnv = getActiveEnvironment(context);
-
+  // Update the main status bar text
   if (activeEnv) {
     statusBarItem.text = `$(globe) Maximo: ${activeEnv.name}`;
     statusBarItem.tooltip = `Connected to ${activeEnv.name} (${activeEnv.hostname}:${activeEnv.port})`;
-    if (fetchLogsStatusBarItem) {
-      fetchLogsStatusBarItem.text = "$(output) Fetch Log";
-      fetchLogsStatusBarItem.tooltip = `Fetch logs for ${activeEnv.name}`;
+  } else {
+    statusBarItem.text = "$(globe) Maximo: No Environment";
+    statusBarItem.tooltip = "Click to manage Maximo environments";
+  }
+
+  // Determine whether the action buttons should be visible for the current workspace.
+  // Only show the action buttons when there is an active environment that applies to the current workspace.
+  const showActionButtons = isActiveEnvApplicableToWorkspace(context, activeEnv);
+
+  if (fetchLogsStatusBarItem) {
+    fetchLogsStatusBarItem.text = "$(output) Fetch Log";
+    fetchLogsStatusBarItem.tooltip = activeEnv ? `Fetch logs for ${activeEnv.name}` : "Fetch logs from active environment";
+    if (showActionButtons) {
       fetchLogsStatusBarItem.show();
+    } else {
+      fetchLogsStatusBarItem.hide();
     }
+  }
+
+  if (showActionButtons) {
     uploadStatusBarItem.show();
     downloadStatusBarItem.show();
     compareStatusBarItem.show();
-    return;
+    if (deleteStatusBarItem) deleteStatusBarItem.show();
+  } else {
+    uploadStatusBarItem.hide();
+    downloadStatusBarItem.hide();
+    compareStatusBarItem.hide();
+    if (deleteStatusBarItem) deleteStatusBarItem.hide();
+  }
+}
+
+/**
+ * Returns true when the active environment should be considered applicable to the current workspace.
+ * Rules:
+ * - If there's no active environment -> false
+ * - If the active environment has scope 'workspace' and there is a workspace open -> true only if that workspace contains the workspace-scoped env
+ * - If the active environment has scope 'global' -> true when no workspace-scoped environment is overriding the workspace settings (or when workspace has no specific hostname configured)
+ */
+function isActiveEnvApplicableToWorkspace(context: vscode.ExtensionContext, activeEnv?: MaximoEnvironment): boolean {
+  if (!activeEnv) return false;
+
+  // If there is no workspace folder open, treat the active environment as applicable (global context)
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders || workspaceFolders.length === 0) {
+    return true;
   }
 
-  // No active environment found
-  statusBarItem.text = "$(globe) Maximo: No Environment";
-  statusBarItem.tooltip = "Click to manage Maximo environments";
-  if (fetchLogsStatusBarItem) {
-    fetchLogsStatusBarItem.hide();
+  // If activeEnv is workspace-scoped, check that this workspace actually contains that workspace-scoped environment
+  if (activeEnv.scope === 'workspace') {
+    const workspaceEnvs = context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
+    return workspaceEnvs.some(e => e.id === activeEnv.id);
   }
-  uploadStatusBarItem.hide();
-  downloadStatusBarItem.hide();
-  compareStatusBarItem.hide();
+
+  // For global-scoped active env: if the workspace has a configured hostname that's different, we treat the global active env as not applicable.
+  try {
+    const cfg = vscode.workspace.getConfiguration('mxscript');
+    const hostname = cfg.get<string>('serverSettings.hostname');
+    if (hostname && activeEnv.hostname && hostname !== activeEnv.hostname) {
+      return false;
+    }
+  } catch (e) {
+    // ignore and assume applicable
+  }
+
+  return true;
 }
 
 function getAllEnvironments(context: vscode.ExtensionContext): MaximoEnvironment[] {

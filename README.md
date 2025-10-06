@@ -11,19 +11,22 @@ It provides unified actions for both Automation Scripts and Application XML.
 
 For both Automation Scripts and Application XML, you can:
 
-1. [Update from Server](#download-update-script--xml-from-server)
+1. [Download (Update) from Server](#download-update-script--xml-from-server)
 2. [Compare with Server](#compare-script--xml-with-server)
-3. [Upload to Server](#upload-to-server) *(only for Automation Scripts)*
+3. [Upload to Server](#upload-to-server) *(Not for application xml)*
 4. [Download All Scripts from Server](#download-all-scripts-from-server)
 5. [Download All Application's xml from Server](#download-all-applicationxml-from-server)
-6. [Delete Script from Server](#delete-script-from-server) *(only for Automation Scripts)*
-7. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
+6. [Download All Conditions from Server](#download-all-conditions-from-server)
+7. [Delete Script from Server](#delete-script-from-server) *(only for Automation Scripts)*
+8. [Compare with Another Environment](#compare-script--xml-with-another-environment)
+9. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
+10. [Manage Environments (Add / Edit / Delete / Set Active)](#managing-environments-in-ui)
 
 ---
 
 ## Actions
 
-### Download (Update) Script / XML from Server
+### Download (Update) Script / XML / Condition from Server
 
 #### Activate
 
@@ -37,7 +40,84 @@ You must have a saved file open for this to work. This downloads the updated aut
 
 [Back to Top](#mxscript)
 
-### Compare Script / XML with Server
+## Commands (quick reference)
+
+These are the command IDs exposed by the extension (useful for keybindings or invoking from other extensions):
+
+- `maximoEnvironments.refreshEnvironments` — Refresh the Environments tree view
+- `maximoEnvironments.addEnvironment` — Open Add Environment editor
+- `maximoEnvironments.editEnvironment` — Edit selected environment (tree)
+- `maximoEnvironments.deleteEnvironment` — Delete selected environment (tree)
+- `maximoEnvironments.setActiveEnvironment` — Set selected environment as active (tree)
+- `maximoEnvironments.compareWithEnvironment` — Compare local file with selected environment (tree)
+- `mxscript.upload` — Upload current file to server
+- `mxscript.update` — Download/update current file from server
+- `mxscript.compare` — Compare current file with server copy
+- `mxscript.compareWithEnvironment` — Compare current file with another environment (quick pick)
+- `mxscript.downloadall` — Download all automation scripts
+- `mxscript.downloadallappxml` — Download all application XML
+- `mxscript.downloadallcondition` — Download all condition scripts
+- `mxscript.delete` — Delete current file on server
+- `mxscript.fetchLogs` — Fetch logs for an environment (accepts an environment tree item or uses active environment)
+- `mxscript.manageEnvironments` — Focus the Environments view (or show help)
+
+## Status bar shortcuts
+
+When an active environment is set the status bar shows quick-action icons:
+
+- $(output) Fetch Log — runs `mxscript.fetchLogs` (fetches logs for active environment) — NOTE: Fetch Logs currently works only against Manage (Maximo Application Suite). It is not supported for classic Maximo 7.6 REST endpoints.
+- $(arrow-up) Upload — runs `mxscript.upload` (clicks from the status bar pass an argument `{ source: "statusbar" }`)
+- $(arrow-down) Download — runs `mxscript.update` (status bar invocation passes `{ source: "statusbar" }`)
+- $(compare-changes) Compare — runs `mxscript.compare` (status bar invocation passes `{ source: "statusbar" }`)
+
+Note: status‑bar invocations include a provenance argument so the command handler can detect that the action originated from the status bar. This allows handlers to change behavior (UI flow) when invoked from the status bar.
+
+## Tree view actions
+
+Each environment in the "Maximo Environments" tree has inline buttons. The buttons call the following commands:
+
+- Activate (set as active) → `maximoEnvironments.setActiveEnvironment`
+- Edit → `maximoEnvironments.editEnvironment`
+- Delete → `maximoEnvironments.deleteEnvironment`
+- Compare → `maximoEnvironments.compareWithEnvironment`
+
+You can add / refresh an environment or use the tree toolbar to Add / Refresh:
+- Add → `maximoEnvironments.addEnvironment`
+- Refresh → `maximoEnvironments.refreshEnvironments`
+
+### Buttons shown over each environment
+
+The tree view shows inline buttons above each environment for quick actions. The table below documents the button/icon, the command invoked, and what it does.
+
+| Icon | Command | Functionality |
+| ---: | :----- | :------------ |
+| $(radio-tower) Active | `maximoEnvironments.setActiveEnvironment` | Sets the environment as the active environment for the extension (updates status bar and enables status-bar shortcuts). |
+| $(pencil) Edit | `maximoEnvironments.editEnvironment` | Opens the environment editor webview pre-populated with the environment details (allows changing hostname, credentials, scope). |
+| $(trash) Delete | `maximoEnvironments.deleteEnvironment` | Prompts for confirmation then deletes the environment from storage (global or workspace). |
+| $(compare-changes) Compare | `maximoEnvironments.compareWithEnvironment` | Compares the currently open file with the selected environment's server copy (downloads and runs comparison). |
+| $(output) Fetch Log | `mxscript.fetchLogs` | Fetches logs for the selected environment and opens the log viewer. NOTE: Fetch Logs uses Manage APIs and is not supported for classic Maximo 7.6 endpoints. |
+
+When a button is clicked the corresponding command receives a tree item context so the handler knows which environment to operate on.
+
+## Environment scope and storage
+
+- Global environments are stored in the extension `globalState` and are available across workspaces.
+- Workspace environments are stored in `workspaceState` and visible only in that workspace.
+- The "active environment" ID is saved in `globalState` under `mxscript.activeEnvironment`.
+- If your workspace lacks explicit `mxscript.serverSettings.hostname`, but a global active environment exists, the extension will silently apply the active environment settings to the workspace (this is the "silent apply" behavior). If hostname mismatches are detected the user is warned and asked to manage environments.
+
+
+
+- "No active Maximo environment" — Set an active environment in the Maximo Environments view or add one via the command palette.
+- Hostname mismatch warning — Either update your workspace `mxscript.serverSettings.hostname` or set the correct active environment.
+- SSL errors — Toggle `mxscript.scriptSettings.ignoresslerrors` to ignore SSL validation (not recommended for production). It is better to add the SSL certificate in environment settings.
+- Fetch Logs not working — Fetch Logs uses Manage APIs and is not available for classic Maximo 7.6 endpoints. Make sure you're pointing to a Manage instance if you need log fetching.
+
+## Contributing
+
+PRs and issues welcome — please open issues for bugs or feature requests and follow the standard GitHub flow.
+
+### Compare with current Environment (Script / XML / Condition)
 
 #### Activate
 
@@ -51,7 +131,7 @@ You must have a saved file open for this to work. This downloads the updated aut
 
 [Back to Top](#mxscript)
 
-### Compare Script / XML with Another Environment
+### Compare Another Environment (Script / XML / Condition)
 
 #### Activate
 
@@ -63,7 +143,7 @@ You must have a saved file open for this to work. This downloads the automation 
 
 [Back to Top](#mxscript)
 
-### Upload to Server
+### Upload to Server (Script / XML / Condition)
 
 #### Activate
 
@@ -105,7 +185,7 @@ This downloads all application XML files from the Maximo server to the folder yo
 
 [Back to Top](#mxscript)
 
-### Delete Script from Server
+### Delete this file from Server (Script / Condition)
 
 #### Activate
 
@@ -246,6 +326,10 @@ Double check the authentication type, user/pass or the api key provided.
 If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 ## Release Notes
+
+### 1.4.0
+
+- Added option to download / upload / compare the condition expressions (sql based only)
 
 ### 1.3.5
 

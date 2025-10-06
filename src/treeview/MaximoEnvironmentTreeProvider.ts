@@ -95,7 +95,7 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
     /**
      * Set an environment as active
      */
-    setActiveEnvironment(environmentId: string, silent: boolean = false): void {
+    setActiveEnvironment(environmentId: string | undefined, silent: boolean = false): void {
         // Save active environment ID
         this._context.globalState.update('mxscript.activeEnvironment', environmentId);
 
@@ -136,6 +136,26 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             if (!silent) {
                 vscode.window.showInformationMessage(`Switched to Maximo environment: ${environment.name}`);
             }
+        } else {
+            // No environment found or ID is undefined, so clear the settings
+            const config = vscode.workspace.getConfiguration('mxscript');
+
+            config.update('serverSettings.hostname', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.port', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('authentication.username', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('authentication.password', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('authentication.apikey', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('authentication.authenticationType', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.httpProtocol', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('scriptSettings.createPythonFileForJythonScripts', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('scriptSettings.logLevel', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('scriptSettings.ignoresslerrors', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('serverSettings.activeEnvironmentName', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('appxml.formatOnDownloadAndCompare', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('scriptSettings.sslcertificate', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('appxml.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
+            config.update('condition.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
         }
 
         // Refresh the tree view
@@ -170,13 +190,8 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         // Check if active environment was deleted
         const activeEnvId = this._context.globalState.get<string>('mxscript.activeEnvironment');
         if (activeEnvId === environmentId) {
-            // Set a new active environment or clear it
-            const allEnvs = [...globalEnvs, ...workspaceEnvs];
-            if (allEnvs.length > 0) {
-                this._context.globalState.update('mxscript.activeEnvironment', allEnvs[0].id);
-            } else {
-                this._context.globalState.update('mxscript.activeEnvironment', undefined);
-            }
+            this._context.globalState.update('mxscript.activeEnvironment', undefined);
+            this.setActiveEnvironment(undefined, true); // Clear active settings silently
         }
 
         // Show notification
