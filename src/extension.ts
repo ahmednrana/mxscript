@@ -569,6 +569,36 @@ export function activate(context: vscode.ExtensionContext) {
     conditionService.downloadAll();
   });
 
+  // Quick pick wrapper: Download from Maximo (lets user choose which type to download)
+  let downloadFromMaximo = vscode.commands.registerCommand("mxscript.downloadFromMaximo", async () => {
+    const picks: Array<vscode.QuickPickItem & { command: string }> = [
+      { label: "Download Script(s) from Maximo", description: "", command: "mxscript.downloadall" },
+      { label: "Download Application xml(s) from Maximo", description: "", command: "mxscript.downloadallappxml" },
+      { label: "Download Condition(s) from Maximo", description: "", command: "mxscript.downloadallcondition" }
+    ];
+
+    const qp = vscode.window.createQuickPick<vscode.QuickPickItem & { command: string }>();
+    qp.title = 'Download from Maximo';
+    qp.items = picks;
+    qp.placeholder = 'Select what you want to download from Maximo';
+
+    const disposables: vscode.Disposable[] = [];
+    disposables.push(qp.onDidAccept(async () => {
+      const selected = qp.selectedItems[0] as (vscode.QuickPickItem & { command?: string }) | undefined;
+      if (selected && selected.command) {
+        await vscode.commands.executeCommand(selected.command);
+      }
+      qp.hide();
+    }));
+
+    disposables.push(qp.onDidHide(() => {
+      disposables.forEach(d => d.dispose());
+      qp.dispose();
+    }));
+
+    qp.show();
+  });
+
   let fetchLogs = vscode.commands.registerCommand("mxscript.fetchLogs", async (item?: MaximoEnvironmentTreeItem | MaximoEnvironment) => {
     const environmentFromItem = extractEnvironmentFromItem(item);
 
@@ -731,6 +761,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(downloadall);
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
+  context.subscriptions.push(downloadFromMaximo);
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteItem);
   context.subscriptions.push(downloadallappxml);

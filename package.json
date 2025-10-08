@@ -50,6 +50,7 @@
     "onCommand:mxscript.update",
     "onCommand:mxscript.compare",
     "onCommand:mxscript.downloadall",
+  "onCommand:mxscript.downloadFromMaximo",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
     "onView:maximoEnvironments",
@@ -87,6 +88,11 @@
       {
         "command": "mxscript.downloadallcondition",
         "title": "Download Condition(s) from Maximo",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.downloadFromMaximo",
+        "title": "Download from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
