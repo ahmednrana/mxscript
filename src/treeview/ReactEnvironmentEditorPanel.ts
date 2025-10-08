@@ -184,7 +184,7 @@ export class ReactEnvironmentEditorPanel {
             apikey: this._environment.apikey,
             objectStructure: this._environment.objectStructure,
             appxmlObjectStructure: this._environment.appxml_objectStructure,
-            conditionObjectStructure: this._environment.condition_objectStructure,
+            conditionExpressionObjectStructure: this._environment.condition_objectStructure,
             logLevel: this._environment.logLevel,
             createPythonFile: this._environment.createPythonFileForJythonScripts,
             ignoreSsl: this._environment.ignoreSslErrors,

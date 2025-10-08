@@ -86,7 +86,7 @@
       },
       {
         "command": "mxscript.downloadallcondition",
-        "title": "Download All Conditions from Server",
+        "title": "Download Multiple Conditions from Server",
         "category": "Maximo [mxscript]"
       },
       {

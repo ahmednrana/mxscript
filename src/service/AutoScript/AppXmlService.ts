@@ -8,6 +8,7 @@ import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { MaxPresentation } from 'maximo-api-client/dist/model/maxpresentation';
 // import * as xmlFormatter from 'xml-formatter';
 import xmlFormat from 'xml-formatter';
+import { QueryBuilder } from 'maximo-api-client/dist/core/query-builder';
 
 export class AppXmlService implements SimpleOSService {
     private context: vscode.ExtensionContext;
@@ -51,7 +52,7 @@ export class AppXmlService implements SimpleOSService {
                 );
 
                 const edit = new vscode.WorkspaceEdit();
-                if (this.configService.getFormatXmlOnDownloadAndCompare()){
+                if (this.configService.getFormatXmlOnDownloadAndCompare()) {
                     xmlFromServer = await this.formatXmlContent(xmlFromServer);
                 }
                 edit.replace(document.uri, fullRange, xmlFromServer);
@@ -78,79 +79,176 @@ export class AppXmlService implements SimpleOSService {
                 return;
             }
 
-            let rootFolder = vscode.workspace.workspaceFolders[0]; // Workspace root folder
-            const options: vscode.OpenDialogOptions = {
-                canSelectMany: false,
-                openLabel: 'Select',
-                canSelectFiles: false,
-                canSelectFolders: true,
-                defaultUri: rootFolder.uri,
-                filters: {
-                    'All files': ['*']
-                }
+            const rootFolder = vscode.workspace.workspaceFolders[0]; // Workspace root folder
+
+            // Helper: sanitize filename and ensure uniqueness
+            const sanitizeFilename = (name: string) => {
+                return name.replace(/[<>:\"\\/\|\?\*]/g, '_').slice(0, 240);
             };
 
-            let selectedFolderUri: vscode.Uri | undefined = await vscode.window.showOpenDialog(options).then(folderUri => {
-                if (folderUri && folderUri[0]) {
-                    let selectedFolder = folderUri[0]; // User selected folder
-                    let selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selectedFolder);
-                    if (selectedFolderRoot !== rootFolder) { // The selected folder is NOT part of already opened project
+            // Helper: prompt for folder (ensure it's part of current workspace)
+            const promptForFolder = async (): Promise<vscode.Uri | undefined> => {
+                const options: vscode.OpenDialogOptions = {
+                    canSelectMany: false,
+                    openLabel: 'Select',
+                    canSelectFiles: false,
+                    canSelectFolders: true,
+                    defaultUri: rootFolder.uri,
+                    filters: { 'All files': ['*'] }
+                };
+                const chosen = await vscode.window.showOpenDialog(options);
+                if (chosen && chosen[0]) {
+                    const selected = chosen[0];
+                    const selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selected);
+                    if (selectedFolderRoot !== rootFolder) {
                         showError("The selected folder is not part of the project. Please select a folder from the current project.");
-                        return;
+                        return undefined;
                     }
-                    this.logger.debug('Selected file: ' + selectedFolder.fsPath);
-                    return selectedFolder;
+                    return selected;
                 }
                 return undefined;
-            });
+            };
 
-            if (!selectedFolderUri) {
-                showError("Folder selection error. It might not be part of the project.");
-                return;
-            }
 
-            let selectedFolderUriResolved: vscode.Uri = selectedFolderUri as vscode.Uri;
+            // Background fetch of app list to speed up Multiple flow
+            const fetchAppList = async () => {
+                const appQuery = new QueryBuilder<any>(this.getMaximoClient().getMaxAppService().getObjectStructure())
+                    .select(['app', 'description'])
+                    .pageSize(3000);
+                const list = await this.getMaximoClient().getMaxAppService().findAll(appQuery);
+                return list || [];
+            };
 
-            // Show progress bar
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: `Downloading app xmls from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
-                cancellable: false,
-            }, async (progress) => {
-                // Step 1: Start downloading application xmls
-                progress.report({ increment: 0, message: "Downloading application xmls..." });
-                let downloadAllResponse = (await this.getMaximoClient().getMaxAppService().getAllAppPresentations());
+            // Helper: write list of applications to folder
+            const writeAppsToFolder = async (apps: any[], folderUri: vscode.Uri, progress: vscode.Progress<{ message?: string; increment?: number }>, token?: vscode.CancellationToken) => {
+                if (!apps || apps.length === 0) return 0;
 
-                if (downloadAllResponse.length === 0) {
-                    vscode.window.showWarningMessage("No application xmls found on the server");
-                    this.logger.warn("No application xmls found on the server");
+                for (let i = 0; i < apps.length; i++) {
+                    if (token?.isCancellationRequested) break;
+                    const app = apps[i];
+                    const baseName = sanitizeFilename((app.app).toString());
+                    let fileName = `${baseName}.xml`;
+                    const xmlRaw = app.maxpresentation?.[0]?.presentation ? app.maxpresentation[0].presentation : '';
+                    const xmlContent = (this.configService.getFormatXmlOnDownloadAndCompare()) ? await this.formatXmlContent(xmlRaw)
+                        : xmlRaw;
+
+                    const filePath = vscode.Uri.joinPath(folderUri, fileName);
+                    try {
+                        await vscode.workspace.fs.writeFile(filePath, Buffer.from(xmlContent, 'utf8'));
+                    } catch (writeErr) {
+                        this.logger.error(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                        showError(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                    }
+
+                    const increment = Math.max(1, Math.floor(80 / apps.length));
+                    progress.report({ increment, message: `Writing ${fileName} (${i + 1}/${apps.length})` });
+                }
+                return apps.length;
+            };
+            const backgroundFetch = fetchAppList();
+
+            // Ask user if they want All or Multiple first.
+            const mode = await vscode.window.showQuickPick([
+                { label: 'All', description: 'Download every application xml from the server' },
+                { label: 'Multiple', description: 'Choose multiple application xmls to download' }
+            ], { placeHolder: 'Download All or Multiple application xmls?' });
+
+            if (!mode) return; // user cancelled
+
+            let picked: vscode.QuickPickItem[] | undefined;
+            let selectedFolderUri: vscode.Uri | undefined;
+
+            if (mode.label === 'Multiple') {
+                // Show busy QuickPick while background fetch runs
+                const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+                quickPick.canSelectMany = true;
+                quickPick.ignoreFocusOut = true;
+                quickPick.busy = true;
+                quickPick.placeholder = `Loading applications from ${this.configService.getActiveEnvironmentName()}...`;
+                quickPick.show();
+
+                let wasHidden = false;
+                quickPick.onDidHide(() => { wasHidden = true; });
+
+                let apps: any[] = [];
+                try {
+                    apps = await backgroundFetch;
+                } catch (fetchErr) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showError(`Failed to fetch application list: ${(fetchErr as Error).message}`);
                     return;
                 }
 
-                // Step 2: Full response received
-                progress.report({ increment: 50, message: "Download complete. Preparing to write appxmls..." });
+                if (wasHidden) { quickPick.dispose(); return; }
 
-                // Step 3: Write application xmls to files
-                for (const appxml of downloadAllResponse) {
-                    const appName = appxml.app;
-                    const fileExtension = 'xml';
-                    const fileName = `${appName}.${fileExtension}`;
-                    const filePath = vscode.Uri.joinPath(selectedFolderUriResolved, fileName);
-                    // Safely obtain presentation XML from possible locations (maxpresentation array or presentation prop)
-                    const xmlRaw = appxml.maxpresentation?.[0]?.presentation ? appxml.maxpresentation[0].presentation : '';
-                    const xmlContent = (this.configService.getFormatXmlOnDownloadAndCompare()) ? await this.formatXmlContent(xmlRaw)
-                        : xmlRaw;
-                    await vscode.workspace.fs.writeFile(filePath, Buffer.from(xmlContent || '', 'utf8'));
+                if (!apps || apps.length === 0) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showWarning(`No application xmls found on ${this.configService.getActiveEnvironmentName()}`);
+                    return;
                 }
 
-                // Step 4: Writing complete
-                progress.report({ increment: 25, message: "Writing application xmls to files..." });
+                quickPick.busy = false;
+                quickPick.placeholder = `Search or select applications (found ${apps.length})`;
+                quickPick.items = apps.map((s: any) => ({ label: s.app || '<no-name>', description: s.description ? (s.description.length > 120 ? s.description.substring(0, 117) + '...' : s.description) : '' }));
 
-                // Step 5: Finalize
-                progress.report({ increment: 25, message: "All application xmls downloaded and written successfully!" });
-                const successMsg = `All ${downloadAllResponse.length} application xmls downloaded and written successfully to ${selectedFolderUriResolved.fsPath}!`;
-                this.logger.info(successMsg);
-                vscode.window.showInformationMessage(successMsg);
+                const chosen: vscode.QuickPickItem[] | undefined = await new Promise(resolve => {
+                    quickPick.onDidAccept(() => { resolve([...quickPick.selectedItems]); quickPick.hide(); quickPick.dispose(); });
+                    quickPick.onDidHide(() => { resolve(undefined); quickPick.dispose(); });
+                });
+
+                if (!chosen || chosen.length === 0) return;
+                picked = chosen;
+
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) return;
+            } else {
+                // All
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) return;
+            }
+
+            // Run actual download/write with progress
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: `Downloading application xmls from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
+                cancellable: true,
+            }, async (progress, token) => {
+                progress.report({ increment: 5, message: 'Preparing download...' });
+                try {
+                    let appQuery = '';
+                    if (mode.label != 'All') { // It is multiselection
+                        const apps = await backgroundFetch; // should already be resolved but safe to await
+                        const pickedLabels = picked!.map(p => p.label);
+                        progress.report({ increment: 10, message: `Fetching ${picked!.length} selected apps...` });
+
+                        const selectedApp = apps
+                            .filter((c: any) => pickedLabels.includes(c.app))
+                            .map(c => c.app).join('","');
+                        appQuery = `app in ["${selectedApp}"]`;
+                    }
+                    else { // All selected
+                        progress.report({ increment: 10, message: `Fetching all apps...` });
+                    }
+                    this.logger.debug(`Fetching apps with query: ${appQuery}`);
+                    progress.report({ increment: 10, message: 'Fetching all apps from server...' });
+                    const appQueryBuilder = new QueryBuilder<any>(this.getMaximoClient().getMaxAppService().getObjectStructure())
+                        .select(['app', 'expression'])
+                        .where(appQuery)
+                        .pageSize(3000);
+                    const fullList = await this.getMaximoClient().getMaxAppService().findAll(appQueryBuilder);
+                    if (!fullList || fullList.length === 0) {
+                        showWarning(`No apps found on ${this.configService.getActiveEnvironmentName()}`);
+                        return;
+                    }
+                    progress.report({ increment: 20, message: `Found ${fullList.length} apps. Writing files...` });
+                    await writeAppsToFolder(fullList, selectedFolderUri!, progress, token);
+                    progress.report({ increment: 100, message: 'Download completed' });
+                    showInformation(`Successfully downloaded ${fullList.length} apps to ${selectedFolderUri!.fsPath}`);
+                } catch (err) {
+                    showError(`Failed to download apps: ${(err as Error).message}`);
+                }
             });
         } catch (error) {
             showError(`Failed to download application xmls: ${(error as Error).message}`);
@@ -167,7 +265,7 @@ export class AppXmlService implements SimpleOSService {
             }
             const appxml: Partial<MaxPresentation> = {
                 app: getFilename(),
-                maxpresentation: [{presentation: source}],
+                maxpresentation: [{ presentation: source }],
                 properties: 'app'
             }
             const addUpdateBuilder = this.getMaximoClient().appXml.bulkOperation().addUpdate(appxml);
@@ -235,11 +333,11 @@ export class AppXmlService implements SimpleOSService {
         try {
             this.logger.debug('Comparing application xml with environment...');
             const appName = getFilename();
-            
+
             // Create client for the target environment
             const { MaximoClientProvider } = await import('../../client/client');
             const targetClient = MaximoClientProvider.createClientFromEnvironment(environment, this.logger);
-            
+
             let sourceFromServer = await targetClient.getMaxAppService().getAppPresentation(appName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No application xml source found for the app ${appName}`);

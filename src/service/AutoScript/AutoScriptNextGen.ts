@@ -7,6 +7,7 @@ import { getFilename, getLanguageFromExtension, showError, showInformation, show
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 
 import { AutoScript } from 'maximo-api-client';
+import { QueryBuilder } from 'maximo-api-client/dist/core/query-builder';
 
 export class AutoScriptNextGen implements SimpleOSService {
     private context: vscode.ExtensionContext;
@@ -67,83 +68,186 @@ export class AutoScriptNextGen implements SimpleOSService {
 
     async downloadAll(): Promise<void> {
         try {
-            this.logger.debug('Downloading all scripts...');
+            this.logger.debug('Downloading scripts (all/multiple) via picker...');
+
+            // ensure workspace
             if (!vscode.workspace.workspaceFolders) {
                 showError("Please open a workspace or folder first");
                 return;
             }
 
-            let rootFolder = vscode.workspace.workspaceFolders[0]; // Workspace root folder
-            const options: vscode.OpenDialogOptions = {
-                canSelectMany: false,
-                openLabel: 'Select',
-                canSelectFiles: false,
-                canSelectFolders: true,
-                defaultUri: rootFolder.uri,
-                filters: {
-                    'All files': ['*']
-                }
+            const rootFolder = vscode.workspace.workspaceFolders[0];
+
+            // Helper: sanitize filename and ensure uniqueness
+            const sanitizeFilename = (name: string) => {
+                return name.replace(/[<>:\"\\/\|\?\*]/g, '_').slice(0, 240);
             };
 
-            let selectedFolderUri: vscode.Uri | undefined = await vscode.window.showOpenDialog(options).then(folderUri => {
-                if (folderUri && folderUri[0]) {
-                    let selectedFolder = folderUri[0]; // User selected folder
-                    let selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selectedFolder);
-                    if (selectedFolderRoot !== rootFolder) { // The selected folder is NOT part of already opened project
+            // Helper: prompt for folder (ensure it's part of current workspace)
+            const promptForFolder = async (): Promise<vscode.Uri | undefined> => {
+                const options: vscode.OpenDialogOptions = {
+                    canSelectMany: false,
+                    openLabel: 'Select',
+                    canSelectFiles: false,
+                    canSelectFolders: true,
+                    defaultUri: rootFolder.uri,
+                    filters: { 'All files': ['*'] }
+                };
+                const chosen = await vscode.window.showOpenDialog(options);
+                if (chosen && chosen[0]) {
+                    const selected = chosen[0];
+                    const selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selected);
+                    if (selectedFolderRoot !== rootFolder) {
                         showError("The selected folder is not part of the project. Please select a folder from the current project.");
-                        return;
+                        return undefined;
                     }
-                    this.logger.debug('Selected file: ' + selectedFolder.fsPath);
-                    return selectedFolder;
+                    return selected;
                 }
                 return undefined;
-            });
+            };
 
-            if (!selectedFolderUri) {
-                showError("Folder selection error. It might not be part of the project.");
-                return;
-            }
+            // Start background fetch early to reduce wait time for the Multiple flow
+            const fetchScriptList = async () => {
+                // Fallback to downloadAllScripts which returns full meta; map to lightweight list
+                const appQuery = new QueryBuilder<any>(this.getMaximoClient().getAutoscriptService().getObjectStructure())
+                    .select(['autoscript', 'description'])
+                    .pageSize(3000);
+                const list = await this.getMaximoClient().getConditionExpressionService().findAll(appQuery);
+                return list || [];
+            };
 
-            let selectedFolderUriResolved: vscode.Uri = selectedFolderUri as vscode.Uri;
+            // Helper: write list of scripts to folder
+            const writeScriptsToFolder = async (scripts: any[], folderUri: vscode.Uri, progress: vscode.Progress<{ message?: string; increment?: number }>, token?: vscode.CancellationToken) => {
+                if (!scripts || scripts.length === 0) return 0;
+                for (let i = 0; i < scripts.length; i++) {
+                    if (token?.isCancellationRequested) break;
+                    const script = scripts[i];
+                    const baseName = sanitizeFilename((script.autoscript).toString());
+                    let fileExtension = 'py'; // default
+                    if (script.scriptlanguage) fileExtension = this.getFileExtensionFromLanguage(script.scriptlanguage);
+                    let fileName = `${baseName}.${fileExtension}`;
 
-            // Show progress bar
-            await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: `Downloading Scripts from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
-                cancellable: false,
-            }, async (progress) => {
-                // Step 1: Start downloading scripts
-                progress.report({ increment: 0, message: "Downloading all scripts..." });
-                let downloadAllResponse = (await this.getMaximoClient().autoScript.downloadAllScripts(this.configService.getOS()))
+                    const filePath = vscode.Uri.joinPath(folderUri, fileName);
+                    const content = script.source || script.script || '';
+                    try {
+                        await vscode.workspace.fs.writeFile(filePath, Buffer.from(content, 'utf8'));
+                    } catch (writeErr) {
+                        this.logger.error(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                        showError(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                    }
 
-                if (downloadAllResponse.length === 0) {
-                    vscode.window.showWarningMessage("No scripts found on the server");
-                    this.logger.warn("No scripts found on the server");
+                    const increment = Math.max(1, Math.floor(80 / scripts.length));
+                    progress.report({ increment, message: `Writing ${fileName} (${i + 1}/${scripts.length})` });
+                }
+                return scripts.length;
+            };
+
+
+            const backgroundFetch = fetchScriptList();
+
+            // Ask user if they want All or Multiple first.
+            const mode = await vscode.window.showQuickPick([
+                { label: 'All', description: 'Download every script from the server' },
+                { label: 'Multiple', description: 'Choose multiple scripts to download' }
+            ], { placeHolder: 'Download All or Multiple scripts?' });
+
+            if (!mode) return; // user cancelled
+
+            let picked: vscode.QuickPickItem[] | undefined;
+            let selectedFolderUri: vscode.Uri | undefined;
+
+            if (mode.label === 'Multiple') {
+                // Show busy QuickPick while background fetch runs
+                const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+                quickPick.canSelectMany = true;
+                quickPick.ignoreFocusOut = true;
+                quickPick.busy = true;
+                quickPick.placeholder = `Loading scripts from ${this.configService.getActiveEnvironmentName()}...`;
+                quickPick.show();
+
+                let wasHidden = false;
+                quickPick.onDidHide(() => { wasHidden = true; });
+
+                let scripts: any[] = [];
+                try {
+                    scripts = await backgroundFetch;
+                } catch (fetchErr) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showError(`Failed to fetch scripts: ${(fetchErr as Error).message}`);
                     return;
                 }
 
-                // Step 2: Full response received
-                progress.report({ increment: 50, message: "Download complete. Preparing to write scripts..." });
+                if (wasHidden) { quickPick.dispose(); return; }
 
-                // Step 3: Write scripts to files
-                for (const script of downloadAllResponse) {
-                    const scriptName = script.autoscript;
-                    const scriptLanguage = script.scriptlanguage;
-                    const fileExtension = this.getFileExtensionFromLanguage(scriptLanguage ?? '');
-                    const fileName = `${scriptName}.${fileExtension}`;
-                    const filePath = vscode.Uri.joinPath(selectedFolderUriResolved, fileName);
-
-                    await vscode.workspace.fs.writeFile(filePath, Buffer.from(script.source || '', 'utf8'));
+                if (!scripts || scripts.length === 0) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showWarning(`No scripts found on ${this.configService.getActiveEnvironmentName()}`);
+                    return;
                 }
 
-                // Step 4: Writing complete
-                progress.report({ increment: 25, message: "Writing scripts to files..." });
+                quickPick.busy = false;
+                quickPick.placeholder = `Search or select scripts (found ${scripts.length})`;
+                quickPick.items = scripts.map((s: any) => ({ label: s.autoscript || '<no-name>', description: s.description ? (s.description.length > 120 ? s.description.substring(0, 117) + '...' : s.description) : '' }));
 
-                // Step 5: Finalize
-                progress.report({ increment: 25, message: "All scripts downloaded and written successfully!" });
-                const successMsg = `All ${downloadAllResponse.length} scripts downloaded and written successfully to ${selectedFolderUriResolved.fsPath}!`;
-                this.logger.info(successMsg);
-                vscode.window.showInformationMessage(successMsg);
+                const chosen: vscode.QuickPickItem[] | undefined = await new Promise(resolve => {
+                    quickPick.onDidAccept(() => { resolve([...quickPick.selectedItems]); quickPick.hide(); quickPick.dispose(); });
+                    quickPick.onDidHide(() => { resolve(undefined); quickPick.dispose(); });
+                });
+
+                if (!chosen || chosen.length === 0) return;
+                picked = chosen;
+
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) return;
+            } else {
+                // All
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) return;
+            }
+
+            // Run actual download/write with progress
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: `Downloading Scripts from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
+                cancellable: true
+            }, async (progress, token) => {
+                progress.report({ increment: 5, message: 'Preparing download...' });
+
+                try {
+                    let scriptQuery = '';
+                    if (mode.label != 'All') { // It is multiselection
+                        const scripts = await backgroundFetch; // should already be resolved but safe to await
+                        const pickedLabels = picked!.map(p => p.label);
+                        progress.report({ increment: 10, message: `Fetching ${picked!.length} selected scripts...` });
+
+                        const selectedScripts = scripts
+                            .filter((c: any) => pickedLabels.includes(c.autoscript))
+                            .map(c => c.autoscript).join('","');
+                        scriptQuery = `autoscript in ["${selectedScripts}"]`;
+                    }
+                    else { // All selected
+                        progress.report({ increment: 10, message: `Fetching all scripts...` });
+                    }
+                    this.logger.debug(`Fetching scripts with query: ${scriptQuery}`);
+                    progress.report({ increment: 10, message: 'Fetching all scripts from server...' });
+                    const scriptQueryBuilder = new QueryBuilder<any>(this.getMaximoClient().autoScript.getObjectStructure())
+                        .select(['autoscript', 'source', 'scriptlanguage'])
+                        .where(scriptQuery)
+                        .pageSize(3000);
+                    const fullList = await this.getMaximoClient().getConditionExpressionService().findAll(scriptQueryBuilder);
+                    if (!fullList || fullList.length === 0) {
+                        showWarning(`No conditions found on ${this.configService.getActiveEnvironmentName()}`);
+                        return;
+                    }
+                    progress.report({ increment: 20, message: `Found ${fullList.length} scripts. Writing files...` });
+                    await writeScriptsToFolder(fullList, selectedFolderUri!, progress, token);
+                    progress.report({ increment: 100, message: 'Download completed' });
+                    showInformation(`Successfully downloaded ${fullList.length} scripts to ${selectedFolderUri!.fsPath}`);
+                } catch (err) {
+                    showError(`Failed to download scripts: ${(err as Error).message}`);
+                }
             });
         } catch (error) {
             showError(`Failed to download all scripts: ${(error as Error).message}`);
@@ -226,18 +330,18 @@ export class AutoScriptNextGen implements SimpleOSService {
         try {
             this.logger.debug('Comparing script with environment...');
             const scriptName = getFilename();
-            
+
             // Create client for the target environment
             const { MaximoClientProvider } = await import('../../client/client');
             const targetClient = MaximoClientProvider.createClientFromEnvironment(environment, this.logger);
-            
+
             const sourceFromServer = await targetClient.autoScript.downloadScriptSource(scriptName);
             if (!sourceFromServer) {
                 vscode.window.showWarningMessage(`No script source found for the script ${scriptName}`);
                 this.logger.warn(`No script source found for the script ${scriptName} from ${environment.name} [${environment.hostname}:${environment.port}]`);
                 return;
             }
-            
+
             // Create a virtual document URI for the server script content
             let serverScript = vscode.Uri.parse('mxscript:' + encodeURIComponent(sourceFromServer));
             const { activeTextEditor } = vscode.window;

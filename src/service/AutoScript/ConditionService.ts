@@ -67,79 +67,203 @@ export class ConditionService implements SimpleOSService {
 
     async downloadAll(): Promise<void> {
         try {
-            this.logger.debug('Downloading all conditions...');
+            this.logger.debug('Downloading conditions (all/multiple) via picker...');
+
+            // ensure workspace
             if (!vscode.workspace.workspaceFolders) {
                 showError("Please open a workspace or folder first");
                 return;
             }
 
-            let rootFolder = vscode.workspace.workspaceFolders[0];
-            const options: vscode.OpenDialogOptions = {
-                canSelectMany: false,
-                openLabel: 'Select',
-                canSelectFiles: false,
-                canSelectFolders: true,
-                defaultUri: rootFolder.uri,
-                filters: {
-                    'All files': ['*']
-                }
+            const rootFolder = vscode.workspace.workspaceFolders[0];
+
+            // Helper: sanitize filename and ensure uniqueness
+            const sanitizeFilename = (name: string) => {
+                // remove illegal chars for Windows, keep it simple
+                return name.replace(/[<>:"\\/\|\?\*]/g, '_').slice(0, 240);
             };
 
-            let selectedFolderUri: vscode.Uri | undefined = await vscode.window.showOpenDialog(options).then(folderUri => {
-                if (folderUri && folderUri[0]) {
-                    return folderUri[0];
+            // Helper: prompt for folder
+            const promptForFolder = async (): Promise<vscode.Uri | undefined> => {
+                const options: vscode.OpenDialogOptions = {
+                    canSelectMany: false,
+                    openLabel: 'Select',
+                    canSelectFiles: false,
+                    canSelectFolders: true,
+                    defaultUri: rootFolder.uri,
+                    filters: { 'All files': ['*'] }
+                };
+                const chosen = await vscode.window.showOpenDialog(options);
+                if (chosen && chosen[0]) {
+                    const selected = chosen[0];
+                    const selectedFolderRoot = vscode.workspace.getWorkspaceFolder(selected);
+                    if (selectedFolderRoot !== rootFolder) {
+                        showError("The selected folder is not part of the project. Please select a folder from the current project.");
+                        return undefined;
+                    }
+                    return selected;
                 }
                 return undefined;
-            });
+            };
 
-            if (!selectedFolderUri) {
-                showError("Folder selection error. It might not be part of the project.");
-                return;
+            // Fetch background lightweight list of conditions from server
+            const fetchConditionList = async () => {
+                const appQuery = new QueryBuilder<any>(this.getMaximoClient().getConditionExpressionService().getObjectStructure())
+                    .select(['conditionnum', 'description'])
+                    .where('type="EXPRESSION"')
+                    .pageSize(3000);
+                const list = await this.getMaximoClient().getConditionExpressionService().findAll(appQuery);
+                return list || [];
+            };
+
+            // Helper: write list of conditions to folder
+            const writeConditionsToFolder = async (conditions: any[], folderUri: vscode.Uri, progress: vscode.Progress<{ message?: string; increment?: number }>, token?: vscode.CancellationToken) => {
+                if (!conditions || conditions.length === 0) return 0;
+
+                for (let i = 0; i < conditions.length; i++) {
+                    if (token?.isCancellationRequested) break;
+                    const condition = conditions[i];
+                    const baseName = sanitizeFilename((condition.conditionnum || condition.description || `condition_${i + 1}`).toString());
+                    let fileName = `${baseName}.sql`;
+
+                    const filePath = vscode.Uri.joinPath(folderUri, fileName);
+                    const content = condition.expression || condition.description || '';
+                    try {
+                        await vscode.workspace.fs.writeFile(filePath, Buffer.from(content, 'utf8'));
+                    } catch (writeErr) {
+                        this.logger.error(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                        showError(`Failed to write file ${filePath.fsPath}: ${(writeErr as Error).message}`);
+                    }
+
+                    const increment = Math.max(1, Math.floor(80 / conditions.length));
+                    progress.report({ increment, message: `Writing ${fileName} (${i + 1}/${conditions.length})` });
+                }
+                return conditions.length;
+            };
+
+            // Start background fetch early to reduce wait time for the Multiple flow
+            const backgroundFetch = fetchConditionList();
+
+            // Ask user if they want All or Multiple first. This is fast UI:
+            const mode = await vscode.window.showQuickPick([
+                { label: 'All', description: 'Download every SQL condition from the server' },
+                { label: 'Multiple', description: 'Choose multiple conditions to download' }
+            ], { placeHolder: 'Download All or Multiple conditions?' });
+
+            if (!mode) return; // user cancelled
+
+            // If user chose Multiple, wait for the background fetch to finish and then show the detailed picker
+            let picked: vscode.QuickPickItem[] | undefined;
+            let selectedFolderUri: vscode.Uri | undefined;
+
+            if (mode.label === 'Multiple') {
+                // Show a busy QuickPick immediately while background fetch runs
+                const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+                quickPick.canSelectMany = true;
+                quickPick.ignoreFocusOut = true;
+                quickPick.busy = true;
+                quickPick.placeholder = `Loading conditions from ${this.configService.getActiveEnvironmentName()}...`;
+                quickPick.show();
+
+                // track if user dismissed the picker while we were loading
+                let wasHidden = false;
+                quickPick.onDidHide(() => { wasHidden = true; });
+
+                let conditions: any[] = [];
+                try {
+                    conditions = await backgroundFetch;
+                } catch (fetchErr) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showError(`Failed to fetch conditions: ${(fetchErr as Error).message}`);
+                    return;
+                }
+
+                if (wasHidden) {
+                    // user dismissed picker while loading
+                    quickPick.dispose();
+                    return;
+                }
+
+                if (!conditions || conditions.length === 0) {
+                    quickPick.hide();
+                    quickPick.dispose();
+                    showWarning(`No conditions found on ${this.configService.getActiveEnvironmentName()}`);
+                    return;
+                }
+
+                quickPick.busy = false;
+                quickPick.placeholder = `Search or select conditions (found ${conditions.length})`;
+
+                const items: vscode.QuickPickItem[] = conditions.map((c: any) => ({
+                    label: c.conditionnum || '<no-name>',
+                    description: c.description ? (c.description.length > 120 ? c.description.substring(0, 117) + '...' : c.description) : ''
+                }));
+                quickPick.items = items;
+
+                const chosen: vscode.QuickPickItem[] | undefined = await new Promise(resolve => {
+                    quickPick.onDidAccept(() => { resolve([...quickPick.selectedItems]); quickPick.hide(); quickPick.dispose(); });
+                    quickPick.onDidHide(() => { resolve(undefined); quickPick.dispose(); });
+                });
+
+                if (!chosen || chosen.length === 0) return; // cancelled or no pick
+                picked = chosen;
+
+                // Prompt for folder now that we have selection
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) return;
+
+            } else {
+                // mode === 'All'
+                // prompt for folder immediately
+                selectedFolderUri = await promptForFolder();
+                if (!selectedFolderUri) {
+                    showError("Folder selection error. It might not be part of the project.");
+                    return;
+                }
             }
 
-            let selectedFolderUriResolved: vscode.Uri = selectedFolderUri as vscode.Uri;
-
-            // Show progress bar
+            // Run actual download/write with progress
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
                 title: `Downloading Conditions from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`,
-                cancellable: false,
-            }, async (progress) => {
-                // Step 1: Start downloading conditions
-                progress.report({ increment: 10, message: "Starting download..." });
+                cancellable: true
+            }, async (progress, token) => {
+                progress.report({ increment: 5, message: 'Preparing download...' });
 
                 try {
-                    // const conditions = await this.getMaximoClient().getConditionExpressionService().downloadAllConditions();
-                    const appQuery = new QueryBuilder<any>(this.getMaximoClient().getConditionExpressionService().getObjectStructure())
-                        .select(['conditionnum', 'description', 'type', 'expression'])
-                        .where('type="EXPRESSION"')
-                        .pageSize(2000);
-                    const conditions = await this.getMaximoClient().getConditionExpressionService().findAll(appQuery);
+                    let conditionQuery = '';
+                    if (mode.label != 'All') { // It is multiselection
+                        const conditions = await backgroundFetch; // should already be resolved but safe to await
+                        const pickedLabels = picked!.map(p => p.label);
+                        progress.report({ increment: 10, message: `Fetching ${picked!.length} selected conditions...` });
 
-                    if (!conditions || conditions.length === 0) {
+                        const selectedCondition = conditions
+                            .filter((c: any) => pickedLabels.includes(c.conditionnum))
+                            .map(c => c.conditionnum).join('","');
+                        conditionQuery = `type="EXPRESSION" and conditionnum in ["${selectedCondition}"]`;
+                    }
+                    else { // All selected
+                        progress.report({ increment: 10, message: `Fetching all conditions...` });
+                        conditionQuery = `type="EXPRESSION"`;
+                    }
+                    this.logger.debug(`Fetching conditions with query: ${conditionQuery}`);
+                    progress.report({ increment: 10, message: 'Fetching all conditions from server...' });
+                    const conditionQueryBuilder = new QueryBuilder<any>(this.getMaximoClient().getConditionExpressionService().getObjectStructure())
+                        .select(['conditionnum', 'expression'])
+                        .where(conditionQuery)
+                        .pageSize(3000);
+                    const fullList = await this.getMaximoClient().getConditionExpressionService().findAll(conditionQueryBuilder);
+                    if (!fullList || fullList.length === 0) {
                         showWarning(`No conditions found on ${this.configService.getActiveEnvironmentName()}`);
                         return;
                     }
-
-                    progress.report({ increment: 30, message: `Found ${conditions.length} conditions. Writing files...` });
-
-                    // Write each condition to a file
-                    for (let i = 0; i < conditions.length; i++) {
-                        const condition = conditions[i];
-                        const fileName = `${condition.conditionnum || condition.description}.sql`; // Assuming SQL format
-                        const filePath = vscode.Uri.joinPath(selectedFolderUriResolved, fileName);
-
-                        await vscode.workspace.fs.writeFile(filePath, Buffer.from(condition.expression || condition.description || '', 'utf8'));
-
-                        const progressIncrement = Math.floor(60 / conditions.length);
-                        progress.report({ increment: progressIncrement, message: `Writing ${fileName}...` });
-                    }
-
-                    progress.report({ increment: 100, message: "Download completed!" });
-                    showInformation(`Successfully downloaded ${conditions.length} conditions to ${selectedFolderUriResolved.fsPath}`);
-
-                } catch (error) {
-                    showError(`Failed to download conditions: ${(error as Error).message}`);
+                    progress.report({ increment: 20, message: `Found ${fullList.length} conditions. Writing files...` });
+                    await writeConditionsToFolder(fullList, selectedFolderUri!, progress, token);
+                    progress.report({ increment: 100, message: 'Download completed' });
+                    showInformation(`Successfully downloaded ${fullList.length} conditions to ${selectedFolderUri!.fsPath}`);
+                } catch (err) {
+                    showError(`Failed to download conditions: ${(err as Error).message}`);
                 }
             });
         } catch (error) {
