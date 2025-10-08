@@ -61,12 +61,12 @@
     "commands": [
       {
         "command": "mxscript.upload",
-        "title": "Upload Script / XML to Server",
+        "title": "Upload Script / XML to Maximo",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.update",
-        "title": "Download (Update) from Server",
+        "title": "Download (Update) from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
@@ -76,28 +76,28 @@
       },
       {
         "command": "mxscript.downloadall",
-        "title": "Download All Scripts from Server",
+        "title": "Download Script(s) from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.downloadallappxml",
-        "title": "Download All Application's xml from Server",
+        "title": "Download Application xml(s) from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.downloadallcondition",
-        "title": "Download Multiple Conditions from Server",
+        "title": "Download Condition(s) from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.fetchLogs",
-        "title": "Fetch Logs from Server",
+        "title": "Fetch Logs from Manage",
         "category": "Maximo [mxscript]",
         "icon": "$(output)"
       },
       {
         "command": "mxscript.delete",
-        "title": "Delete this file from Server",
+        "title": "Delete this file from Maximo",
         "category": "Maximo [mxscript]"
       },
       {
@@ -149,7 +149,7 @@
       "properties": {
         "mxscript.serverSettings.hostname": {
           "type": "string",
-          "description": "Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)"
+          "description": "Hostname / IP of Maximo (e.g. 10.10.12.12 or www.xyz.com)"
         },
         "mxscript.serverSettings.port": {
           "type": "number",
