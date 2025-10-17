@@ -183,41 +183,52 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         }
     }
 
-    private _setActiveEnvironment(id: string) {
+    private async _setActiveEnvironment(id: string) {
         this._activeEnvironmentId = id;
-        this._saveActiveEnvironment();
-        this._applyActiveEnvironmentSettings();
+        // Persist active environment before applying settings
+        await this._saveActiveEnvironment();
+        await this._applyActiveEnvironmentSettings();
         this._sendEnvironmentsToWebview();
-        
-        // Call the update status bar function
-        if (this._updateStatusBar) {
-            this._updateStatusBar();
+
+        // Call the update status bar function (if provided) and prefer the global command if available
+        try {
+            await vscode.commands.executeCommand('mxscript.updateStatusBar');
+        } catch (e) {
+            if (this._updateStatusBar) {
+                this._updateStatusBar();
+            }
         }
     }
 
-    private _applyActiveEnvironmentSettings() {
+    private async _applyActiveEnvironmentSettings(): Promise<void> {
         const activeEnv = this._environments.find(e => e.id === this._activeEnvironmentId);
         if (!activeEnv) return;
         
-        // Apply settings to VSCode configuration
+        // Apply settings to VSCode configuration and await them
         const config = vscode.workspace.getConfiguration('mxscript');
-        
-        // Apply each setting from the active environment
-        config.update('serverSettings.hostname', activeEnv.hostname, vscode.ConfigurationTarget.Workspace);
-        config.update('serverSettings.port', activeEnv.port, vscode.ConfigurationTarget.Workspace);
-        config.update('authentication.username', activeEnv.username, vscode.ConfigurationTarget.Workspace);
-        config.update('authentication.password', activeEnv.password, vscode.ConfigurationTarget.Workspace);
-        config.update('authentication.apikey', activeEnv.apikey, vscode.ConfigurationTarget.Workspace);
-        config.update('authentication.authenticationType', activeEnv.authenticationType, vscode.ConfigurationTarget.Workspace);
-        config.update('serverSettings.objectStructure', activeEnv.objectStructure, vscode.ConfigurationTarget.Workspace);
-        config.update('serverSettings.httpProtocol', activeEnv.httpProtocol, vscode.ConfigurationTarget.Workspace);
-        config.update('scriptSettings.createPythonFileForJythonScripts', activeEnv.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace);
-        config.update('scriptSettings.logLevel', activeEnv.logLevel, vscode.ConfigurationTarget.Workspace);
-        config.update('scriptSettings.ignoresslerrors', activeEnv.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
-        config.update('serverSettings.activeEnvironmentName', activeEnv.name, vscode.ConfigurationTarget.Workspace);
-        config.update('appxml.formatOnDownloadAndCompare', activeEnv.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace);
-        config.update('appxml.objectStructure', activeEnv.appxml_objectStructure, vscode.ConfigurationTarget.Workspace);
-        config.update('condition.objectStructure', activeEnv.condition_objectStructure, vscode.ConfigurationTarget.Workspace);
+        const promises: Thenable<any>[] = [];
+
+        promises.push(config.update('serverSettings.hostname', activeEnv.hostname, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('serverSettings.port', activeEnv.port, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('authentication.username', activeEnv.username, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('authentication.password', activeEnv.password, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('authentication.apikey', activeEnv.apikey, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('authentication.authenticationType', activeEnv.authenticationType, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('serverSettings.objectStructure', activeEnv.objectStructure, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('serverSettings.httpProtocol', activeEnv.httpProtocol, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('scriptSettings.createPythonFileForJythonScripts', activeEnv.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('scriptSettings.logLevel', activeEnv.logLevel, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('scriptSettings.ignoresslerrors', activeEnv.ignoreSslErrors, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('serverSettings.activeEnvironmentName', activeEnv.name, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('appxml.formatOnDownloadAndCompare', activeEnv.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('appxml.objectStructure', activeEnv.appxml_objectStructure, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('condition.objectStructure', activeEnv.condition_objectStructure, vscode.ConfigurationTarget.Workspace));
+
+        try {
+            await Promise.all(promises);
+        } catch (err) {
+            console.warn('Error applying workspace configuration for active environment', err);
+        }
 
         vscode.window.showInformationMessage(`Switched to Maximo environment: ${activeEnv.name}`);
     }
@@ -228,8 +239,8 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         this._context.workspaceState.update('mxscript.environments', this._workspaceEnvironments);
     }
 
-    private _saveActiveEnvironment() {
-        this._context.globalState.update('mxscript.activeEnvironment', this._activeEnvironmentId);
+    private _saveActiveEnvironment(): Thenable<any> {
+        return this._context.globalState.update('mxscript.activeEnvironment', this._activeEnvironmentId);
     }
 
     private _generateId() {

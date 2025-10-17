@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -50,7 +50,7 @@
     "onCommand:mxscript.update",
     "onCommand:mxscript.compare",
     "onCommand:mxscript.downloadall",
-  "onCommand:mxscript.downloadFromMaximo",
+    "onCommand:mxscript.downloadFromMaximo",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
     "onView:maximoEnvironments",
@@ -62,12 +62,12 @@
     "commands": [
       {
         "command": "mxscript.upload",
-        "title": "Upload Script / XML to Maximo",
+        "title": "Upload to Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.update",
-        "title": "Download (Update) from Maximo",
+        "title": "Download (Update) from Server",
         "category": "Maximo [mxscript]"
       },
       {
@@ -77,22 +77,22 @@
       },
       {
         "command": "mxscript.downloadall",
-        "title": "Download Script(s) from Maximo",
+        "title": "Download Script(s) from Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.downloadallappxml",
-        "title": "Download Application xml(s) from Maximo",
+        "title": "Download Application xml(s) from Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.downloadallcondition",
-        "title": "Download Condition(s) from Maximo",
+        "title": "Download Condition(s) from Server",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "mxscript.downloadFromMaximo",
-        "title": "Download from Maximo",
+        "title": "Download from Server",
         "category": "Maximo [mxscript]"
       },
       {
@@ -103,7 +103,7 @@
       },
       {
         "command": "mxscript.delete",
-        "title": "Delete this file from Maximo",
+        "title": "Delete this file from Server",
         "category": "Maximo [mxscript]"
       },
       {

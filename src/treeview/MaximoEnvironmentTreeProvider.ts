@@ -95,9 +95,9 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
     /**
      * Set an environment as active
      */
-    setActiveEnvironment(environmentId: string | undefined, silent: boolean = false): void {
+    async setActiveEnvironment(environmentId: string | undefined, silent: boolean = false): Promise<void> {
         // Save active environment ID
-        this._context.globalState.update('mxscript.activeEnvironment', environmentId);
+        await this._context.globalState.update('mxscript.activeEnvironment', environmentId);
 
         // Get the environment details
         const globalEnvs = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
@@ -105,26 +105,34 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         const environments = [...globalEnvs, ...workspaceEnvs];
         const environment = environments.find(env => env.id === environmentId);
 
-        if (environment) {
-            // Apply settings to VSCode configuration
-            const config = vscode.workspace.getConfiguration('mxscript');
+        const config = vscode.workspace.getConfiguration('mxscript');
+        const updatePromises: Thenable<any>[] = [];
 
-            config.update('serverSettings.hostname', environment.hostname, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.port', environment.port, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.username', environment.username, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.password', environment.password, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.apikey', environment.apikey, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.authenticationType', environment.authenticationType, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.objectStructure', environment.objectStructure, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.httpProtocol', environment.httpProtocol, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.createPythonFileForJythonScripts', environment.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.logLevel', environment.logLevel, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace);
-            config.update('appxml.formatOnDownloadAndCompare', environment.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.sslcertificate', environment.sslcertificate, vscode.ConfigurationTarget.Workspace);
-            config.update('appxml.objectStructure', environment.appxml_objectStructure, vscode.ConfigurationTarget.Workspace);
-            config.update('condition.objectStructure', environment.condition_objectStructure, vscode.ConfigurationTarget.Workspace);
+        if (environment) {
+            // Apply settings to VSCode configuration (collect promises and await them)
+            updatePromises.push(config.update('serverSettings.hostname', environment.hostname, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.port', environment.port, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.username', environment.username, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.password', environment.password, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.apikey', environment.apikey, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.authenticationType', environment.authenticationType, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.objectStructure', environment.objectStructure, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.httpProtocol', environment.httpProtocol, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.createPythonFileForJythonScripts', environment.createPythonFileForJythonScripts, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.logLevel', environment.logLevel, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.ignoresslerrors', environment.ignoreSslErrors, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.activeEnvironmentName', environment.name, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('appxml.formatOnDownloadAndCompare', environment.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.sslcertificate', environment.sslcertificate, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('appxml.objectStructure', environment.appxml_objectStructure, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('condition.objectStructure', environment.condition_objectStructure, vscode.ConfigurationTarget.Workspace));
+
+            // Wait for configuration updates to complete before reinitializing client and updating UI
+            try {
+                await Promise.all(updatePromises);
+            } catch (err) {
+                console.warn('Error applying workspace configuration for active environment', err);
+            }
 
             // Reinitialize the Maximo client with new environment settings
             try {
@@ -138,34 +146,44 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
             }
         } else {
             // No environment found or ID is undefined, so clear the settings
-            const config = vscode.workspace.getConfiguration('mxscript');
+            updatePromises.push(config.update('serverSettings.hostname', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.port', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.username', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.password', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.apikey', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('authentication.authenticationType', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.objectStructure', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.httpProtocol', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.createPythonFileForJythonScripts', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.logLevel', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.ignoresslerrors', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('serverSettings.activeEnvironmentName', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('appxml.formatOnDownloadAndCompare', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('scriptSettings.sslcertificate', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('appxml.objectStructure', undefined, vscode.ConfigurationTarget.Workspace));
+            updatePromises.push(config.update('condition.objectStructure', undefined, vscode.ConfigurationTarget.Workspace));
 
-            config.update('serverSettings.hostname', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.port', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.username', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.password', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.apikey', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('authentication.authenticationType', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.httpProtocol', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.createPythonFileForJythonScripts', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.logLevel', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.ignoresslerrors', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('serverSettings.activeEnvironmentName', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('appxml.formatOnDownloadAndCompare', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('scriptSettings.sslcertificate', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('appxml.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
-            config.update('condition.objectStructure', undefined, vscode.ConfigurationTarget.Workspace);
+            try {
+                await Promise.all(updatePromises);
+            } catch (err) {
+                console.warn('Error clearing workspace configuration for active environment', err);
+            }
         }
 
         // Refresh the tree view
         this.refresh();
+        // Tell the extension to update its status bar (keeps UI decoupled)
+        try {
+            await vscode.commands.executeCommand('mxscript.updateStatusBar');
+        } catch (e) {
+            // ignore if command not registered yet
+        }
     }
 
     /**
      * Delete an environment
      */
-    deleteEnvironment(environmentId: string): void {
+    async deleteEnvironment(environmentId: string): Promise<void> {
         // Get environments
         const globalEnvs = this._context.globalState.get<MaximoEnvironment[]>('mxscript.environments', []);
         const workspaceEnvs = this._context.workspaceState.get<MaximoEnvironment[]>('mxscript.environments', []);
@@ -190,8 +208,8 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         // Check if active environment was deleted
         const activeEnvId = this._context.globalState.get<string>('mxscript.activeEnvironment');
         if (activeEnvId === environmentId) {
-            this._context.globalState.update('mxscript.activeEnvironment', undefined);
-            this.setActiveEnvironment(undefined, true); // Clear active settings silently
+            // Delegate to setActiveEnvironment which will persist and update UI
+            await this.setActiveEnvironment(undefined, true); // Clear active settings silently
         }
 
         // Show notification

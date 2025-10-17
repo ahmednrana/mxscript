@@ -19,13 +19,13 @@ let statusBarItem: vscode.StatusBarItem;
 let fetchLogsStatusBarItem: vscode.StatusBarItem;
 let uploadStatusBarItem: vscode.StatusBarItem;
 let downloadStatusBarItem: vscode.StatusBarItem;
+let downloadFromMaximoStatusBarItem: vscode.StatusBarItem;
 let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
 
 
 
 export function activate(context: vscode.ExtensionContext) {
-
 
   const configService = new ConfigService();
   // Configure the logger instance based on settings *before* anything else uses it.
@@ -87,10 +87,26 @@ export function activate(context: vscode.ExtensionContext) {
   // Status bar icon for fetching logs
   fetchLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 99);
   fetchLogsStatusBarItem.text = "$(output) Fetch Log";
-  fetchLogsStatusBarItem.command = "mxscript.fetchLogs";
+  // pass an argument so the command knows it was invoked from the status bar
+  fetchLogsStatusBarItem.command = {
+    command: "mxscript.fetchLogs",
+    title: "Fetch Logs",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
   fetchLogsStatusBarItem.tooltip = "Fetch logs from the active environment (Manage / MAS only; not supported on classic Maximo 7.6)";
-  fetchLogsStatusBarItem.hide();
   context.subscriptions.push(fetchLogsStatusBarItem);
+
+  // Status bar icon for Download from Maximo quick-pick
+  downloadFromMaximoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98.5);
+  downloadFromMaximoStatusBarItem.text = "$(desktop-download)";
+  // pass an argument so the command knows it was invoked from the status bar
+  downloadFromMaximoStatusBarItem.command = {
+    command: "mxscript.downloadFromMaximo",
+    title: "Download from Maximo",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  downloadFromMaximoStatusBarItem.tooltip = "Choose what to download from Maximo";
+  context.subscriptions.push(downloadFromMaximoStatusBarItem);
 
   uploadStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98);
   // pass an argument so the command knows it was invoked from the status bar
@@ -163,7 +179,7 @@ export function activate(context: vscode.ExtensionContext) {
         context.extensionUri,
         context,
         undefined,
-        (environment: MaximoEnvironment) => {
+        async (environment: MaximoEnvironment) => {
           // Generate an ID for the new environment
           environment.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
@@ -182,7 +198,12 @@ export function activate(context: vscode.ExtensionContext) {
           const allEnvs = [...globalEnvs, ...workspaceEnvs];
 
           if (allEnvs.length === 1) {
-            context.globalState.update('mxscript.activeEnvironment', environment.id);
+            await context.globalState.update('mxscript.activeEnvironment', environment.id);
+            try {
+              await vscode.commands.executeCommand('mxscript.updateStatusBar');
+            } catch (e) {
+              updateStatusBar(context);
+            }
           }
 
           // Refresh the tree view
@@ -572,13 +593,13 @@ export function activate(context: vscode.ExtensionContext) {
   // Quick pick wrapper: Download from Maximo (lets user choose which type to download)
   let downloadFromMaximo = vscode.commands.registerCommand("mxscript.downloadFromMaximo", async () => {
     const picks: Array<vscode.QuickPickItem & { command: string }> = [
-      { label: "Download Script(s) from Maximo", description: "", command: "mxscript.downloadall" },
-      { label: "Download Application xml(s) from Maximo", description: "", command: "mxscript.downloadallappxml" },
-      { label: "Download Condition(s) from Maximo", description: "", command: "mxscript.downloadallcondition" }
+      { label: "Download Script(s) from Server", description: "", command: "mxscript.downloadall" },
+      { label: "Download Application xml(s) from Server", description: "", command: "mxscript.downloadallappxml" },
+      { label: "Download Condition(s) from Server", description: "", command: "mxscript.downloadallcondition" }
     ];
 
     const qp = vscode.window.createQuickPick<vscode.QuickPickItem & { command: string }>();
-    qp.title = 'Download from Maximo';
+    qp.title = 'Select and download items from server';
     qp.items = picks;
     qp.placeholder = 'Select what you want to download from Maximo';
 
@@ -654,7 +675,7 @@ export function activate(context: vscode.ExtensionContext) {
         context.extensionUri,
         context,
         undefined,
-        (environment: MaximoEnvironment) => {
+        async (environment: MaximoEnvironment) => {
           // Generate an ID for the new environment
           environment.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
 
@@ -673,7 +694,12 @@ export function activate(context: vscode.ExtensionContext) {
           const allEnvs = [...globalEnvs, ...workspaceEnvs];
 
           if (allEnvs.length === 1) {
-            context.globalState.update('mxscript.activeEnvironment', environment.id);
+            await context.globalState.update('mxscript.activeEnvironment', environment.id);
+            try {
+              await vscode.commands.executeCommand('mxscript.updateStatusBar');
+            } catch (e) {
+              updateStatusBar(context);
+            }
           }
 
           // Refresh the tree view
@@ -768,6 +794,10 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(downloadallcondition);
   context.subscriptions.push(fetchLogs);
 
+  // Expose a command so other modules (like the tree provider) can request a status bar refresh
+  const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));
+  context.subscriptions.push(updateStatusBarCommand);
+
   // Initialize status bar with current environment
   updateStatusBar(context);
 }
@@ -789,7 +819,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
   const showActionButtons = isActiveEnvApplicableToWorkspace(context, activeEnv);
 
   if (fetchLogsStatusBarItem) {
-    fetchLogsStatusBarItem.text = "$(output) Fetch Log";
+    fetchLogsStatusBarItem.text = "$(output)";
     fetchLogsStatusBarItem.tooltip = activeEnv ? `Fetch logs for ${activeEnv.name}` : "Fetch logs from active environment";
     if (showActionButtons) {
       fetchLogsStatusBarItem.show();
@@ -798,7 +828,22 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     }
   }
 
+  if (downloadFromMaximoStatusBarItem) {
+    downloadFromMaximoStatusBarItem.text = "$(desktop-download)";
+    downloadFromMaximoStatusBarItem.tooltip = activeEnv ? `Download from ${activeEnv.name}` : "Download from active Maximo environment";
+    if (showActionButtons) {
+      downloadFromMaximoStatusBarItem.show();
+    } else {
+      downloadFromMaximoStatusBarItem.hide();
+    }
+  }
+
   if (showActionButtons) {
+    uploadStatusBarItem.tooltip = activeEnv ? `Upload to ${activeEnv.name}` : "Upload to active Maximo environment";
+    downloadStatusBarItem.tooltip = activeEnv ? `Download from ${activeEnv.name}` : "Download from active Maximo environment";
+    compareStatusBarItem.tooltip = activeEnv ? `Compare with ${activeEnv.name}` : "Compare with active Maximo environment";
+    if (deleteStatusBarItem) deleteStatusBarItem.tooltip = activeEnv ? `Delete from ${activeEnv.name}` : "Delete from active Maximo environment";
+
     uploadStatusBarItem.show();
     downloadStatusBarItem.show();
     compareStatusBarItem.show();
