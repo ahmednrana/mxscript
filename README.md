@@ -244,7 +244,7 @@ When an active environment is set the status bar shows quick-action icons:
 
 - **Active Environment**— It shows the maximo active environment you have selected
 - **Fetch Log** — runs `mxscript.fetchLogs` (fetches logs for active environment) — NOTE: Fetch Logs currently works only against Manage (Maximo Application Suite). It is not supported for classic Maximo 7.6 REST endpoints
-- **Select and download items from server** — Shows the same download high lebel menu as [Download from Server](#download-from-server) (opens a quick-pick to choose: scripts, application XML, or conditions)
+- **Select and download items from server** — Shows the same download high level menu as [Download from Server](#download-from-server) (opens a quick-pick to choose: scripts, application XML, or conditions)
 - **Upload** — Uploads the currently opened file to current environment
 - **Download**— Updates the currently open file from current environment
 - **Compare**— Compares the currently open file with version at current environment
