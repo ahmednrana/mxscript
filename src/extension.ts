@@ -816,12 +816,20 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
 
   // Determine whether the action buttons should be visible for the current workspace.
   // Only show the action buttons when there is an active environment that applies to the current workspace.
-  const showActionButtons = isActiveEnvApplicableToWorkspace(context, activeEnv);
+  const hasActiveEnvironment = !!activeEnv;
+  const actionButtonsApplicable = isActiveEnvApplicableToWorkspace(context, activeEnv);
+  const mismatchNotice = activeEnv && !actionButtonsApplicable
+    ? " (workspace settings differ; commands may prompt to reconfigure)"
+    : "";
 
   if (fetchLogsStatusBarItem) {
     fetchLogsStatusBarItem.text = "$(output)";
-    fetchLogsStatusBarItem.tooltip = activeEnv ? `Fetch logs for ${activeEnv.name}` : "Fetch logs from active environment";
-    if (showActionButtons) {
+    if (activeEnv) {
+      fetchLogsStatusBarItem.tooltip = `Fetch logs for ${activeEnv.name}${mismatchNotice}`;
+    } else {
+      fetchLogsStatusBarItem.tooltip = "Fetch logs from active environment";
+    }
+    if (hasActiveEnvironment) {
       fetchLogsStatusBarItem.show();
     } else {
       fetchLogsStatusBarItem.hide();
@@ -830,19 +838,33 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
 
   if (downloadFromMaximoStatusBarItem) {
     downloadFromMaximoStatusBarItem.text = "$(desktop-download)";
-    downloadFromMaximoStatusBarItem.tooltip = activeEnv ? `Download from ${activeEnv.name}` : "Download from active Maximo environment";
-    if (showActionButtons) {
+    if (activeEnv) {
+      downloadFromMaximoStatusBarItem.tooltip = `Download from ${activeEnv.name}${mismatchNotice}`;
+    } else {
+      downloadFromMaximoStatusBarItem.tooltip = "Download from active Maximo environment";
+    }
+    if (hasActiveEnvironment) {
       downloadFromMaximoStatusBarItem.show();
     } else {
       downloadFromMaximoStatusBarItem.hide();
     }
   }
 
-  if (showActionButtons) {
-    uploadStatusBarItem.tooltip = activeEnv ? `Upload to ${activeEnv.name}` : "Upload to active Maximo environment";
-    downloadStatusBarItem.tooltip = activeEnv ? `Download from ${activeEnv.name}` : "Download from active Maximo environment";
-    compareStatusBarItem.tooltip = activeEnv ? `Compare with ${activeEnv.name}` : "Compare with active Maximo environment";
-    if (deleteStatusBarItem) deleteStatusBarItem.tooltip = activeEnv ? `Delete from ${activeEnv.name}` : "Delete from active Maximo environment";
+  if (hasActiveEnvironment) {
+    uploadStatusBarItem.tooltip = activeEnv
+      ? `Upload to ${activeEnv.name}${mismatchNotice}`
+      : "Upload to active Maximo environment";
+    downloadStatusBarItem.tooltip = activeEnv
+      ? `Download from ${activeEnv.name}${mismatchNotice}`
+      : "Download from active Maximo environment";
+    compareStatusBarItem.tooltip = activeEnv
+      ? `Compare with ${activeEnv.name}${mismatchNotice}`
+      : "Compare with active Maximo environment";
+    if (deleteStatusBarItem) {
+      deleteStatusBarItem.tooltip = activeEnv
+        ? `Delete from ${activeEnv.name}${mismatchNotice}`
+        : "Delete from active Maximo environment";
+    }
 
     uploadStatusBarItem.show();
     downloadStatusBarItem.show();
