@@ -13,6 +13,7 @@ import { ReactEnvironmentEditorPanel } from './treeview/ReactEnvironmentEditorPa
 import { getFileExtension, getFilename, showError, showWarning } from "./utils/utils";
 import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
 import { MaximoEnvironment } from './webview/EnvironmentManager';
+import { CacheRefreshService } from "./service/Cache/CacheRefreshService";
 
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
@@ -620,6 +621,12 @@ export function activate(context: vscode.ExtensionContext) {
     qp.show();
   });
 
+  let refreshCache = vscode.commands.registerCommand("mxscript.refreshCache", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    const cacheService = new CacheRefreshService(context, new ConfigService());
+    await cacheService.refreshCaches();
+  });
+
   let fetchLogs = vscode.commands.registerCommand("mxscript.fetchLogs", async (item?: MaximoEnvironmentTreeItem | MaximoEnvironment) => {
     const environmentFromItem = extractEnvironmentFromItem(item);
 
@@ -788,6 +795,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
   context.subscriptions.push(downloadFromMaximo);
+  context.subscriptions.push(refreshCache);
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteItem);
   context.subscriptions.push(downloadallappxml);

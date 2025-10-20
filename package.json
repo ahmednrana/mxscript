@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.4.2",
+  "version": "1.4.4",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -51,6 +51,7 @@
     "onCommand:mxscript.compare",
     "onCommand:mxscript.downloadall",
     "onCommand:mxscript.downloadFromMaximo",
+    "onCommand:mxscript.refreshCache",
     "onCommand:mxscript.delete",
     "onCommand:mxscript.manageEnvironments",
     "onView:maximoEnvironments",
@@ -93,6 +94,11 @@
       {
         "command": "mxscript.downloadFromMaximo",
         "title": "Download from Server",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.refreshCache",
+        "title": "Refresh Maximo Cache",
         "category": "Maximo [mxscript]"
       },
       {

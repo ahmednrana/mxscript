@@ -8,6 +8,22 @@
 		}
 	],
 	"settings": {
-		"typescript.tsc.autoDetect": "off"
+		"typescript.tsc.autoDetect": "off",
+		"mxscript.serverSettings.hostname": "dev.manage.masdev.transdev.ca",
+		"mxscript.serverSettings.port": 443,
+		"mxscript.authentication.username": "",
+		"mxscript.authentication.password": "",
+		"mxscript.authentication.apikey": "2cofscvpom6v79t5tgb5gd4lbi1ogbc5haaa0ofk",
+		"mxscript.authentication.authenticationType": "apikey",
+		"mxscript.serverSettings.objectStructure": "MXSCRIPT",
+		"mxscript.serverSettings.httpProtocol": "https",
+		"mxscript.scriptSettings.createPythonFileForJythonScripts": true,
+		"mxscript.scriptSettings.logLevel": "INFO",
+		"mxscript.scriptSettings.ignoresslerrors": true,
+		"mxscript.serverSettings.activeEnvironmentName": "mas1_test_environment",
+		"mxscript.appxml.formatOnDownloadAndCompare": true,
+		"mxscript.scriptSettings.sslcertificate": "",
+		"mxscript.appxml.objectStructure": "MXL_APPS",
+		"mxscript.condition.objectStructure": "MXL_CONDITION"
 	}
 }

@@ -13,6 +13,7 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 - Can compare with currently selected or any other Maximo environment
 - Adds buttons in status bar for quick switch, upload, download, compare and fetching logs
 - MAS Supported
+- Can refresh Maximo caches
 
 ## Supported Actions
 
@@ -27,8 +28,17 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 9. [Compare with Another Environment](#compare-with-other-environment)
 10. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
 11. [Manage Environments (Add / Edit / Delete / Set Active)](#managing-environments-in-ui)
+11. [Cache Refresh](#cache-refresh)
 
 ---
+[Requirements](#requirements)
+
+[Configuration](#configuration)
+
+[Status bar shortcuts](#status-bar-shortcuts)
+
+[Tree view actions](#tree-view-actions)
+
 
 ## Actions
 
@@ -235,6 +245,17 @@ There are two types of environments,
   [Back to Top](#mxscript)
 
 
+### Cache Refresh
+
+It can also refresh the cache present in IBM Maximo. Sometimes needed after adding certain items in maximo. Maximo wont refresh the changes unless those caches are refreshed. e.g. INTOBJECT, MAXPROP etc
+
+Upong triggering this option. You will be presented with a list of cache (might differ for 7.6 or MAS) to be refreshed. You can selected them all, multiple or single.
+
+![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/cache-refresh.gif)
+  
+  [Back to Top](#mxscript)
+
+
 
 ## Status bar shortcuts
 
@@ -408,6 +429,10 @@ This extension contributes the following settings:
 [Back to Top](#mxscript)
 
 ## Release Notes
+
+### 1.4.4
+
+- Added option to refresh Maximo cache
 
 ### 1.4.0
 
