@@ -23,7 +23,7 @@ const SETTINGS: SettingMeta[] = [
   { id: 'envName', label: 'Environment Name', group: 'connection', required: true, type: 'string', placeholder: 'Production, Dev...', description: 'Friendly display name for this environment.' },
   {
     id: 'hostname', label: 'Hostname / Base URL', group: 'connection', required: true, type: 'string',
-    placeholder: 'https://mymaximo.example.com',
+    placeholder: 'mymaximo.example.com',
     description: 'The base URL or host where Maximo is reachable. Include protocol if using a full URL.',
     validate: v => !v ? 'Hostname is required' : undefined
   },
