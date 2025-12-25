@@ -88,7 +88,8 @@ export class ReactEnvironmentEditorPanel {
                                 ignoreSslErrors: !!(incoming.ignoreSslErrors ?? this._environment?.ignoreSslErrors ?? true),
                                 formatXmlOnDownloadAndCompare: !!(incoming.formatXmlOnDownloadAndCompare ?? this._environment?.formatXmlOnDownloadAndCompare ?? true),
                                 scope: incoming.scope || this._environment?.scope || 'global',
-                                sslcertificate: incoming.sslcertificate ?? this._environment?.sslcertificate ?? ''
+                                sslcertificate: incoming.sslcertificate ?? this._environment?.sslcertificate ?? '',
+                                toolsHostname: incoming.toolsHostname ?? this._environment?.toolsHostname ?? ''
                             };
                             this._onSave(normalized);
                         }
@@ -112,7 +113,7 @@ export class ReactEnvironmentEditorPanel {
                                 type: 'verificationResult',
                                 ...result
                             });
-                        }).catch(error => { 
+                        }).catch(error => {
                             this._panel.webview.postMessage({
                                 type: 'verificationResult',
                                 success: false,
@@ -165,13 +166,13 @@ export class ReactEnvironmentEditorPanel {
 
     private _getHtmlForWebview(): string {
         const webview = this._panel.webview;
-        
+
         // Use the React build output instead of the old environmentEditor.js
         const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'environmentEditor.js'));
         const codiconUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'codicons', 'codicon.css'));
-        
+
         const nonce = this._nonce();
-        
+
         // Map environment data to React component format
         const initialValues = this._environment ? {
             envName: this._environment.name,
@@ -190,7 +191,8 @@ export class ReactEnvironmentEditorPanel {
             ignoreSsl: this._environment.ignoreSslErrors,
             formatXmlOnDownload: this._environment.formatXmlOnDownloadAndCompare,
             scope: this._environment.scope,
-            sslcertificate: this._environment.sslcertificate
+            sslcertificate: this._environment.sslcertificate,
+            toolsHostname: this._environment.toolsHostname
         } : null;
 
         const bootstrap = {
@@ -234,7 +236,7 @@ export class ReactEnvironmentEditorPanel {
 </body>
 </html>`;
     }
-    
+
     private _nonce(): string {
         let text = '';
         const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

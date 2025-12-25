@@ -36151,9 +36151,17 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       group: "connection",
       required: true,
       type: "string",
-      placeholder: "https://mymaximo.example.com",
+      placeholder: "mymaximo.example.com",
       description: "The base URL or host where Maximo is reachable. Include protocol if using a full URL.",
       validate: (v3) => !v3 ? "Hostname is required" : void 0
+    },
+    {
+      id: "toolsHostname",
+      label: "Tools API Hostname (MAS)",
+      group: "connection",
+      type: "string",
+      placeholder: "maxinst.mymaximo.com",
+      description: "Hostname for Tools API (maxinst). Only for MAS environments. Auto-derived from Hostname if possible."
     },
     { id: "port", label: "Port", group: "connection", type: "number", placeholder: "443", defaultValue: 443, description: "Port to connect to the Maximo server (usually 443 for HTTPS)." },
     { id: "httpProtocol", label: "HTTP Protocol", group: "connection", type: "select", placeholder: "https", defaultValue: "https", options: ["http", "https"], description: "Choose HTTPS for secure connections when supported." },
@@ -36262,12 +36270,26 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const updateValue = (id, value) => {
       console.log(`[updateValue] id: ${id}, value:`, value);
       setForm((f3) => {
-        var _a7;
-        const newFormState = { ...f3, [id]: { ...f3[id], value, touched: true } };
+        var _a7, _b2;
+        let newFormState = { ...f3, [id]: { ...f3[id], value, touched: true } };
         const meta = SETTINGS.find((s8) => s8.id === id);
         const error = validateFieldWithState(meta, value, newFormState);
         newFormState[id].error = error;
-        console.log(`[updateValue:setForm] id: ${id}, old value:`, (_a7 = f3[id]) == null ? void 0 : _a7.value, `new value:`, value);
+        if (id === "hostname" && value && typeof value === "string") {
+          const currentTools = (_a7 = newFormState["toolsHostname"]) == null ? void 0 : _a7.value;
+          if (!currentTools) {
+            const parts = value.split(".");
+            if (parts.length >= 3) {
+              const derived = "maxinst." + parts.slice(1).join(".");
+              newFormState = {
+                ...newFormState,
+                toolsHostname: { value: derived, touched: true }
+                // Auto-fill
+              };
+            }
+          }
+        }
+        console.log(`[updateValue:setForm] id: ${id}, old value:`, (_b2 = f3[id]) == null ? void 0 : _b2.value, `new value:`, value);
         console.log(`[updateValue:setForm] id: ${id}, new field state:`, newFormState[id]);
         return newFormState;
       });
@@ -36402,7 +36424,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         ignoreSslErrors: !!v3.ignoreSsl,
         formatXmlOnDownloadAndCompare: !!v3.formatXmlOnDownload,
         scope: v3.scope,
-        sslcertificate: v3.sslcertificate
+        sslcertificate: v3.sslcertificate,
+        toolsHostname: v3.toolsHostname
       };
     };
     const [vscodeApi, setVscodeApi] = (0, import_react77.useState)(null);

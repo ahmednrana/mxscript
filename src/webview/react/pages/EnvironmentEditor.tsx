@@ -27,6 +27,11 @@ const SETTINGS: SettingMeta[] = [
     description: 'The base URL or host where Maximo is reachable. Include protocol if using a full URL.',
     validate: v => !v ? 'Hostname is required' : undefined
   },
+  {
+    id: 'toolsHostname', label: 'Tools API Hostname (MAS)', group: 'connection', type: 'string',
+    placeholder: 'maxinst.mymaximo.com',
+    description: 'Hostname for Tools API (maxinst). Only for MAS environments. Auto-derived from Hostname if possible.',
+  },
   { id: 'port', label: 'Port', group: 'connection', type: 'number', placeholder: '443', defaultValue: 443, description: 'Port to connect to the Maximo server (usually 443 for HTTPS).' },
   { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http', 'https'], description: 'Choose HTTPS for secure connections when supported.' },
   { id: 'scope', label: 'Scope', group: 'connection', type: 'radio', defaultValue: 'global', options: ['global', 'workspace'], description: 'Whether this environment is stored globally or only for this workspace.' },
@@ -157,10 +162,36 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   const updateValue = (id: string, value: any) => {
     console.log(`[updateValue] id: ${id}, value:`, value);
     setForm(f => {
-      const newFormState = { ...f, [id]: { ...f[id], value, touched: true } };
+      let newFormState = { ...f, [id]: { ...f[id], value, touched: true } };
       const meta = SETTINGS.find(s => s.id === id)!;
       const error = validateFieldWithState(meta, value, newFormState);
       newFormState[id].error = error;
+
+      // Auto-derive toolsHostname from hostname if toolsHostname is empty
+      if (id === 'hostname' && value && typeof value === 'string') {
+        const currentTools = newFormState['toolsHostname']?.value;
+        if (!currentTools) {
+          // Attempt to derive: abc.mymaximo.com -> maxinst.mymaximo.com
+          // Logic: replace first subdomain part if it looks like a standard Maximo hostname,
+          // OR just prepend maxinst if it seems appropriate.
+          // Heuristic: if hostname starts with 'manage.', replace with 'maxinst.'
+          // If it is just 'something.com', maybe we don't know.
+          // Let's try to interpret common patterns or just replace the first part if it has multiple parts.
+          // User said: "starts same as manage url but with the maxinst the in the beginning"
+          // e.g. abc.mymaximo.com -> maxinst.mymaximo.com
+          // So we take everything after the first dot, and prepend maxinst.
+
+          const parts = value.split('.');
+          if (parts.length >= 3) {
+            // e.g. [abc, mymaximo, com] -> maxinst.mymaximo.com
+            const derived = 'maxinst.' + parts.slice(1).join('.');
+            newFormState = {
+              ...newFormState,
+              toolsHostname: { value: derived, touched: true } // Auto-fill
+            };
+          }
+        }
+      }
 
       console.log(`[updateValue:setForm] id: ${id}, old value:`, f[id]?.value, `new value:`, value);
       console.log(`[updateValue:setForm] id: ${id}, new field state:`, newFormState[id]);
@@ -190,7 +221,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   useEffect(() => {
     const valuesToUse = initialValues || (typeof window !== 'undefined' ? (window as any).initialValues : null);
     if (!valuesToUse) return;
-    
+
     setForm(prev => {
       const next: FormState = { ...prev };
       for (const s of SETTINGS) {
@@ -253,11 +284,11 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
     if (vscodeApi) {
       try {
         const payload = mapToEnvironmentPayload();
-        vscodeApi.postMessage({ 
-          type: 'save', 
-          environment: payload 
+        vscodeApi.postMessage({
+          type: 'save',
+          environment: payload
         });
-        
+
         // For real VS Code webview, the extension will handle the save and close the panel
         // For dev preview, simulate success
         if (!('acquireVsCodeApi' in window)) {
@@ -316,7 +347,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       ignoreSslErrors: !!v.ignoreSsl,
       formatXmlOnDownloadAndCompare: !!v.formatXmlOnDownload,
       scope: v.scope,
-      sslcertificate: v.sslcertificate
+      sslcertificate: v.sslcertificate,
+      toolsHostname: v.toolsHostname
     };
   };
 

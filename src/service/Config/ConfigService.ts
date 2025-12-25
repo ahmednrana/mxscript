@@ -27,6 +27,7 @@ export class ConfigService implements IConfigService {
   private activeEnvironmentName: string;
   private ignoreSsl: boolean;
   private sslcertificate: string;
+  private toolsHostname: string | undefined;
   private vscode = require("vscode");
   private formatXmlOnDownloadAndCompare: boolean;
 
@@ -34,6 +35,7 @@ export class ConfigService implements IConfigService {
     const config = this.vscode.workspace.getConfiguration('mxscript');
 
     this.hostname = config.get('serverSettings.hostname');
+    this.toolsHostname = config.get('serverSettings.toolsHostname');
     this.httpProtocol = config.get('serverSettings.httpProtocol');
     this.port = config.get('serverSettings.port');
     this.username = config.get('authentication.username');
@@ -137,6 +139,9 @@ export class ConfigService implements IConfigService {
   }
   public getHostname(): string {
     return this.hostname;
+  }
+  public getToolsHostname(): string | undefined {
+    return this.toolsHostname;
   }
 
   public getActiveEnvironmentName(): string {

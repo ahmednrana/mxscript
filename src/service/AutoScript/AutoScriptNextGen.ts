@@ -112,7 +112,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 const appQuery = new QueryBuilder<any>(this.getMaximoClient().getAutoscriptService().getObjectStructure())
                     .select(['autoscript', 'description'])
                     .pageSize(3000);
-                const list = await this.getMaximoClient().getConditionExpressionService().findAll(appQuery);
+                const list = await this.getMaximoClient().getAutoscriptService().findAll(appQuery);
                 return list || [];
             };
 
@@ -236,7 +236,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                         .select(['autoscript', 'source', 'scriptlanguage'])
                         .where(scriptQuery)
                         .pageSize(3000);
-                    const fullList = await this.getMaximoClient().getConditionExpressionService().findAll(scriptQueryBuilder);
+                    const fullList = await this.getMaximoClient().getAutoscriptService().findAll(scriptQueryBuilder);
                     if (!fullList || fullList.length === 0) {
                         showWarning(`No conditions found on ${this.configService.getActiveEnvironmentName()}`);
                         return;
@@ -271,7 +271,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 // status: 'Active',
                 properties: 'autoscript,description,source,status,scriptlanguage'
             }
-            const addUpdateBuilder = this.getMaximoClient().autoScript.bulkOperation().addUpdate(autoscript);
+            const addUpdateBuilder = this.getMaximoClient().autoScript.bulkOperation().addChange(autoscript);
             const addUpdateResult = await this.getMaximoClient().autoScript.executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses

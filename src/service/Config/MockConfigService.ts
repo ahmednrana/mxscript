@@ -140,6 +140,9 @@ export class MockConfigService implements IConfigService {
   getHostname: () => string = () => {
     return this.hostname;
   }
+  public getToolsHostname(): string | undefined {
+    return undefined;
+  }
   public getFilename(): string {
     return 'OSACTION.MXAPIINSPRESULT.CREATEWO';
   }

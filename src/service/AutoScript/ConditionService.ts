@@ -286,7 +286,7 @@ export class ConditionService implements SimpleOSService {
                 expression: source,
                 properties: 'condition,description,source'
             };
-            const addUpdateBuilder = this.getMaximoClient().getConditionExpressionService().bulkOperation().addUpdate(condition);
+            const addUpdateBuilder = this.getMaximoClient().getConditionExpressionService().bulkOperation().addChange(condition);
             const addUpdateResult = await this.getMaximoClient().getConditionExpressionService().executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses

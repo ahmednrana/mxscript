@@ -15,10 +15,11 @@ export interface MaximoEnvironment {
     createPythonFileForJythonScripts: boolean;
     logLevel: string;
     ignoreSslErrors: boolean;
-    scope: 'global' | 'workspace'; 
+    scope: 'global' | 'workspace';
     formatXmlOnDownloadAndCompare: boolean;
     appxml_objectStructure: string;
     condition_objectStructure: string;
+    toolsHostname?: string;
 }
 
 export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProvider {
@@ -99,24 +100,24 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
 
     private _addEnvironment(environment: MaximoEnvironment) {
         environment.id = this._generateId();
-        
+
         // Add to appropriate storage based on scope
         if (environment.scope === 'workspace') {
             this._workspaceEnvironments.push(environment);
         } else {
             this._globalEnvironments.push(environment);
         }
-        
+
         this._saveEnvironments();
-        
+
         // If this is the first environment, make it active
         if (this._environments.length === 1) {
             this._activeEnvironmentId = environment.id;
             this._saveActiveEnvironment();
         }
-        
+
         this._sendEnvironmentsToWebview();
-        
+
         // Update status bar
         if (this._updateStatusBar) {
             this._updateStatusBar();
@@ -127,7 +128,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         // First, find where the environment currently exists
         const globalIndex = this._globalEnvironments.findIndex(e => e.id === environment.id);
         const workspaceIndex = this._workspaceEnvironments.findIndex(e => e.id === environment.id);
-        
+
         // Remove the environment from its current location
         if (globalIndex !== -1) {
             this._globalEnvironments.splice(globalIndex, 1);
@@ -137,17 +138,17 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
             console.log('Environment not found in either global or workspace storage');
             return; // Environment not found
         }
-        
+
         // Add the environment to the correct location based on its new scope
         if (environment.scope === 'workspace') {
             this._workspaceEnvironments.push(environment);
         } else {
             this._globalEnvironments.push(environment);
         }
-        
+
         this._saveEnvironments();
         this._sendEnvironmentsToWebview();
-        
+
         // Update status bar if active environment was updated
         if (this._activeEnvironmentId === environment.id && this._updateStatusBar) {
             this._updateStatusBar();
@@ -157,7 +158,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
     private _deleteEnvironment(id: string) {
         console.log(`Deleting environment: ${id}`);
         console.log(`Before deletion: ${this._environments.length} environments`);
-        
+
         // Find which array contains the environment
         const globalIndex = this._globalEnvironments.findIndex(e => e.id === id);
         if (globalIndex !== -1) {
@@ -165,18 +166,18 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         } else {
             this._workspaceEnvironments = this._workspaceEnvironments.filter(e => e.id !== id);
         }
-        
+
         this._saveEnvironments();
-        
+
         // If active environment was deleted, select a new one
         if (this._activeEnvironmentId === id) {
             this._activeEnvironmentId = this._environments.length > 0 ? this._environments[0].id : undefined;
             this._saveActiveEnvironment();
         }
-        
+
         this._sendEnvironmentsToWebview();
         console.log(`After deletion: ${this._environments.length} environments`);
-        
+
         // Update status bar
         if (this._updateStatusBar) {
             this._updateStatusBar();
@@ -203,7 +204,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
     private async _applyActiveEnvironmentSettings(): Promise<void> {
         const activeEnv = this._environments.find(e => e.id === this._activeEnvironmentId);
         if (!activeEnv) return;
-        
+
         // Apply settings to VSCode configuration and await them
         const config = vscode.workspace.getConfiguration('mxscript');
         const promises: Thenable<any>[] = [];
@@ -223,6 +224,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
         promises.push(config.update('appxml.formatOnDownloadAndCompare', activeEnv.formatXmlOnDownloadAndCompare, vscode.ConfigurationTarget.Workspace));
         promises.push(config.update('appxml.objectStructure', activeEnv.appxml_objectStructure, vscode.ConfigurationTarget.Workspace));
         promises.push(config.update('condition.objectStructure', activeEnv.condition_objectStructure, vscode.ConfigurationTarget.Workspace));
+        promises.push(config.update('serverSettings.toolsHostname', activeEnv.toolsHostname, vscode.ConfigurationTarget.Workspace));
 
         try {
             await Promise.all(promises);

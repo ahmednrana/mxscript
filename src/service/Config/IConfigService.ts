@@ -19,6 +19,7 @@ export default interface IConfigService {
   getOS: () => string;
   getXMLUrl: () => string;
   getHostname: () => string;
+  getToolsHostname: () => string | undefined;
   getCreatePythonScriptInEditor: () => boolean;
   ignoreSslError: () => boolean;
   getActiveEnvironmentName(): string;

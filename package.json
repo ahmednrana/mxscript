@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -162,6 +162,10 @@
         "mxscript.serverSettings.hostname": {
           "type": "string",
           "description": "Hostname / IP of Maximo (e.g. 10.10.12.12 or www.xyz.com)"
+        },
+        "mxscript.serverSettings.toolsHostname": {
+          "type": "string",
+          "description": "Hostname for Tools API (maxinst). Only for MAS environments."
         },
         "mxscript.serverSettings.port": {
           "type": "number",

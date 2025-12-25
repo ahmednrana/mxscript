@@ -114,6 +114,7 @@ export class AppXmlService implements SimpleOSService {
             const fetchAppList = async () => {
                 const appQuery = new QueryBuilder<any>(this.getMaximoClient().getMaxAppService().getObjectStructure())
                     .select(['app', 'description'])
+                    .where('apptype="RUN"')
                     .pageSize(3000);
                 const list = await this.getMaximoClient().getMaxAppService().findAll(appQuery);
                 return list || [];
@@ -128,7 +129,7 @@ export class AppXmlService implements SimpleOSService {
                     const app = apps[i];
                     const baseName = sanitizeFilename((app.app).toString());
                     let fileName = `${baseName}.xml`;
-                    const xmlRaw = app.maxpresentation?.[0]?.presentation ? app.maxpresentation[0].presentation : '';
+                    const xmlRaw = app.maxpresentation?.[0]?.presentation ? app.maxpresentation[0].presentation : app.maxpresentation.presentation ? app.maxpresentation.presentation : '';
                     const xmlContent = (this.configService.getFormatXmlOnDownloadAndCompare()) ? await this.formatXmlContent(xmlRaw)
                         : xmlRaw;
 
@@ -217,7 +218,7 @@ export class AppXmlService implements SimpleOSService {
             }, async (progress, token) => {
                 progress.report({ increment: 5, message: 'Preparing download...' });
                 try {
-                    let appQuery = '';
+                    let appQuery = 'apptype="RUN"';
                     if (mode.label != 'All') { // It is multiselection
                         const apps = await backgroundFetch; // should already be resolved but safe to await
                         const pickedLabels = picked!.map(p => p.label);
@@ -234,7 +235,7 @@ export class AppXmlService implements SimpleOSService {
                     this.logger.debug(`Fetching apps with query: ${appQuery}`);
                     progress.report({ increment: 10, message: 'Fetching all apps from server...' });
                     const appQueryBuilder = new QueryBuilder<any>(this.getMaximoClient().getMaxAppService().getObjectStructure())
-                        .select(['app', 'expression'])
+                        .select(['app', 'maxpresentation.presentation'])
                         .where(appQuery)
                         .pageSize(3000);
                     const fullList = await this.getMaximoClient().getMaxAppService().findAll(appQueryBuilder);
