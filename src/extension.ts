@@ -14,6 +14,7 @@ import { getFileExtension, getFilename, showError, showWarning } from "./utils/u
 import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
 import { MaximoEnvironment } from './webview/EnvironmentManager';
 import { CacheRefreshService } from "./service/Cache/CacheRefreshService";
+import { ToolsService } from "./service/Tools/ToolsService";
 
 // Status bar item to show current environment
 let statusBarItem: vscode.StatusBarItem;
@@ -23,6 +24,7 @@ let downloadStatusBarItem: vscode.StatusBarItem;
 let downloadFromMaximoStatusBarItem: vscode.StatusBarItem;
 let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
+let toolsLogsStatusBarItem: vscode.StatusBarItem;
 
 
 
@@ -154,6 +156,18 @@ export function activate(context: vscode.ExtensionContext) {
   deleteStatusBarItem.tooltip = "Delete from active Maximo environment";
   deleteStatusBarItem.hide();
   context.subscriptions.push(deleteStatusBarItem);
+
+  // Status bar icon for Tools Logs (MAS only - shown when toolsHostname is configured)
+  toolsLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 94);
+  toolsLogsStatusBarItem.command = {
+    command: "mxscript.toolsLogs",
+    title: "Tools Logs",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  toolsLogsStatusBarItem.text = "$(tools) Tools";
+  toolsLogsStatusBarItem.tooltip = "Access MAS Tools API logs";
+  toolsLogsStatusBarItem.hide(); // Initially hidden, shown when toolsHostname is configured
+  context.subscriptions.push(toolsLogsStatusBarItem);
 
   // Create the tree view provider
   const maximoEnvironmentTreeProvider = new MaximoEnvironmentTreeProvider(context);
@@ -650,7 +664,29 @@ export function activate(context: vscode.ExtensionContext) {
     await logService.fetchCurrentEnvironmentLogs(logContentProvider);
   });
 
+  // Tools command (MAS only) - shows main tools menu
+  let toolsLogs = vscode.commands.registerCommand("mxscript.toolsLogs", async (arg?: { source?: string }) => {
+    const activeEnvironment = getActiveEnvironment(context);
+    if (!activeEnvironment) {
+      showWarning("No active environment set. Please select an environment before accessing Tools.");
+      return;
+    }
 
+    const toolsService = new ToolsService();
+    if (!toolsService.hasToolsApi(activeEnvironment)) {
+      vscode.window.showWarningMessage(
+        'Tools API hostname is not configured for this environment. Edit the environment to add the Tools Hostname (maxinst).',
+        'Edit Environment'
+      ).then(selection => {
+        if (selection === 'Edit Environment') {
+          vscode.commands.executeCommand('maximoEnvironments.editEnvironment', { environment: activeEnvironment });
+        }
+      });
+      return;
+    }
+
+    await toolsService.showToolsMenu(activeEnvironment);
+  });
 
   vscode.workspace.onDidChangeConfiguration(event => {
     if (event.affectsConfiguration('mxscript.scriptSettings.ignoresslerrors')) {
@@ -801,6 +837,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
   context.subscriptions.push(fetchLogs);
+  context.subscriptions.push(toolsLogs);
 
   // Expose a command so other modules (like the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));
@@ -883,6 +920,16 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     downloadStatusBarItem.hide();
     compareStatusBarItem.hide();
     if (deleteStatusBarItem) deleteStatusBarItem.hide();
+  }
+
+  // Tools Logs status bar item (only show when toolsHostname is configured)
+  if (toolsLogsStatusBarItem) {
+    if (activeEnv && activeEnv.toolsHostname) {
+      toolsLogsStatusBarItem.tooltip = `Tools Logs for ${activeEnv.name}`;
+      toolsLogsStatusBarItem.show();
+    } else {
+      toolsLogsStatusBarItem.hide();
+    }
   }
 }
 

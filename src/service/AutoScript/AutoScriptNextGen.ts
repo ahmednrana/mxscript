@@ -271,7 +271,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 // status: 'Active',
                 properties: 'autoscript,description,source,status,scriptlanguage'
             }
-            const addUpdateBuilder = this.getMaximoClient().autoScript.bulkOperation().addChange(autoscript);
+            const addUpdateBuilder = this.getMaximoClient().autoScript.bulkOperation().addUpdate(autoscript);
             const addUpdateResult = await this.getMaximoClient().autoScript.executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses
