@@ -29,7 +29,7 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 9. [Compare with Another Environment](#compare-with-other-environment)
 10. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
 11. [Manage Environments (Add / Edit / Delete / Set Active)](#managing-environments-in-ui)
-12. [Cache Refresh](#cache-refresh)
+12. [Cache Refresh / reload](#cache-refresh)
 13. [MAS Tools](#mas-tools)
 
 ---
@@ -272,17 +272,21 @@ When an active environment is set the status bar shows quick-action icons:
 - **Download**— Updates the currently open file from current environment
 - **Compare**— Compares the currently open file with version at current environment
 - **Deletes** — Deletes the currently open file at the current environment
-- **Tools Menu** — $(tools) Opens the Maximo Tools menu (MAS only) - Access Logs, Database tools, Pod Manager, etc.
+- **MAS Tools Menu** — Opens the MAS Tools (MAS only) - Access Logs, Database tools, Pod Manager, Customizations etc. See [API for administrative utilities](https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=reference-apis-administrative-utilities)
 
 [Back to Top](#mxscript)
 
-## Maximo Tools (MAS Only)
+## MAS Tools
 
-New in version 1.5+, MxScript includes a comprehensive suite of management tools specifically for Maximo Application Suite (MAS) environments. This is the maxinst pod tools API.
+New in version 1.5+, MxScript includes a comprehensive suite of management tools specifically for Maximo Application Suite (MAS) environments. This is the MAS tools API (which usually operates on the maxinst pod).
 
 ### Requirements
 
 To use these features, you must configure the **Tools Hostname** in your environment settings. This is typically the `maxinst` pod route (e.g., `https://maxinst.manage.mas-instance.com`).
+It will add a tools icon in the status bar 
+
+![Tools Icon](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/tools_icon.jpg)
+You can click this icon to show the Tools menu or use the command 
 
 ![Tools Menu](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/tools_menu.jpg)
 

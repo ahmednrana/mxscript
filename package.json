@@ -115,7 +115,7 @@
       },
       {
         "command": "mxscript.toolsMenu",
-        "title": "Maximo Tools Menu",
+        "title": "MAS Tools",
         "category": "Maximo [mxscript]",
         "icon": "$(tools)"
       },
