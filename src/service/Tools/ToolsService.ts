@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { MaximoToolsClient, MaximoToolsClientConfig, ToolsLog } from 'maximo-api-client';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { Logger } from '../Logger/Logger';
+import { MaximoLoggingService } from '../AutoScript/LogService';
 
 /**
  * Unified service for all Maximo Tools API operations in VS Code
@@ -14,14 +15,14 @@ export class ToolsService {
         this.logger = Logger.getInstance();
     }
 
+
     /**
      * Creates a MaximoToolsClient from an environment configuration
      */
     private createToolsClient(environment: MaximoEnvironment): MaximoToolsClient {
-        if (!environment.toolsHostname) {
+        if (!environment.toolsHostname) 
             throw new Error('Tools API hostname is not configured for this environment');
-        }
-
+        
         const config: MaximoToolsClientConfig = {
             baseUrl: environment.toolsHostname,
             apiKey: environment.apikey,
@@ -56,7 +57,7 @@ export class ToolsService {
 
         const picks: vscode.QuickPickItem[] = [
             { label: '$(file-text) Tools Logs', description: 'View and manage tools logs' },
-            { label: '$(lock) Certificates', description: 'Install SSL/TLS certificates' },
+            { label: '$(lock) Certificates', description: 'Add trusted SSL/TLS certificates' },
             { label: '$(package) Customizations', description: 'Manage customization archives' },
             { label: '$(database) Database', description: 'Database validation and configuration' },
             { label: '$(search) Diagnostics', description: 'ERD generator and integrity checker' },
@@ -118,7 +119,8 @@ export class ToolsService {
         if (selected.label.includes('View Tools Logs')) {
             await this.viewToolsLogs(environment);
         } else if (selected.label.includes('Upload Logs')) {
-            await this.uploadLogs(environment);
+            const logService = new MaximoLoggingService();
+            await logService.uploadLogs(environment);
         }
     }
 
@@ -185,32 +187,7 @@ export class ToolsService {
         );
     }
 
-    public async uploadLogs(environment: MaximoEnvironment): Promise<void> {
-        const confirm = await vscode.window.showWarningMessage(
-            'This will submit a request to upload Manage logs to S3 Cloud Storage. Continue?',
-            'Yes', 'No'
-        );
 
-        if (confirm !== 'Yes') return;
-
-        await vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: 'Submitting log upload request...',
-                cancellable: false
-            },
-            async () => {
-                const client = this.createToolsClient(environment);
-                const result = await client.logManager.submitUploadLogRequest();
-
-                if (result.success) {
-                    vscode.window.showInformationMessage(result.message || 'Log upload request submitted successfully.');
-                } else {
-                    vscode.window.showWarningMessage(result.message || 'Log upload request completed with unknown status.');
-                }
-            }
-        );
-    }
 
     // ==================== CERTIFICATES ====================
 
@@ -219,12 +196,12 @@ export class ToolsService {
      */
     public async showCertificatesMenu(environment: MaximoEnvironment): Promise<void> {
         const picks: vscode.QuickPickItem[] = [
-            { label: '$(globe) Install Certificate from Host', description: 'Download and install cert from a hostname' },
-            { label: '$(file-code) Install Certificate from File', description: 'Install cert from PEM content' }
+            { label: '$(globe) Add Trusted Certificate from Host', description: 'Download and add trusted cert from a hostname' },
+            { label: '$(file-code) Add Trusted Certificate from File', description: 'Add trusted cert from PEM content' }
         ];
 
         const selected = await vscode.window.showQuickPick(picks, {
-            title: `Certificates - ${environment.name}`,
+            title: `Trusted Certificates - ${environment.name}`,
             placeHolder: 'Select an action'
         });
 
@@ -238,12 +215,12 @@ export class ToolsService {
     }
 
     /**
-     * Install certificate by connecting to a host
+     * Add trusted certificate by connecting to a host
      */
     public async installCertificateFromHost(environment: MaximoEnvironment): Promise<void> {
         // Step 1: Get hostname
         const host = await vscode.window.showInputBox({
-            title: 'Install Certificate - Step 1/3',
+            title: 'Add Trusted Certificate - Step 1/3',
             prompt: 'Enter the hostname to fetch the certificate from',
             placeHolder: 'e.g., api.example.com',
             validateInput: (value) => {
@@ -258,7 +235,7 @@ export class ToolsService {
 
         // Step 2: Get port
         const portStr = await vscode.window.showInputBox({
-            title: 'Install Certificate - Step 2/3',
+            title: 'Add Trusted Certificate - Step 2/3',
             prompt: 'Enter the port number',
             placeHolder: '443',
             value: '443',
@@ -276,7 +253,7 @@ export class ToolsService {
 
         // Step 3: Get alias
         const alias = await vscode.window.showInputBox({
-            title: 'Install Certificate - Step 3/3',
+            title: 'Add Trusted Certificate - Step 3/3',
             prompt: 'Enter an alias name for this certificate',
             placeHolder: 'e.g., my-api-cert',
             value: host.replace(/\./g, '-'),
@@ -295,37 +272,37 @@ export class ToolsService {
 
         // Confirm and execute
         const confirm = await vscode.window.showWarningMessage(
-            `Install certificate from ${host}:${port} with alias "${alias}"?`,
-            'Install', 'Cancel'
+            `Add Trusted Certificate from ${host}:${port} with alias "${alias}"?`,
+            'Add', 'Cancel'
         );
 
-        if (confirm !== 'Install') return;
+        if (confirm !== 'Add') return;
 
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
-                title: `Installing certificate from ${host}:${port}...`,
+                title: `Adding trusted certificate from ${host}:${port}...`,
                 cancellable: false
             },
             async () => {
                 const client = this.createToolsClient(environment);
-                const result = await client.certificateManager.installExternalCertificateByHost(host, port, alias);
+                const result = await client.trustStoreImporter.installExternalCertificateByHost(host, port, alias);
 
                 vscode.window.showInformationMessage(
-                    `Certificate installed successfully with alias "${alias}"`
+                    `Trusted certificate added successfully with alias "${alias}"`
                 );
-                this.logger.info(`Certificate installed: ${JSON.stringify(result)}`);
+                this.logger.info(`Trusted certificate added: ${JSON.stringify(result)}`);
             }
         );
     }
 
     /**
-     * Install certificate from PEM content
+     * Add trusted certificate from PEM content
      */
     public async installCertificateFromContent(environment: MaximoEnvironment): Promise<void> {
         // Step 1: Get alias
         const alias = await vscode.window.showInputBox({
-            title: 'Install Certificate - Step 1/2',
+            title: 'Add Trusted Certificate - Step 1/2',
             prompt: 'Enter an alias name for this certificate',
             placeHolder: 'e.g., my-api-cert',
             validateInput: (value) => {
@@ -347,7 +324,7 @@ export class ToolsService {
                 { label: '$(folder-opened) Select File', description: 'Choose a .pem or .crt file' },
                 { label: '$(clippy) Paste Content', description: 'Paste PEM certificate content' }
             ],
-            { title: 'Install Certificate - Step 2/2', placeHolder: 'How would you like to provide the certificate?' }
+            { title: 'Add Trusted Certificate - Step 2/2', placeHolder: 'How would you like to provide the certificate?' }
         );
 
         if (!method) return;
@@ -382,32 +359,33 @@ export class ToolsService {
                     return undefined;
                 }
             });
+
         }
 
         if (!certContent) return;
 
         // Confirm and execute
         const confirm = await vscode.window.showWarningMessage(
-            `Install certificate with alias "${alias}"?`,
-            'Install', 'Cancel'
+            `Add trusted certificate with alias "${alias}"?`,
+            'Add', 'Cancel'
         );
 
-        if (confirm !== 'Install') return;
+        if (confirm !== 'Add') return;
 
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
-                title: `Installing certificate with alias "${alias}"...`,
+                title: `Adding trusted certificate with alias "${alias}"...`,
                 cancellable: false
             },
             async () => {
                 const client = this.createToolsClient(environment);
-                const result = await client.certificateManager.installExternalCertificateByContent(certContent!, alias);
+                const result = await client.trustStoreImporter.installExternalCertificateByContent(certContent!, alias);
 
                 vscode.window.showInformationMessage(
-                    `Certificate installed successfully with alias "${alias}"`
+                    `Trusted certificate added successfully with alias "${alias}"`
                 );
-                this.logger.info(`Certificate installed: ${JSON.stringify(result)}`);
+                this.logger.info(`Trusted certificate added: ${JSON.stringify(result)}`);
             }
         );
     }
@@ -422,7 +400,8 @@ export class ToolsService {
             { label: '$(add) Add Customization Archive', description: 'Add a new customization archive from URL' },
             { label: '$(sync) Update Customization Archive', description: 'Update an existing customization archive' },
             { label: '$(trash) Delete Customization Archive', description: 'Remove a customization archive' },
-            { label: '$(key) Create Archive Secret', description: 'Create S3 secret for archive access' }
+            { label: '$(key) Create Archive Secret', description: 'Create secret for archive access (Username/Password)' },
+            { label: '$(key) Create S3 Secret', description: 'Create S3 secret for archive access (S3 Secret Key)' }
         ];
 
         const selected = await vscode.window.showQuickPick(picks, {
@@ -440,6 +419,8 @@ export class ToolsService {
             await this.manageCustomizationArchive(environment, 'delete');
         } else if (selected.label.includes('Create Archive Secret')) {
             await this.createArchiveSecret(environment);
+        } else if (selected.label.includes('Create S3 Secret')) {
+            await this.createS3SecretKeySecret(environment);
         }
     }
 
@@ -521,14 +502,14 @@ export class ToolsService {
     }
 
     /**
-     * Create an archive secret for S3 access
+     * Create an archive secret (Username/Password)
      */
     public async createArchiveSecret(environment: MaximoEnvironment): Promise<void> {
         // Step 1: Get secret name
         const secretname = await vscode.window.showInputBox({
-            title: 'Create Archive Secret - Step 1/2',
+            title: 'Create Archive Secret - Step 1/3',
             prompt: 'Enter a name for this secret',
-            placeHolder: 'e.g., my-s3-secret',
+            placeHolder: 'e.g., my-archive-secret',
             validateInput: (value) => {
                 if (!value || value.trim().length === 0) {
                     return 'Secret name is required';
@@ -542,20 +523,35 @@ export class ToolsService {
 
         if (!secretname) return;
 
-        // Step 2: Get S3 secret key
-        const s3secretkey = await vscode.window.showInputBox({
-            title: 'Create Archive Secret - Step 2/2',
-            prompt: 'Enter the S3 secret key',
-            password: true,
+        // Step 2: Get username
+        const username = await vscode.window.showInputBox({
+            title: 'Create Archive Secret - Step 2/3',
+            prompt: 'Enter the username',
+            placeHolder: 'e.g., maxadmin',
             validateInput: (value) => {
                 if (!value || value.trim().length === 0) {
-                    return 'S3 secret key is required';
+                    return 'Username is required';
                 }
                 return undefined;
             }
         });
 
-        if (!s3secretkey) return;
+        if (!username) return;
+
+        // Step 3: Get password
+        const password = await vscode.window.showInputBox({
+            title: 'Create Archive Secret - Step 3/3',
+            prompt: 'Enter the password',
+            password: true,
+            validateInput: (value) => {
+                if (!value || value.trim().length === 0) {
+                    return 'Password is required';
+                }
+                return undefined;
+            }
+        });
+
+        if (!password) return;
 
         // Confirm
         const confirm = await vscode.window.showWarningMessage(
@@ -575,13 +571,80 @@ export class ToolsService {
                 const client = this.createToolsClient(environment);
                 const result = await client.customizationManager.createArchiveSecret({
                     secretname,
-                    s3secretkey
+                    username,
+                    password
                 });
 
                 vscode.window.showInformationMessage(
                     `Archive secret "${secretname}" created successfully`
                 );
                 this.logger.info(`Archive secret created: ${JSON.stringify(result)}`);
+            }
+        );
+    }
+
+    /**
+     * Create an archive secret for S3 access
+     */
+    public async createS3SecretKeySecret(environment: MaximoEnvironment): Promise<void> {
+        // Step 1: Get secret name
+        const secretname = await vscode.window.showInputBox({
+            title: 'Create S3 Secret - Step 1/2',
+            prompt: 'Enter a name for this secret',
+            placeHolder: 'e.g., my-s3-secret',
+            validateInput: (value) => {
+                if (!value || value.trim().length === 0) {
+                    return 'Secret name is required';
+                }
+                if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+                    return 'Secret name can only contain letters, numbers, underscores, and hyphens';
+                }
+                return undefined;
+            }
+        });
+
+        if (!secretname) return;
+
+        // Step 2: Get S3 secret key
+        const s3secretkey = await vscode.window.showInputBox({
+            title: 'Create S3 Secret - Step 2/2',
+            prompt: 'Enter the S3 secret key',
+            password: true,
+            validateInput: (value) => {
+                if (!value || value.trim().length === 0) {
+                    return 'S3 secret key is required';
+                }
+                return undefined;
+            }
+        });
+
+        if (!s3secretkey) return;
+
+        // Confirm
+        const confirm = await vscode.window.showWarningMessage(
+            `Create S3 secret "${secretname}"?`,
+            'Create', 'Cancel'
+        );
+
+        if (confirm !== 'Create') return;
+
+        await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: 'Creating S3 secret...',
+                cancellable: false
+            },
+            async () => {
+                const client = this.createToolsClient(environment);
+                const result = await client.customizationManager.createS3SecretKeySecret({
+                    secretname,
+                    s3secretkey
+                });
+
+                vscode.window.showInformationMessage(
+                    `S3 secret "${secretname}" created successfully`
+                );
+                this.logger.info(`S3 secret created: ${JSON.stringify(result)}`);
             }
         );
     }
@@ -593,7 +656,8 @@ export class ToolsService {
     public async showDatabaseMenu(environment: MaximoEnvironment): Promise<void> {
         const picks: vscode.QuickPickItem[] = [
             { label: '$(check) Validate Database for Migration', description: 'Validate DB for MAS migration' },
-            { label: '$(gear) Configure Database', description: 'Run configdb script' }
+            { label: '$(gear) Configure Database', description: 'Run configdb script' },
+            { label: '$(refresh) Reset Crypto/CryptoX', description: 'Reset CRYPTO and CRYPTOX columns' }
         ];
 
         const selected = await vscode.window.showQuickPick(picks, {
@@ -607,6 +671,8 @@ export class ToolsService {
             await this.validateDatabaseForMigration(environment);
         } else if (selected.label.includes('Configure Database')) {
             await this.configureDatabase(environment);
+        } else if (selected.label.includes('Reset Crypto')) {
+            await this.resetCryptoCryptox(environment);
         }
     }
 
@@ -631,7 +697,7 @@ export class ToolsService {
                 const client = this.createToolsClient(environment);
                 const result = await client.databaseService.validateDatabaseForMigration();
 
-                vscode.window.showInformationMessage('Database validation completed. Check logs for details.');
+                vscode.window.showInformationMessage('Database validation request submitted.');
                 this.logger.info(`Database validation result: ${JSON.stringify(result)}`);
             }
         );
@@ -642,7 +708,7 @@ export class ToolsService {
      */
     public async configureDatabase(environment: MaximoEnvironment): Promise<void> {
         const confirm = await vscode.window.showWarningMessage(
-            'This will run the configdb script. This may take a while and could affect database state. Continue?',
+            'This will run the configdb script. This requires Maximo Manage to be stopped. This may take a while and could affect database state. Continue?',
             'Configure', 'Cancel'
         );
 
@@ -658,8 +724,35 @@ export class ToolsService {
                 const client = this.createToolsClient(environment);
                 const result = await client.databaseService.configureDb();
 
-                vscode.window.showInformationMessage('Database configuration completed. Check logs for details.');
+                vscode.window.showInformationMessage("Database configuration request submitted. You can monitor the status by selecting 'View Tools Logs' from the Tools menu.");
                 this.logger.info(`Database configuration result: ${JSON.stringify(result)}`);
+            }
+        );
+    }
+
+    /**
+     * Reset CRYPTO and CRYPTOX columns
+     */
+    public async resetCryptoCryptox(environment: MaximoEnvironment): Promise<void> {
+        const confirm = await vscode.window.showWarningMessage(
+            '⚠️ This will reset CRYPTO and CRYPTOX columns. This is a potentially destructive operation. Continue?',
+            'Reset', 'Cancel'
+        );
+
+        if (confirm !== 'Reset') return;
+
+        await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: 'Resetting CRYPTO and CRYPTOX columns...',
+                cancellable: false
+            },
+            async () => {
+                const client = this.createToolsClient(environment);
+                const result = await client.databaseService.resetCryptoCryptox();
+
+                vscode.window.showInformationMessage('Rest Crypto/CryptoX request submitted.');
+                this.logger.info(`Reset Crypto result: ${JSON.stringify(result)}`);
             }
         );
     }
@@ -752,50 +845,36 @@ export class ToolsService {
     private async downloadAndSaveErd(environment: MaximoEnvironment, client?: MaximoToolsClient): Promise<void> {
         const toolsClient = client || this.createToolsClient(environment);
 
-        // Download the ERD data
-        const erdData = await toolsClient.erdGenerator.downloadErd();
-
-        if (!erdData) {
-            vscode.window.showWarningMessage('No ERD data received. Make sure an ERD has been generated first.');
-            return;
-        }
-
-        // Ask user where to save the file
-        const saveUri = await vscode.window.showSaveDialog({
-            defaultUri: vscode.Uri.file(`${environment.name}-erd.zip`),
-            filters: {
-                'ZIP Archive': ['zip'],
-                'All Files': ['*']
-            },
-            title: 'Save ERD File'
-        });
-
-        if (!saveUri) {
-            vscode.window.showInformationMessage('ERD download cancelled.');
-            return;
-        }
-
-        // Write the file
         try {
-            let fileData: Uint8Array;
+            // Download the ERD data
+            const erdData = await toolsClient.erdGenerator.downloadErd();
 
-            if (typeof erdData === 'string') {
-                // If it's a string (maybe base64 or raw data), convert it
-                fileData = Buffer.from(erdData);
-            } else if (erdData instanceof Buffer) {
-                fileData = erdData;
-            } else if (erdData.data) {
-                // Response object with data property
-                fileData = Buffer.from(erdData.data);
-            } else {
-                // Try to serialize as JSON as fallback
-                fileData = Buffer.from(JSON.stringify(erdData));
+            if (!erdData) {
+                vscode.window.showWarningMessage('No ERD data received. Make sure an ERD has been generated first.');
+                return;
             }
 
-            await vscode.workspace.fs.writeFile(saveUri, fileData);
+            // Ask user where to save the file
+            const saveUri = await vscode.window.showSaveDialog({
+                defaultUri: vscode.Uri.file(`${environment.name}-erd.zip`),
+                filters: {
+                    'ZIP Archive': ['zip'],
+                    'All Files': ['*']
+                },
+                title: 'Save ERD File'
+            });
 
-            vscode.window.showInformationMessage(`ERD saved to: ${saveUri.fsPath}`);
+            if (!saveUri) {
+                vscode.window.showInformationMessage('ERD download cancelled.');
+                return;
+            }
+
+            // Write the file directly (API client returns Buffer)
+            await vscode.workspace.fs.writeFile(saveUri, erdData as Buffer);
+
+            vscode.window.showInformationMessage(`ERD saved to: ${saveUri.fsPath} (${this.formatBytes(erdData.length)})`);
             this.logger.info(`ERD saved to: ${saveUri.fsPath}`);
+
         } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error);
             vscode.window.showErrorMessage(`Failed to save ERD: ${errorMsg}`);
@@ -814,6 +893,8 @@ export class ToolsService {
 
         if (confirm !== 'Generate') return;
 
+        let result: any;
+
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
@@ -822,12 +903,23 @@ export class ToolsService {
             },
             async () => {
                 const client = this.createToolsClient(environment);
-                const result = await client.integrityChecker.generateIntegrityCheckerLog();
-
-                vscode.window.showInformationMessage('Integrity report generation completed. Check Tools Logs for the report.');
+                result = await client.integrityChecker.generateIntegrityCheckerLog();
                 this.logger.info(`Integrity report result: ${JSON.stringify(result)}`);
             }
         );
+
+        if (result && result.logfile) {
+            const selection = await vscode.window.showInformationMessage(
+                `Integrity report generated: ${result.logfile}. Note: Log may be incomplete as processing continues asynchronously.`,
+                'View Log'
+            );
+
+            if (selection === 'View Log') {
+                await this.fetchAndShowLog(environment, result.logfile);
+            }
+        } else {
+            vscode.window.showInformationMessage('Integrity report generation started (async). Check Tools Logs for the report.');
+        }
     }
 
     /**
@@ -849,6 +941,8 @@ export class ToolsService {
 
         if (doubleConfirm !== 'Yes, Run Repair') return;
 
+        let result: any;
+
         await vscode.window.withProgress(
             {
                 location: vscode.ProgressLocation.Notification,
@@ -857,12 +951,23 @@ export class ToolsService {
             },
             async () => {
                 const client = this.createToolsClient(environment);
-                const result = await client.integrityChecker.runIntegrityCheckerRepair();
-
-                vscode.window.showInformationMessage('Integrity repair completed. Check Tools Logs for details.');
+                result = await client.integrityChecker.runIntegrityCheckerRepair();
                 this.logger.info(`Integrity repair result: ${JSON.stringify(result)}`);
             }
         );
+
+        if (result && result.logfile) {
+            const selection = await vscode.window.showInformationMessage(
+                `Integrity repair initiated: ${result.logfile}. Note: Log may be incomplete as processing continues asynchronously.`,
+                'View Log'
+            );
+
+            if (selection === 'View Log') {
+                await this.fetchAndShowLog(environment, result.logfile);
+            }
+        } else {
+            vscode.window.showInformationMessage('Integrity repair started (async). Check Tools Logs for details.');
+        }
     }
 
     // ==================== POD MANAGER ====================
@@ -912,7 +1017,7 @@ export class ToolsService {
                 const result = await client.podManager.startPods();
 
                 vscode.window.showInformationMessage('Pod start request submitted. This is an asynchronous operation.');
-                this.logger.info(`Start pods result: ${JSON.stringify(result)}`);
+                this.logger.info(`Start pods result: ${JSON.stringify(result.data)}`);
             }
         );
     }
@@ -928,13 +1033,7 @@ export class ToolsService {
 
         if (confirm !== 'Stop Pods') return;
 
-        // Double confirm for destructive operation
-        const doubleConfirm = await vscode.window.showWarningMessage(
-            'Final confirmation: Stop all Maximo Manage pods?',
-            'Yes, Stop All Pods', 'Cancel'
-        );
-
-        if (doubleConfirm !== 'Yes, Stop All Pods') return;
+        if (confirm !== 'Stop Pods') return;
 
         await vscode.window.withProgress(
             {
@@ -947,7 +1046,7 @@ export class ToolsService {
                 const result = await client.podManager.stopPods();
 
                 vscode.window.showInformationMessage('Pod stop request submitted. This is an asynchronous operation.');
-                this.logger.info(`Stop pods result: ${JSON.stringify(result)}`);
+                this.logger.info(`Stop pods result: ${JSON.stringify(result.data)}`);
             }
         );
     }

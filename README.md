@@ -13,7 +13,8 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 - Can compare with currently selected or any other Maximo environment
 - Adds buttons in status bar for quick switch, upload, download, compare and fetching logs
 - MAS Supported
-- Can refresh Maximo caches
+- Can refresh / reload Maximo caches
+- MAS Tools API (maxinst) Supported
 
 ## Supported Actions
 
@@ -28,7 +29,8 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 9. [Compare with Another Environment](#compare-with-other-environment)
 10. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
 11. [Manage Environments (Add / Edit / Delete / Set Active)](#managing-environments-in-ui)
-11. [Cache Refresh](#cache-refresh)
+12. [Cache Refresh](#cache-refresh)
+13. [MAS Tools](#mas-tools)
 
 ---
 [Requirements](#requirements)
@@ -247,7 +249,7 @@ There are two types of environments,
 
 ### Cache Refresh
 
-It can also refresh the cache present in IBM Maximo. Sometimes needed after adding certain items in maximo. Maximo wont refresh the changes unless those caches are refreshed. e.g. INTOBJECT, MAXPROP etc
+It can also refresh / reload the cache present in IBM Maximo. Sometimes needed after adding certain items in maximo. Maximo wont refresh the changes unless those caches are refreshed. e.g. INTOBJECT, MAXPROP etc
 
 Upong triggering this option. You will be presented with a list of cache (might differ for 7.6 or MAS) to be refreshed. You can selected them all, multiple or single.
 
@@ -270,6 +272,50 @@ When an active environment is set the status bar shows quick-action icons:
 - **Download**— Updates the currently open file from current environment
 - **Compare**— Compares the currently open file with version at current environment
 - **Deletes** — Deletes the currently open file at the current environment
+- **Tools Menu** — $(tools) Opens the Maximo Tools menu (MAS only) - Access Logs, Database tools, Pod Manager, etc.
+
+[Back to Top](#mxscript)
+
+## Maximo Tools (MAS Only)
+
+New in version 1.5+, MxScript includes a comprehensive suite of management tools specifically for Maximo Application Suite (MAS) environments. This is the maxinst pod tools API.
+
+### Requirements
+
+To use these features, you must configure the **Tools Hostname** in your environment settings. This is typically the `maxinst` pod route (e.g., `https://maxinst.manage.mas-instance.com`).
+
+![Tools Menu](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/tools_menu.jpg)
+
+### Features
+
+#### Tools Logs
+- **View Tools Logs**: Browse and view logs from the `maxinst` tools pod.
+- **Upload Logs to S3**: Trigger a log upload to the configured S3 bucket.
+
+#### Certificates
+- **Add Trusted Certificate from Host**: Download and add a trusted SSL certificate from a remote host (useful for fixing connectivity issues).
+- **Add Trusted Certificate from File**: Add a trusted certificate from a local `.pem` or `.crt` file.
+
+#### Database
+- **Validate Database**: Run the validation utility to check readiness for MAS upgrades.
+- **Configure Database**: Run `configdb` (requires Manage to be stopped).
+- **Reset Crypto**: Reset `CRYPTO` and `CRYPTOX` columns if they become corrupted or out of sync.
+
+#### Diagnostics
+- **Generate ERD**: Generate an Entity Relationship Diagram (ERD) for your Maximo database. You can download the result as a ZIP file.
+- **Integrity Checker**:
+  - **Generate Report**: Run the integrity checker in report-only mode.
+  - **Run Repair**: Run the integrity checker in repair mode (Use with caution!).
+
+#### Pod Manager
+- **Start All Pods**: Start the Maximo Manage application server pods.
+- **Stop All Pods**: Stop the Maximo Manage application server pods.
+
+#### Build Status
+- **Check Status**: View the current build and deployment status of the Maximo image.
+
+#### Script Runner
+- **Run DBC Script**: Execute a specific database configuration (DBC) script by name.
 
 [Back to Top](#mxscript)
 
@@ -392,6 +438,7 @@ This extension contributes the following settings:
 | Property Name                                              | Type    | Default  | Description                                                                                       |
 | ---------------------------------------------------------- | ------- | -------- | ------------------------------------------------------------------------------------------------- |
 | `mxscript.serverSettings.hostname`                         | string  |          | Hostname / IP of Maximo server (e.g. 10.10.12.12 or www.xyz.com)                                  |
+| `mxscript.serverSettings.toolsHostname`                    | string  |          | Hostname for Tools API (maxinst). Only for MAS environments.                                      |
 | `mxscript.serverSettings.port`                             | number  |          | Maximo port                                                                                       |
 | `mxscript.authentication.username`                         | string  | maxadmin | Username for Maximo Authentication                                                                |
 | `mxscript.authentication.password`                         | string  | maxadmin | Password for Maximo Authentication                                                                |
@@ -429,6 +476,10 @@ This extension contributes the following settings:
 [Back to Top](#mxscript)
 
 ## Release Notes
+
+### 1.5.0
+
+- Added MAXINST pod Tools API support
 
 ### 1.4.4
 

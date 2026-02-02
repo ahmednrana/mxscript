@@ -165,7 +165,56 @@ export class MaximoLoggingService {
         progress?.report({ increment: 10, message: `Fetched at ${fetchedAt.toLocaleString()}` });
     }
 
+    public async uploadLogs(environment: MaximoEnvironment): Promise<void> {
+        const confirm = await vscode.window.showWarningMessage(
+            'This will submit a request to upload Manage logs to S3 Cloud Storage. Continue?',
+            'Yes', 'No'
+        );
 
+        if (confirm !== 'Yes') return;
 
+        try {
+            await vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: 'Submitting log upload request...',
+                    cancellable: false
+                },
+                async () => {
 
+                    let client: MaximoClient;
+                    // Check if the passed environment is the active one, if so use the singleton client
+                    // Since ConfigService might not have getActiveEnvironmentId, we can compare with the name which is usually unique or just always create a new client if needed, 
+                    // but let's check ConfigService. For now, assuming name might be used or we can just use the provided environment to create a client always or use the singleton if names match.
+                    // Let's safe bet: create client from environment if ID is passed, but environment object is passed.
+                    // Actually, MaximoClientProvider.getInstance().getClient() returns the client for the *active* environment.
+                    // Let's check if the passed environment's ID matches the active one.
+                    // If ConfigService doesn't have ID, we might have to rely on name.
+                    const activeEnvName = this.configService.getActiveEnvironmentName();
+                    if (environment.name === activeEnvName) {
+                        client = this.getMaximoClient();
+                    } else {
+                        client = MaximoClientProvider.createClientFromEnvironment(environment);
+                    }
+
+                    const result = await client.getLoggingService().uploadLogsToS3();
+
+                    // Expected format: {"return":"1002-1767713985445"}
+                    if (result && result.return) {
+                        const returnStr = result.return;
+                        const logRequestNum = returnStr.split('-')[0];
+                        vscode.window.showInformationMessage(`Log upload request submitted. Request #${logRequestNum}. Check LOGREQUEST table.`);
+                        this.logger.info(`Log upload request successful: ${JSON.stringify(result)}`);
+                    } else {
+                        vscode.window.showWarningMessage('Log upload request submitted but returned unexpected format. Check server logs.');
+                        this.logger.warn(`Log upload request returned unexpected format: ${JSON.stringify(result)}`);
+                    }
+                }
+            );
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            this.logger.error(`Log upload failed: ${errorMessage}`);
+            vscode.window.showErrorMessage(`Log upload failed: ${errorMessage}`);
+        }
+    }
 }

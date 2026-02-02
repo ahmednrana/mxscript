@@ -36167,7 +36167,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "httpProtocol", label: "HTTP Protocol", group: "connection", type: "select", placeholder: "https", defaultValue: "https", options: ["http", "https"], description: "Choose HTTPS for secure connections when supported." },
     { id: "scope", label: "Scope", group: "connection", type: "radio", defaultValue: "global", options: ["global", "workspace"], description: "Whether this environment is stored globally or only for this workspace." },
     // Auth
-    { id: "authType", label: "Authentication Type", group: "auth", order: 1, type: "select", defaultValue: "internal", options: ["apikey", "internal", "ldap"], description: "Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey." },
+    { id: "authType", label: "Authentication Type", group: "auth", order: 1, type: "select", defaultValue: "apikey", options: ["apikey", "internal", "ldap"], description: "Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey." },
     { id: "apikey", label: "API Key", group: "auth", order: 2, type: "password", placeholder: "your-api-key", description: "Required if using API key authentication." },
     { id: "username", label: "Username", group: "auth", order: 3, type: "string", placeholder: "maxadmin", description: "Username for internal/LDAP authentication." },
     { id: "password", label: "Password", group: "auth", order: 4, type: "password", placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022", description: "Password for internal/LDAP authentication." },
@@ -36276,9 +36276,25 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         const error = validateFieldWithState(meta, value, newFormState);
         newFormState[id].error = error;
         if (id === "hostname" && value && typeof value === "string") {
+          let cleanedHostname = value;
+          if (value.startsWith("https://")) {
+            cleanedHostname = value.substring(8);
+            newFormState = {
+              ...newFormState,
+              httpProtocol: { value: "https", touched: true },
+              [id]: { ...newFormState[id], value: cleanedHostname }
+            };
+          } else if (value.startsWith("http://")) {
+            cleanedHostname = value.substring(7);
+            newFormState = {
+              ...newFormState,
+              httpProtocol: { value: "http", touched: true },
+              [id]: { ...newFormState[id], value: cleanedHostname }
+            };
+          }
           const currentTools = (_a7 = newFormState["toolsHostname"]) == null ? void 0 : _a7.value;
           if (!currentTools) {
-            const parts = value.split(".");
+            const parts = cleanedHostname.split(".");
             if (parts.length >= 3) {
               const derived = "maxinst." + parts.slice(1).join(".");
               newFormState = {

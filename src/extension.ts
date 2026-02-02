@@ -160,12 +160,12 @@ export function activate(context: vscode.ExtensionContext) {
   // Status bar icon for Tools Logs (MAS only - shown when toolsHostname is configured)
   toolsLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 94);
   toolsLogsStatusBarItem.command = {
-    command: "mxscript.toolsLogs",
-    title: "Tools Logs",
+    command: "mxscript.toolsMenu",
+    title: "Tools Menu",
     arguments: [{ source: 'statusbar' }]
   } as any;
-  toolsLogsStatusBarItem.text = "$(tools) Tools";
-  toolsLogsStatusBarItem.tooltip = "Access MAS Tools API logs";
+  toolsLogsStatusBarItem.text = "$(tools)";
+  toolsLogsStatusBarItem.tooltip = "Access MAS Tools API";
   toolsLogsStatusBarItem.hide(); // Initially hidden, shown when toolsHostname is configured
   context.subscriptions.push(toolsLogsStatusBarItem);
 
@@ -665,7 +665,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Tools command (MAS only) - shows main tools menu
-  let toolsLogs = vscode.commands.registerCommand("mxscript.toolsLogs", async (arg?: { source?: string }) => {
+  let toolsMenu = vscode.commands.registerCommand("mxscript.toolsMenu", async (arg?: { source?: string }) => {
     const activeEnvironment = getActiveEnvironment(context);
     if (!activeEnvironment) {
       showWarning("No active environment set. Please select an environment before accessing Tools.");
@@ -837,7 +837,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
   context.subscriptions.push(fetchLogs);
-  context.subscriptions.push(toolsLogs);
+  context.subscriptions.push(toolsMenu);
 
   // Expose a command so other modules (like the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));

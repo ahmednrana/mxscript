@@ -36,7 +36,7 @@ const SETTINGS: SettingMeta[] = [
   { id: 'httpProtocol', label: 'HTTP Protocol', group: 'connection', type: 'select', placeholder: 'https', defaultValue: 'https', options: ['http', 'https'], description: 'Choose HTTPS for secure connections when supported.' },
   { id: 'scope', label: 'Scope', group: 'connection', type: 'radio', defaultValue: 'global', options: ['global', 'workspace'], description: 'Whether this environment is stored globally or only for this workspace.' },
   // Auth
-  { id: 'authType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'internal', options: ['apikey', 'internal', 'ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
+  { id: 'authType', label: 'Authentication Type', group: 'auth', order: 1, type: 'select', defaultValue: 'apikey', options: ['apikey', 'internal', 'ldap'], description: 'Select how to authenticate with Maximo (API key, internal, or LDAP). Username/Password fields appear for internal/LDAP; API Key appears for apikey.' },
   { id: 'apikey', label: 'API Key', group: 'auth', order: 2, type: 'password', placeholder: 'your-api-key', description: 'Required if using API key authentication.' },
   { id: 'username', label: 'Username', group: 'auth', order: 3, type: 'string', placeholder: 'maxadmin', description: 'Username for internal/LDAP authentication.' },
   { id: 'password', label: 'Password', group: 'auth', order: 4, type: 'password', placeholder: '••••••', description: 'Password for internal/LDAP authentication.' },
@@ -169,21 +169,30 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
 
       // Auto-derive toolsHostname from hostname if toolsHostname is empty
       if (id === 'hostname' && value && typeof value === 'string') {
+        let cleanedHostname = value;
+        
+        // Check for protocol prefix and strip it, setting httpProtocol accordingly
+        if (value.startsWith('https://')) {
+          cleanedHostname = value.substring(8); // Remove 'https://'
+          newFormState = {
+            ...newFormState,
+            httpProtocol: { value: 'https', touched: true },
+            [id]: { ...newFormState[id], value: cleanedHostname }
+          };
+        } else if (value.startsWith('http://')) {
+          cleanedHostname = value.substring(7); // Remove 'http://'
+          newFormState = {
+            ...newFormState,
+            httpProtocol: { value: 'http', touched: true },
+            [id]: { ...newFormState[id], value: cleanedHostname }
+          };
+        }
+        
+        // Auto-derive toolsHostname from cleaned hostname if toolsHostname is empty
         const currentTools = newFormState['toolsHostname']?.value;
         if (!currentTools) {
-          // Attempt to derive: abc.mymaximo.com -> maxinst.mymaximo.com
-          // Logic: replace first subdomain part if it looks like a standard Maximo hostname,
-          // OR just prepend maxinst if it seems appropriate.
-          // Heuristic: if hostname starts with 'manage.', replace with 'maxinst.'
-          // If it is just 'something.com', maybe we don't know.
-          // Let's try to interpret common patterns or just replace the first part if it has multiple parts.
-          // User said: "starts same as manage url but with the maxinst the in the beginning"
-          // e.g. abc.mymaximo.com -> maxinst.mymaximo.com
-          // So we take everything after the first dot, and prepend maxinst.
-
-          const parts = value.split('.');
+          const parts = cleanedHostname.split('.');
           if (parts.length >= 3) {
-            // e.g. [abc, mymaximo, com] -> maxinst.mymaximo.com
             const derived = 'maxinst.' + parts.slice(1).join('.');
             newFormState = {
               ...newFormState,

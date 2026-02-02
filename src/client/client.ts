@@ -33,7 +33,7 @@ export class MaximoClientProvider {
         'mxscript.serverSettings.activeEnvironmentName',
         'mxscript.appxml.formatOnDownloadAndCompare',
         'mxscript.appxml.objectStructure',
-        'mxscript.condition.objectStructure'
+        'mxscript.condition.objectStructure',
     ];
 
     /**

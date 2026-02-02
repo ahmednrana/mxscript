@@ -6,15 +6,25 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
-			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}"
+			],
 			"preLaunchTask": "npm: watch (webview)",
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
 			"skipFiles": [
 				"${workspaceFolder}/node_modules/**/*.js",
-				"**/node_modules/**/*.js",
-				"<node_internals>/**/*.js"
+				// "**/node_modules/**/*.js",
+				"<node_internals>/**/*.js",
+				"!**/node_modules/maximo-api-client/**",
+				"!c:/Users/ranaa/OneDrive/Dev/maximorelated/api/maximo-api-client/**"
+			],
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**",
+				"**/node_modules/maximo-api-client/**",
+				"c:/Users/ranaa/OneDrive/Dev/maximorelated/api/maximo-api-client/**"
 			]
 		},
 		{
@@ -26,9 +36,21 @@
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/out/test"
 			],
-			"outFiles": ["${workspaceFolder}/out/test/**/*.js"],
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js"
+			],
 			"preLaunchTask": "npm: watch (webview)",
-			"skipFiles": ["${workspaceFolder}/node_modules/**/*.js", "<node_internals>/**/*.js"]
+			"skipFiles": [
+				"${workspaceFolder}/node_modules/**/*.js",
+				"<node_internals>/**/*.js",
+				"!**/node_modules/maximo-api-client/**"
+			],
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**",
+				"**/node_modules/maximo-api-client/**",
+				"c:/Users/ranaa/OneDrive/Dev/maximorelated/api/maximo-api-client/**"
+			]
 		}
 	]
 }

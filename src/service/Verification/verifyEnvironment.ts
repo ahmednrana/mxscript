@@ -27,6 +27,8 @@ export async function verifyEnvironment(env: MaximoEnvironment): Promise<Verific
       rejectUnauthorized: !env.ignoreSslErrors,
       autoscriptObjectStructure: env.objectStructure,
       ca: env.sslcertificate ? env.sslcertificate : undefined,
+      autoExtractCert: env.ignoreSslErrors,
+      skipHostnameValidation: env.ignoreSslErrors,
     };
 
     const client = new MaximoClient(clientConfig);

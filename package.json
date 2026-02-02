@@ -1,8 +1,8 @@
 {
   "name": "mxscript",
   "displayName": "MxScript",
-  "description": "Script / App Xml Manager for IBM Maximo",
-  "version": "1.4.5",
+  "description": "Development Utilities for IBM Maximo",
+  "version": "1.5.0",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -57,7 +57,7 @@
     "onView:maximoEnvironments",
     "onCommand:mxscript.downloadallappxml",
     "onCommand:mxscript.fetchLogs",
-    "onCommand:mxscript.toolsLogs",
+    "onCommand:mxscript.toolsMenu",
     "onCommand:maximoEnvironments.compareWithEnvironment"
   ],
   "contributes": {
@@ -99,7 +99,7 @@
       },
       {
         "command": "mxscript.refreshCache",
-        "title": "Refresh Maximo Cache",
+        "title": "Refresh / reload Maximo Cache",
         "category": "Maximo [mxscript]"
       },
       {
@@ -114,8 +114,8 @@
         "category": "Maximo [mxscript]"
       },
       {
-        "command": "mxscript.toolsLogs",
-        "title": "Maximo Tools (MAS)",
+        "command": "mxscript.toolsMenu",
+        "title": "Maximo Tools Menu",
         "category": "Maximo [mxscript]",
         "icon": "$(tools)"
       },
