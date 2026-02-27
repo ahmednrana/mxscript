@@ -925,7 +925,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
   // Tools Logs status bar item (only show when toolsHostname is configured)
   if (toolsLogsStatusBarItem) {
     if (activeEnv && activeEnv.toolsHostname) {
-      toolsLogsStatusBarItem.tooltip = `Tools Logs for ${activeEnv.name}`;
+      toolsLogsStatusBarItem.tooltip = `Tools API for ${activeEnv.name}`;
       toolsLogsStatusBarItem.show();
     } else {
       toolsLogsStatusBarItem.hide();
