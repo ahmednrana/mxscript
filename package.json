@@ -59,6 +59,8 @@
     "onCommand:mxscript.fetchLogs",
     "onCommand:mxscript.toolsMenu",
     "onCommand:maximoEnvironments.compareWithEnvironment",
+    "onCommand:maximoEnvironments.exportEnvironments",
+    "onCommand:maximoEnvironments.importEnvironments",
     "onCommand:mxscript.uploadAndExecute"
   ],
   "contributes": {
@@ -166,6 +168,18 @@
         "command": "maximoEnvironments.compareWithEnvironment",
         "title": "Compare with other Environment",
         "icon": "$(compare-changes)",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "maximoEnvironments.exportEnvironments",
+        "title": "Export Environments",
+        "icon": "$(export)",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "maximoEnvironments.importEnvironments",
+        "title": "Import Environments",
+        "icon": "$(import)",
         "category": "Maximo [mxscript]"
       }
     ],
@@ -314,12 +328,22 @@
         {
           "command": "maximoEnvironments.refreshEnvironments",
           "when": "view == maximoEnvironments",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
           "command": "maximoEnvironments.addEnvironment",
           "when": "view == maximoEnvironments",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "maximoEnvironments.exportEnvironments",
+          "when": "view == maximoEnvironments",
+          "group": "navigation@3"
+        },
+        {
+          "command": "maximoEnvironments.importEnvironments",
+          "when": "view == maximoEnvironments",
+          "group": "navigation@4"
         }
       ],
       "view/item/context": [

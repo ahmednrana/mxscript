@@ -244,6 +244,18 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maximoEnvironments.exportEnvironments', () => {
+      maximoEnvironmentTreeProvider.exportEnvironments();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('maximoEnvironments.importEnvironments', () => {
+      maximoEnvironmentTreeProvider.importEnvironments();
+    })
+  );
+
   // Command registration for maximoEnvironments.editEnvironment
   const editEnvironmentCommandHandler = (item?: any) => {
     if (item && item.environment) {

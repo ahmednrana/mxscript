@@ -259,4 +259,146 @@ export class MaximoEnvironmentTreeProvider implements vscode.TreeDataProvider<Ma
         // Combine both arrays
         return [...globalEnvs, ...workspaceEnvs];
     }
+
+    /**
+     * Export environments to a JSON file
+     */
+    async exportEnvironments(): Promise<void> {
+        const environments = this.getEnvironments();
+        if (environments.length === 0) {
+            vscode.window.showInformationMessage('No environments to export.');
+            return;
+        }
+
+        // Ask user if they want to export credentials
+        const exportCredentials = await vscode.window.showQuickPick(
+            ['No (Recommended)', 'Yes'],
+            {
+                placeHolder: 'Include ApiKeys and Passwords in the export file?',
+                ignoreFocusOut: true
+            }
+        );
+
+        if (!exportCredentials) {
+            return; // Cancelled
+        }
+
+        const includeCredentials = exportCredentials === 'Yes';
+
+        // Prepare data
+        const exportData = environments.map(env => {
+            const envCopy = { ...env };
+            if (!includeCredentials) {
+                envCopy.apikey = '';
+                envCopy.password = '';
+            }
+            return envCopy;
+        });
+
+        const uri = await vscode.window.showSaveDialog({
+            filters: {
+                'JSON Files': ['json']
+            },
+            defaultUri: vscode.Uri.file('maximo-environments.json'),
+            saveLabel: 'Export Environments'
+        });
+
+        if (uri) {
+            try {
+                const data = new TextEncoder().encode(JSON.stringify(exportData, null, 2));
+                await vscode.workspace.fs.writeFile(uri, data);
+                vscode.window.showInformationMessage(`Successfully exported ${environments.length} environments.`);
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`Failed to export environments: ${error.message}`);
+            }
+        }
+    }
+
+    /**
+     * Import environments from a JSON file
+     */
+    async importEnvironments(): Promise<void> {
+        const uris = await vscode.window.showOpenDialog({
+            canSelectMany: false,
+            openLabel: 'Import Environments',
+            filters: {
+                'JSON Files': ['json']
+            }
+        });
+
+        if (!uris || uris.length === 0) {
+            return;
+        }
+
+        const scopeSelection = await vscode.window.showQuickPick(
+            [
+                { label: 'Global', description: 'Available in all workspaces' },
+                { label: 'Workspace', description: 'Only in this workspace' }
+            ],
+            {
+                placeHolder: 'Where should the imported environments be saved?',
+                ignoreFocusOut: true
+            }
+        );
+
+        if (!scopeSelection) {
+            return; // Cancelled
+        }
+
+        const importScope = scopeSelection.label.toLowerCase() as 'global' | 'workspace';
+
+        try {
+            const data = await vscode.workspace.fs.readFile(uris[0]);
+            const jsonString = new TextDecoder().decode(data);
+            const importedEnvs = JSON.parse(jsonString) as MaximoEnvironment[];
+
+            if (!Array.isArray(importedEnvs)) {
+                throw new Error('Invalid format: Expected an array of environments.');
+            }
+
+            let importCount = 0;
+
+            // Get current environments based on selected scope
+            const currentStateKey = 'mxscript.environments';
+            let currentEnvs: MaximoEnvironment[] = [];
+
+            if (importScope === 'global') {
+                currentEnvs = this._context.globalState.get<MaximoEnvironment[]>(currentStateKey, []);
+            } else {
+                currentEnvs = this._context.workspaceState.get<MaximoEnvironment[]>(currentStateKey, []);
+            }
+
+            // Process and add imported environments
+            for (const env of importedEnvs) {
+                if (!env.name || !env.hostname) {
+                    console.warn('Skipping invalid environment entry:', env);
+                    continue;
+                }
+
+                // Generate new ID to prevent conflicts
+                env.id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+                env.scope = importScope;
+
+                currentEnvs.push(env);
+                importCount++;
+            }
+
+            // Save back to state
+            if (importScope === 'global') {
+                await this._context.globalState.update(currentStateKey, currentEnvs);
+            } else {
+                await this._context.workspaceState.update(currentStateKey, currentEnvs);
+            }
+
+            this.refresh();
+
+            // Inform webview if it's open (triggers a refresh across the board)
+            vscode.commands.executeCommand('mxscript.environments.refresh');
+
+            vscode.window.showInformationMessage(`Successfully imported ${importCount} environments to ${scopeSelection.label} scope.`);
+
+        } catch (error: any) {
+            vscode.window.showErrorMessage(`Failed to import environments: ${error.message}`);
+        }
+    }
 }
