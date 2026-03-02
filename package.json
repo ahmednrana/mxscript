@@ -58,10 +58,17 @@
     "onCommand:mxscript.downloadallappxml",
     "onCommand:mxscript.fetchLogs",
     "onCommand:mxscript.toolsMenu",
-    "onCommand:maximoEnvironments.compareWithEnvironment"
+    "onCommand:maximoEnvironments.compareWithEnvironment",
+    "onCommand:mxscript.uploadAndExecute"
   ],
   "contributes": {
     "commands": [
+      {
+        "command": "mxscript.uploadAndExecute",
+        "title": "Upload, Execute and Delete using script handler",
+        "category": "Maximo [mxscript]",
+        "icon": "$(play)"
+      },
       {
         "command": "mxscript.upload",
         "title": "Upload to Server",
@@ -345,6 +352,20 @@
           "command": "maximoEnvironments.compareWithEnvironment",
           "when": "view == maximoEnvironments",
           "group": "inline@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "mxscript.uploadAndExecute",
+          "group": "navigation",
+          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "mxscript.uploadAndExecute",
+          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt",
+          "group": "maximo@1"
         }
       ]
     }

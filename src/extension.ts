@@ -25,6 +25,7 @@ let downloadFromMaximoStatusBarItem: vscode.StatusBarItem;
 let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
 let toolsLogsStatusBarItem: vscode.StatusBarItem;
+let executeStatusBarItem: vscode.StatusBarItem;
 
 
 
@@ -143,6 +144,16 @@ export function activate(context: vscode.ExtensionContext) {
   compareStatusBarItem.text = "$(compare-changes)";
   compareStatusBarItem.tooltip = "Compare with active Maximo environment";
   context.subscriptions.push(compareStatusBarItem);
+
+  executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 95.5);
+  executeStatusBarItem.command = {
+    command: "mxscript.uploadAndExecute",
+    title: "Upload and Execute",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  executeStatusBarItem.text = "$(play)";
+  executeStatusBarItem.tooltip = "Upload and Execute on active Maximo environment";
+  context.subscriptions.push(executeStatusBarItem);
 
   // Status bar icon for delete
   deleteStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 95);
@@ -489,6 +500,33 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.compareWithServer();
+    }
+  });
+
+  let uploadAndExecute = vscode.commands.registerCommand("mxscript.uploadAndExecute", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    const fileName = getFilename();
+    let config = new ConfigService();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    if (fileExtension === 'xml') {
+      showWarning("Execution of App XML files is not supported.");
+    } else if (fileExtension === 'sql') {
+      showWarning("Execution of Condition files is not supported.");
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      if (as.uploadAndExecute) {
+        as.uploadAndExecute();
+      } else {
+        showError("Upload and Execute is not implemented for this service.");
+      }
     }
   });
 
@@ -910,16 +948,23 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
         ? `Delete from ${activeEnv.name}${mismatchNotice}`
         : "Delete from active Maximo environment";
     }
+    if (executeStatusBarItem) {
+      executeStatusBarItem.tooltip = activeEnv
+        ? `Upload, Execute and Delete on ${activeEnv.name}${mismatchNotice}`
+        : "Upload, Execute and Delete on active Maximo environment";
+    }
 
     uploadStatusBarItem.show();
     downloadStatusBarItem.show();
     compareStatusBarItem.show();
     if (deleteStatusBarItem) deleteStatusBarItem.show();
+    if (executeStatusBarItem) executeStatusBarItem.show();
   } else {
     uploadStatusBarItem.hide();
     downloadStatusBarItem.hide();
     compareStatusBarItem.hide();
     if (deleteStatusBarItem) deleteStatusBarItem.hide();
+    if (executeStatusBarItem) executeStatusBarItem.hide();
   }
 
   // Tools Logs status bar item (only show when toolsHostname is configured)

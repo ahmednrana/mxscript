@@ -1,8 +1,10 @@
 export interface SimpleOSService {
-    downloadAll : () => any;
-    update : () => any;
+    downloadAll: () => any;
+    update: () => any;
     // syncAll : () => any;
-    upload : () => any;
-    compareWithServer : () => any;
-    delete : () => any;
+    upload: (silent?: boolean) => any;
+    compareWithServer: () => any;
+    delete: (silent?: boolean) => any;
+    execute?: () => any;
+    uploadAndExecute?: () => any;
 }

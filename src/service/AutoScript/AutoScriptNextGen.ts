@@ -254,14 +254,14 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async upload(): Promise<void> {
+    async upload(silent: boolean = false): Promise<boolean> {
         try {
             let language = getLanguageFromExtension(this.configService);
-            this.logger.debug('Uploading script...');
+            if (!silent) this.logger.debug('Uploading script...');
             const source = this.getSource();
             if (!source || source.length === 0) {
                 showError("No file is open");
-                return;
+                return false;
             }
             const autoscript: Partial<AutoScript> = {
                 autoscript: getFilename(),
@@ -277,20 +277,25 @@ export class AutoScriptNextGen implements SimpleOSService {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    if (!silent) showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    return true;
                 }
                 else if (addUpdateResult.responses.length > 0) {
                     showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
+                    return false;
                 }
                 else {
                     showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
+                    return false;
                 }
             }
             else {
                 showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                return false;
             }
         } catch (error) {
             showError(`Failed to upload script: ${(error as Error).message}`);
+            return false;
         }
     }
 
@@ -362,9 +367,9 @@ export class AutoScriptNextGen implements SimpleOSService {
             showError(`Failed to download script: ${(error as Error).message}`);
         }
     }
-    async delete(): Promise<void> {
+    async delete(silent: boolean = false): Promise<void> {
         try {
-            this.logger.debug('Deleting script...');
+            if (!silent) this.logger.debug('Deleting script...');
             const scriptName = getFilename();
             if (!scriptName) {
                 showWarning("No valid file is open or filename could not be determined.");
@@ -373,6 +378,18 @@ export class AutoScriptNextGen implements SimpleOSService {
 
             // Use showWarningMessage with Delete/Cancel buttons
             const serverName = this.configService.getActiveEnvironmentName() || this.configService.getUrl();
+
+            if (silent) {
+                try {
+                    const scriptFromServer = await this.getMaximoClient().autoScript.findAll(`autoscript="${scriptName}"`);
+                    if (scriptFromServer.length === 0) return;
+                    await this.getMaximoClient().autoScript.delete(scriptFromServer[0]);
+                } catch (error) {
+                    showError(`Failed to delete script: ${(error as Error).message}`);
+                }
+                return;
+            }
+
             vscode.window.showWarningMessage(
                 `Are you sure you want to delete the script "${scriptName}" from server "${serverName}"?`,
                 "Delete",
@@ -404,6 +421,54 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
+    async uploadAndExecute(): Promise<void> {
+        try {
+            const uploaded = await this.upload(true);
+            if (!uploaded) {
+                this.logger.debug('Script upload failed, aborting execution.');
+                return;
+            }
+
+            this.logger.debug('Executing script...');
+            const scriptName = getFilename();
+            if (!scriptName) {
+                showWarning("No valid file is open or filename could not be determined.");
+                return;
+            }
+
+            const serverName = this.configService.getActiveEnvironmentName() || this.configService.getUrl();
+            vscode.window.showInformationMessage(`Executing script "${scriptName}" on server "${serverName}"...`);
+
+            const response = await (this.getMaximoClient().autoScript as any).executeScript(scriptName, 'GET');
+
+            // Delete the script after execution
+            await this.delete(true);
+
+            // extract data
+            const data = response?.data !== undefined ? response.data : response;
+
+            if (!data || (typeof data === 'object' && Object.keys(data).length === 0) || (typeof data === 'string' && data.trim() === '')) {
+                showInformation(`Script ${scriptName} executed successfully on ${serverName}. No response data.`);
+                return;
+            }
+
+            let formattedOutput = '';
+
+            if (typeof data === 'object') {
+                formattedOutput += JSON.stringify(data, null, 2);
+            } else {
+                formattedOutput += data.toString();
+            }
+
+            const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+
+        } catch (error) {
+            showError(`Failed to execute script: ${(error as Error).message}`);
+            // Attempt to clean up even if execution fails
+            await this.delete(true);
+        }
+    }
 
     getSource(): string {
         const editor = vscode.window.activeTextEditor;
