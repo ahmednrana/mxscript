@@ -456,6 +456,15 @@ This extension contributes the following settings:
 | `mxscript.scriptSettings.ignoresslerrors`                  | boolean | false    | Ignore SSL errors                                                                                 |
 | `mxscript.scriptSettings.sslcertificate `                  | string  |          | a custom certifcate                                                                               |
 | `mxscript.appxml.formatOnDownloadAndCompare`               | boolean | true     | Whether to format XML on download and compare                                                     |
+| `mxscript.statusBar.showFetchLogs`                         | boolean | true     | Show the Fetch Logs icon in the status bar                                                        |
+| `mxscript.statusBar.showDownloadFromMaximo`                | boolean | true     | Show the Download from Maximo icon in the status bar                                              |
+| `mxscript.statusBar.showUpload`                            | boolean | true     | Show the Upload icon in the status bar                                                            |
+| `mxscript.statusBar.showDownload`                          | boolean | true     | Show the Download icon in the status bar                                                          |
+| `mxscript.statusBar.showCompare`                           | boolean | true     | Show the Compare icon in the status bar                                                           |
+| `mxscript.statusBar.showUploadAndExecute`                  | boolean | true     | Show the Upload and Execute icon in the status bar                                                |
+| `mxscript.statusBar.showDelete`                            | boolean | false    | Show the Delete icon in the status bar                                                            |
+| `mxscript.statusBar.showToolsMenu`                         | boolean | false    | Show the Tools Menu icon in the status bar                                                        |
+| `mxscript.statusBar.showManageEnvironments`                | boolean | true     | Show the Manage Environments icon in the status bar                                               |
 
 ## 
 

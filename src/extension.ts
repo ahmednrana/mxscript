@@ -743,6 +743,11 @@ export function activate(context: vscode.ExtensionContext) {
       let ignoreSsl = vscode.workspace.getConfiguration().get("mxscript.scriptSettings.ignoresslerrors")
       process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = ignoreSsl ? '0' : '1';
     }
+
+    // Update status bar items if any of their visibility settings change
+    if (event.affectsConfiguration('mxscript.statusBar')) {
+      updateStatusBar(context);
+    }
   });
 
   // Register the environment manager webview
@@ -900,6 +905,13 @@ export function activate(context: vscode.ExtensionContext) {
 // Function to update status bar with current environment
 export function updateStatusBar(context: vscode.ExtensionContext) {
   const activeEnv = getActiveEnvironment(context);
+  const config = vscode.workspace.getConfiguration('mxscript.statusBar');
+
+  // Helper function to check if an item should be shown based on user settings
+  const shouldShowItem = (settingName: string, defaultValue: boolean): boolean => {
+    return config.get<boolean>(settingName, defaultValue);
+  };
+
   // Update the main status bar text
   if (activeEnv) {
     statusBarItem.text = `$(globe) Maximo: ${activeEnv.name}`;
@@ -907,6 +919,12 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
   } else {
     statusBarItem.text = "$(globe) Maximo: No Environment";
     statusBarItem.tooltip = "Click to manage Maximo environments";
+  }
+
+  if (shouldShowItem('showManageEnvironments', true)) {
+    statusBarItem.show();
+  } else {
+    statusBarItem.hide();
   }
 
   // Determine whether the action buttons should be visible for the current workspace.
@@ -924,7 +942,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     } else {
       fetchLogsStatusBarItem.tooltip = "Fetch logs from active environment";
     }
-    if (hasActiveEnvironment) {
+    if (hasActiveEnvironment && shouldShowItem('showFetchLogs', true)) {
       fetchLogsStatusBarItem.show();
     } else {
       fetchLogsStatusBarItem.hide();
@@ -938,7 +956,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     } else {
       downloadFromMaximoStatusBarItem.tooltip = "Download from active Maximo environment";
     }
-    if (hasActiveEnvironment) {
+    if (hasActiveEnvironment && shouldShowItem('showDownloadFromMaximo', true)) {
       downloadFromMaximoStatusBarItem.show();
     } else {
       downloadFromMaximoStatusBarItem.hide();
@@ -966,11 +984,15 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
         : "Upload, Execute and Delete on active Maximo environment";
     }
 
-    uploadStatusBarItem.show();
-    downloadStatusBarItem.show();
-    compareStatusBarItem.show();
-    if (deleteStatusBarItem) deleteStatusBarItem.show();
-    if (executeStatusBarItem) executeStatusBarItem.show();
+    if (shouldShowItem('showUpload', true)) uploadStatusBarItem.show(); else uploadStatusBarItem.hide();
+    if (shouldShowItem('showDownload', true)) downloadStatusBarItem.show(); else downloadStatusBarItem.hide();
+    if (shouldShowItem('showCompare', true)) compareStatusBarItem.show(); else compareStatusBarItem.hide();
+    if (deleteStatusBarItem) {
+      if (shouldShowItem('showDelete', false)) deleteStatusBarItem.show(); else deleteStatusBarItem.hide();
+    }
+    if (executeStatusBarItem) {
+      if (shouldShowItem('showUploadAndExecute', true)) executeStatusBarItem.show(); else executeStatusBarItem.hide();
+    }
   } else {
     uploadStatusBarItem.hide();
     downloadStatusBarItem.hide();
@@ -981,7 +1003,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
 
   // Tools Logs status bar item (only show when toolsHostname is configured)
   if (toolsLogsStatusBarItem) {
-    if (activeEnv && activeEnv.toolsHostname) {
+    if (activeEnv && activeEnv.toolsHostname && shouldShowItem('showToolsMenu', false)) {
       toolsLogsStatusBarItem.tooltip = `Tools API for ${activeEnv.name}`;
       toolsLogsStatusBarItem.show();
     } else {

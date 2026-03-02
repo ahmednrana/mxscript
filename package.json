@@ -311,6 +311,51 @@
           "scope": "window",
           "default": true,
           "description": "Whether to format XML on download and compare"
+        },
+        "mxscript.statusBar.showFetchLogs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Fetch Logs icon in the status bar"
+        },
+        "mxscript.statusBar.showDownloadFromMaximo": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Download from Maximo icon in the status bar"
+        },
+        "mxscript.statusBar.showUpload": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Upload icon in the status bar"
+        },
+        "mxscript.statusBar.showDownload": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Download icon in the status bar"
+        },
+        "mxscript.statusBar.showCompare": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Compare icon in the status bar"
+        },
+        "mxscript.statusBar.showUploadAndExecute": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Upload and Execute icon in the status bar"
+        },
+        "mxscript.statusBar.showDelete": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the Delete icon in the status bar"
+        },
+        "mxscript.statusBar.showToolsMenu": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the Tools Menu icon in the status bar"
+        },
+        "mxscript.statusBar.showManageEnvironments": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Manage Environments icon in the status bar"
         }
       }
     },
