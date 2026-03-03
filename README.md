@@ -25,12 +25,13 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 5. [Download (Update) from Server](#download-update-from-server)
 6. [Upload to Server](#upload-to-server) *(Not for application xml)*
 7. [Compare with Server](#compare-with-environment-script--xml--condition)
-8. [Delete from Server](#delete-this-file-from-server) *(Not for application xml)*
-9. [Compare with Another Environment](#compare-with-other-environment)
-10. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
-11. [Manage Environments (Add / Edit / Delete / Set Active)](#managing-environments-in-ui)
-12. [Cache Refresh / reload](#cache-refresh)
-13. [MAS Tools](#mas-tools)
+8. [Execute Script using Script Handler](#execute-script-using-script-handler) *(Only scripts)*
+9. [Delete from Server](#delete-this-file-from-server) *(Not for application xml)*
+10. [Compare with Another Environment](#compare-with-other-environment)
+11. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
+12. [Manage Environments (Add / Edit / Delete / Set Active / Import / Export)](#managing-environments-in-ui)
+13. [Cache Refresh / reload](#cache-refresh)
+14. [MAS Tools](#mas-tools)
 
 ---
 [Requirements](#requirements)
@@ -203,6 +204,29 @@ This deletes the automation script or condition on the server
 
 [Back to Top](#mxscript)
 
+### Execute script using Script Handler
+
+#### Activate
+
+Use the command palette, click the "execute" (play) status bar button next to the active environment, or use the command "Execute script using Script Handler".
+
+#### Functionality
+
+Uploads the currently opened automation script (`.py`, `.js`, or `.jy`) to the active environment, immediately executes it, and deletes it from the server to keep your environment clean. The body returned from the script execution is then displayed in a new split VS Code virtual document adjacent to the active file. The body is usually stored in `responseBody` implicit variable in Maximo automation scripts.
+
+![Execute](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/execute_script.gif)
+
+You can read more about it below
+
+https://ibm-maximo-dev.github.io/maximo-restapi-documentation/autoscript/autoscript
+
+https://ibm-maximo-dev.github.io/maximo-autoscript-documentation/rest/scripthandler/
+
+
+**⚠️ Warning**: You must confirm a security prompt explicitly warning you before this execution happens. This functionality mimics the standard Automation Script Handler REST API (GET method).
+
+[Back to Top](#mxscript)
+
 ### Fetch Logs from Server
 
 #### Activate
@@ -222,7 +246,7 @@ Fetches Manage logs via the Maximo stream log end point. When complete, a dedica
 You can add multiple environments and switch between them.
 Under the explorer webview there is a section for Maximo Environments:
 
-Using the buttons displayed over these environments you can activate, edit and delete them as well
+Using the buttons displayed over these environments you can activate, edit, delete, export and import them as well.
 
 ![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/add_env_button.jpg)
 
@@ -271,6 +295,7 @@ When an active environment is set the status bar shows quick-action icons:
 - **Upload** — Uploads the currently opened file to current environment
 - **Download**— Updates the currently open file from current environment
 - **Compare**— Compares the currently open file with version at current environment
+- **Upload and Execute** — Uploads, executes and deletes the currently open file at the current environment
 - **Deletes** — Deletes the currently open file at the current environment
 - **MAS Tools Menu** — Opens the MAS Tools (MAS only) - Access Logs, Database tools, Pod Manager, Customizations etc. See [API for administrative utilities](https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=reference-apis-administrative-utilities)
 
@@ -337,10 +362,12 @@ The buttons call the following commands:
 - **Compare**→ Compares the currently opened file with this environment
 - **Fetch Logs**→ Fetches the log from this environment
 
-You can add / refresh an environment or use the tree toolbar to Add / Refresh:
+You can add / refresh an environment or use the tree toolbar:
 
 - Add → Adds a new environment
 - Refresh → Refreshes an environment
+- Export → Exports all configured environments to a JSON file
+- Import → Imports environments from a previously exported JSON file
 
 [Back to Top](#mxscript)
 
@@ -489,6 +516,11 @@ This extension contributes the following settings:
 [Back to Top](#mxscript)
 
 ## Release Notes
+### 1.6.0
+
+- Added execute script functionality
+- Added option to show / hide buttons in status bar using extension settings
+- Added option to import and export Maximo environments
 
 ### 1.5.0
 

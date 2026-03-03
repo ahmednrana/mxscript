@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.5.0",
+  "version": "1.6.1",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -61,13 +61,13 @@
     "onCommand:maximoEnvironments.compareWithEnvironment",
     "onCommand:maximoEnvironments.exportEnvironments",
     "onCommand:maximoEnvironments.importEnvironments",
-    "onCommand:mxscript.uploadAndExecute"
+    "onCommand:mxscript.execute"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "mxscript.uploadAndExecute",
-        "title": "Upload, Execute and Delete using script handler",
+        "command": "mxscript.execute",
+        "title": "Execute script using Script Handler",
         "category": "Maximo [mxscript]",
         "icon": "$(play)"
       },
@@ -173,13 +173,13 @@
       {
         "command": "maximoEnvironments.exportEnvironments",
         "title": "Export Environments",
-        "icon": "$(export)",
+        "icon": "$(cloud-upload)",
         "category": "Maximo [mxscript]"
       },
       {
         "command": "maximoEnvironments.importEnvironments",
         "title": "Import Environments",
-        "icon": "$(import)",
+        "icon": "$(cloud-download)",
         "category": "Maximo [mxscript]"
       }
     ],
@@ -337,19 +337,19 @@
           "default": true,
           "description": "Show the Compare icon in the status bar"
         },
-        "mxscript.statusBar.showUploadAndExecute": {
+        "mxscript.statusBar.showExecute": {
           "type": "boolean",
           "default": true,
-          "description": "Show the Upload and Execute icon in the status bar"
+          "description": "Show the Execute icon in the status bar"
         },
         "mxscript.statusBar.showDelete": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Show the Delete icon in the status bar"
         },
         "mxscript.statusBar.showToolsMenu": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Show the Tools Menu icon in the status bar"
         },
         "mxscript.statusBar.showManageEnvironments": {
@@ -425,14 +425,14 @@
       ],
       "editor/title": [
         {
-          "command": "mxscript.uploadAndExecute",
+          "command": "mxscript.execute",
           "group": "navigation",
           "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt"
         }
       ],
       "editor/context": [
         {
-          "command": "mxscript.uploadAndExecute",
+          "command": "mxscript.execute",
           "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt",
           "group": "maximo@1"
         }

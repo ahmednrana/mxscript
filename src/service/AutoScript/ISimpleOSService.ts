@@ -6,5 +6,4 @@ export interface SimpleOSService {
     compareWithServer: () => any;
     delete: (silent?: boolean) => any;
     execute?: () => any;
-    uploadAndExecute?: () => any;
 }

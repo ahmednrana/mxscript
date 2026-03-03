@@ -147,7 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   executeStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 95.5);
   executeStatusBarItem.command = {
-    command: "mxscript.uploadAndExecute",
+    command: "mxscript.execute",
     title: "Upload and Execute",
     arguments: [{ source: 'statusbar' }]
   } as any;
@@ -515,7 +515,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  let uploadAndExecute = vscode.commands.registerCommand("mxscript.uploadAndExecute", async () => {
+  let execute = vscode.commands.registerCommand("mxscript.execute", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     const fileName = getFilename();
     let config = new ConfigService();
@@ -534,8 +534,8 @@ export function activate(context: vscode.ExtensionContext) {
       showWarning("Execution of Condition files is not supported.");
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
-      if (as.uploadAndExecute) {
-        as.uploadAndExecute();
+      if (as.execute) {
+        as.execute();
       } else {
         showError("Upload and Execute is not implemented for this service.");
       }
@@ -980,8 +980,8 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     }
     if (executeStatusBarItem) {
       executeStatusBarItem.tooltip = activeEnv
-        ? `Upload, Execute and Delete on ${activeEnv.name}${mismatchNotice}`
-        : "Upload, Execute and Delete on active Maximo environment";
+        ? `Execute script on ${activeEnv.name}${mismatchNotice}`
+        : "Execute script on active Maximo environment";
     }
 
     if (shouldShowItem('showUpload', true)) uploadStatusBarItem.show(); else uploadStatusBarItem.hide();
@@ -991,7 +991,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
       if (shouldShowItem('showDelete', false)) deleteStatusBarItem.show(); else deleteStatusBarItem.hide();
     }
     if (executeStatusBarItem) {
-      if (shouldShowItem('showUploadAndExecute', true)) executeStatusBarItem.show(); else executeStatusBarItem.hide();
+      if (shouldShowItem('showExecute', true)) executeStatusBarItem.show(); else executeStatusBarItem.hide();
     }
   } else {
     uploadStatusBarItem.hide();

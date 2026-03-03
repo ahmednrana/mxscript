@@ -421,8 +421,30 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async uploadAndExecute(): Promise<void> {
+    async execute(): Promise<void> {
         try {
+            const fileName = vscode.window.activeTextEditor?.document.fileName;
+            if (!fileName || !/\.(jy|py|js)$/i.test(fileName)) {
+                showWarning("Execution is only supported for .jy, .py, or .js files.");
+                return;
+            }
+
+            const confirmation = await vscode.window.showWarningMessage(
+                "This will upload the script to server, then invoke it through Automation Script Handler (GET method) and then remove the script from server. Are you sure you want to continue?",
+                "Yes",
+                "Read More",
+                "Cancel"
+            );
+
+            if (confirmation === "Read More") {
+                vscode.env.openExternal(vscode.Uri.parse("https://ibm-maximo-dev.github.io/maximo-restapi-documentation/autoscript/autoscript"));
+                return;
+            }
+
+            if (confirmation !== "Yes") {
+                return;
+            }
+
             const uploaded = await this.upload(true);
             if (!uploaded) {
                 this.logger.debug('Script upload failed, aborting execution.');
