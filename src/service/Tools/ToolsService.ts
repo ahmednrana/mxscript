@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MaximoToolsClient, MaximoToolsClientConfig, ToolsLog } from 'maximo-api-client';
+import { MaximoToolsClient, MaximoToolsClientConfig, ToolsLog } from '@maximomize/maximo-api-client';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { Logger } from '../Logger/Logger';
 import { MaximoLoggingService } from '../AutoScript/LogService';

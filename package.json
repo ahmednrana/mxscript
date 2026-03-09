@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -61,10 +61,16 @@
     "onCommand:maximoEnvironments.compareWithEnvironment",
     "onCommand:maximoEnvironments.exportEnvironments",
     "onCommand:maximoEnvironments.importEnvironments",
-    "onCommand:mxscript.execute"
+    "onCommand:mxscript.execute",
+    "onCommand:mxscript.testApiConsumer"
   ],
   "contributes": {
     "commands": [
+      {
+        "command": "mxscript.testApiConsumer",
+        "title": "Test Extension API Consumer Consent Flow",
+        "category": "Maximo [mxscript]"
+      },
       {
         "command": "mxscript.execute",
         "title": "Execute script using Script Handler",
@@ -453,6 +459,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@maximomize/maximo-api-client": "^0.8.0",
     "@types/node-fetch": "^2.5.5",
     "@vscode-elements/elements": "^2.3.0",
     "@vscode-elements/react-elements": "^2.3.1",

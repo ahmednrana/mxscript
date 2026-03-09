@@ -1,5 +1,5 @@
-import type { AuthType, MaximoClientConfig } from "maximo-api-client";
-import { LogLevel, MaximoClient } from "maximo-api-client";
+import type { AuthType, MaximoClientConfig } from "@maximomize/maximo-api-client";
+import { LogLevel, MaximoClient } from "@maximomize/maximo-api-client";
 import IConfigService from "../service/Config/IConfigService";
 import * as vscode from 'vscode';
 import { Logger } from "../service/Logger/Logger";

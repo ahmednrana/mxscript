@@ -6,8 +6,7 @@ import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { showError, showWarning, showInformation } from '../../utils/utils';
 import { getFilename } from '../../utils/utils';
 import { SimpleOSService } from './ISimpleOSService';
-import { ConditionExpression } from 'maximo-api-client';
-import { QueryBuilder } from 'maximo-api-client/dist/core/query-builder';
+import { ConditionExpression, QueryBuilder } from '@maximomize/maximo-api-client';
 
 export class ConditionService implements SimpleOSService {
     private context: vscode.ExtensionContext;

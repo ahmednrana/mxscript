@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { format } from 'util';
-import { ILogger } from 'maximo-api-client';
+import { ILogger } from '@maximomize/maximo-api-client';
 
 export enum LogLevel {
   ERROR = 'error',

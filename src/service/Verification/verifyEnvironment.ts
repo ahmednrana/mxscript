@@ -1,4 +1,4 @@
-import { MaximoClient, MaximoClientConfig } from 'maximo-api-client';
+import { MaximoClient, MaximoClientConfig } from '@maximomize/maximo-api-client';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 import { convertAuthType, getLogLevel } from '../../utils/utils';
 

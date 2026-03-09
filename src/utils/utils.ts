@@ -1,7 +1,6 @@
 import { Constants } from "../Constants";
 import IConfigService from "../service/Config/IConfigService";
-import { AuthType } from "maximo-api-client";
-import { LogLevel } from "maximo-api-client";
+import { AuthType, LogLevel } from "@maximomize/maximo-api-client";
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigService } from "../service/Config/ConfigService";

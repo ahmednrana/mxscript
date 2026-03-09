@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CacheService } from 'maximo-api-client';
+import { CacheService } from '@maximomize/maximo-api-client';
 import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';

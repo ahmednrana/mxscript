@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
-import { MaximoClient, MaximoClientConfig } from 'maximo-api-client';
+import { MaximoClient, MaximoClientConfig } from '@maximomize/maximo-api-client';
 import { showError, showInformation, showWarning, convertAuthType, getLogLevel } from '../../utils/utils';
 import { EnvironmentLogContentProvider } from '../../webview/EnvironmentLogContentProvider';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';

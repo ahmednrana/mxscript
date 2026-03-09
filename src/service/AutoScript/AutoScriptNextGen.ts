@@ -6,8 +6,7 @@ import { Logger } from '../Logger/Logger';
 import { getFilename, getLanguageFromExtension, showError, showInformation, showWarning } from '../../utils/utils';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 
-import { AutoScript } from 'maximo-api-client';
-import { QueryBuilder } from 'maximo-api-client/dist/core/query-builder';
+import { AutoScript, QueryBuilder } from '@maximomize/maximo-api-client';
 
 export class AutoScriptNextGen implements SimpleOSService {
     private context: vscode.ExtensionContext;
@@ -461,7 +460,7 @@ export class AutoScriptNextGen implements SimpleOSService {
             const serverName = this.configService.getActiveEnvironmentName() || this.configService.getUrl();
             vscode.window.showInformationMessage(`Executing script "${scriptName}" on server "${serverName}"...`);
 
-            const response = await (this.getMaximoClient().autoScript as any).executeScript(scriptName, 'GET');
+            const response = await this.getMaximoClient().autoScript.executeScript(scriptName, 'GET');
 
             // Delete the script after execution
             await this.delete(true);

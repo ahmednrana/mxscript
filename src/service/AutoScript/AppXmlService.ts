@@ -5,10 +5,9 @@ import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
 import { getFilename, showError, showInformation, showWarning } from '../../utils/utils';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
-import { MaxPresentation } from 'maximo-api-client/dist/model/maxpresentation';
+import { MaxPresentation, QueryBuilder } from '@maximomize/maximo-api-client';
 // import * as xmlFormatter from 'xml-formatter';
 import xmlFormat from 'xml-formatter';
-import { QueryBuilder } from 'maximo-api-client/dist/core/query-builder';
 
 export class AppXmlService implements SimpleOSService {
     private context: vscode.ExtensionContext;
