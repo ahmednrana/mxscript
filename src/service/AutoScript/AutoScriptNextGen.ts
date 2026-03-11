@@ -264,7 +264,7 @@ export class AutoScriptNextGen implements SimpleOSService {
             }
             const autoscript: Partial<AutoScript> = {
                 autoscript: getFilename(),
-                description: '',
+                // description: '',
                 scriptlanguage: language,
                 source: source,
                 // status: 'Active',
