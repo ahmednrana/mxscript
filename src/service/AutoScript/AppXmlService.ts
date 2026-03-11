@@ -448,4 +448,51 @@ export class AppXmlService implements SimpleOSService {
             return xmlContent; // Return original if even basic formatting fails
         }
     }
+
+    async openInMaximo(): Promise<void> {
+        try {
+            const appName = getFilename();
+            if (!appName) {
+                showWarning("No valid file is open or application name could not be determined.");
+                return;
+            }
+
+            const { getActiveMaximoEnvironment } = await import('../../utils/utils');
+            const env = getActiveMaximoEnvironment(this.context);
+
+            if (!env) {
+                showWarning("Could not resolve active environment.");
+                return;
+            }
+
+            const client = this.getMaximoClient();
+
+            const choice = await vscode.window.showQuickPick([
+                { label: 'Open Application', description: `Open ${appName} in Maximo` },
+                { label: 'Open in Application Designer', description: 'Open Application Designer' }
+            ], { placeHolder: 'Where do you want to open this? ' });
+
+            if (!choice) return;
+
+            let url: string;
+
+            if (choice.label === 'Open Application') {
+                url = client.getWebUrl({
+                    value: appName
+                });
+            } else {
+                url = client.getWebUrl({
+                    value: 'designer',
+                    additionalevent: 'useqbe',
+                    additionaleventvalue: `app=${appName}`
+                });
+            }
+
+            const { openBrowserWithChoice } = await import('../../utils/browserUtils');
+            await openBrowserWithChoice(url, env, this.context);
+
+        } catch (error) {
+            showError(`Failed to open in Maximo: ${(error as Error).message}`);
+        }
+    }
 }

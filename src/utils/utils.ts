@@ -101,5 +101,19 @@ export function showError(message: string): void {
     const logger = Logger.getInstance();
     vscode.window.showErrorMessage(message);
     logger.error(`${message} [Environment: ${configService.getActiveEnvironmentName()} [${configService.getUrl()}]]`);
+}
 
+/**
+ * Retrieves the fully populated active MaximoEnvironment object
+ * from VS Code global/workspace state.
+ */
+export function getActiveMaximoEnvironment(context: vscode.ExtensionContext) {
+    const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+    if (!activeEnvId) return undefined;
+
+    const globalEnvs = context.globalState.get<any[]>('mxscript.environments', []);
+    const workspaceEnvs = context.workspaceState.get<any[]>('mxscript.environments', []);
+    const environments = [...globalEnvs, ...workspaceEnvs];
+
+    return environments.find(e => e.id === activeEnvId);
 }

@@ -542,6 +542,33 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  let openInMaximo = vscode.commands.registerCommand("mxscript.openInMaximo", async (arg?: any) => {
+    // If not configured, this ensures they select an environment first
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+
+    const fileName = getFilename();
+    let config = new ConfigService();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    if (fileExtension === 'xml') {
+      let appservice: SimpleOSService = new AppXmlService(context, config);
+      if (appservice.openInMaximo) appservice.openInMaximo(arg);
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      if (ce.openInMaximo) ce.openInMaximo(arg);
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      if (as.openInMaximo) as.openInMaximo(arg);
+    }
+  });
+
   let compareWithEnvironment = vscode.commands.registerCommand("mxscript.compareWithEnvironment", async () => {
     const fileName = getFilename();
     if (!fileName) {
@@ -886,15 +913,17 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
   context.subscriptions.push(downloadFromMaximo);
-  context.subscriptions.push(refreshCache);
-  context.subscriptions.push(manageEnvironments);
-  context.subscriptions.push(deleteItem);
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
+  context.subscriptions.push(refreshCache);
+  context.subscriptions.push(execute);
   context.subscriptions.push(fetchLogs);
   context.subscriptions.push(toolsMenu);
+  context.subscriptions.push(openInMaximo);
+  context.subscriptions.push(manageEnvironments);
+  context.subscriptions.push(deleteItem);
 
-  // Expose a command so other modules (like the tree provider) can request a status bar refresh
+  // Expose an API for other extensions to get a MaximoApiClient instance the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));
   context.subscriptions.push(updateStatusBarCommand);
 

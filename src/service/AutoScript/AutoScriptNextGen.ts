@@ -491,6 +491,52 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
+    async openInMaximo(): Promise<void> {
+        try {
+            const scriptName = getFilename();
+            if (!scriptName) {
+                showWarning("No valid file is open or filename could not be determined.");
+                return;
+            }
+
+            const { getActiveMaximoEnvironment } = await import('../../utils/utils');
+            const env = getActiveMaximoEnvironment(this.context);
+
+            if (!env) {
+                showWarning("Could not resolve active environment.");
+                return;
+            }
+
+            const client = this.getMaximoClient();
+            vscode.window.showInformationMessage(`Opening ${scriptName} in Maximo...`);
+
+            const query = new QueryBuilder<AutoScript>(client.autoScript.getObjectStructure())
+                .where(`autoscript="${scriptName}"`)
+                .select(['autoscriptid']);
+
+            const searchResult = await client.autoScript.executeQuery(query);
+
+            if (!searchResult || searchResult.items.length === 0) {
+                vscode.window.showWarningMessage(`Could not find Autoscript: ${scriptName} in ${env.name}`);
+                return;
+            }
+
+            const scriptId = searchResult.items[0].autoscriptid;
+            if (!scriptId) {
+                vscode.window.showErrorMessage(`ID missing for autoscript ${scriptName}.`);
+                return;
+            }
+
+            const url = client.getWebUrl({ value: "autoscript", uniqueid: Number(scriptId) });
+
+            const { openBrowserWithChoice } = await import('../../utils/browserUtils');
+            await openBrowserWithChoice(url, env, this.context);
+
+        } catch (error) {
+            showError(`Failed to open in Maximo: ${(error as Error).message}`);
+        }
+    }
+
     getSource(): string {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {

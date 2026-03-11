@@ -62,7 +62,8 @@
     "onCommand:maximoEnvironments.exportEnvironments",
     "onCommand:maximoEnvironments.importEnvironments",
     "onCommand:mxscript.execute",
-    "onCommand:mxscript.testApiConsumer"
+    "onCommand:mxscript.testApiConsumer",
+    "onCommand:mxscript.openInMaximo"
   ],
   "contributes": {
     "commands": [
@@ -70,6 +71,12 @@
         "command": "mxscript.testApiConsumer",
         "title": "Test Extension API Consumer Consent Flow",
         "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.openInMaximo",
+        "title": "Open in Maximo",
+        "category": "Maximo [mxscript]",
+        "icon": "$(globe)"
       },
       {
         "command": "mxscript.execute",
@@ -312,6 +319,11 @@
           "default": "",
           "description": "The friendly name of the currently active Maximo environment profile"
         },
+        "mxscript.scriptSettings.showOpenInMaximo": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the 'Open in Maximo' action in editor title and context menus"
+        },
         "mxscript.appxml.formatOnDownloadAndCompare": {
           "type": "boolean",
           "scope": "window",
@@ -431,6 +443,11 @@
       ],
       "editor/title": [
         {
+          "command": "mxscript.openInMaximo",
+          "group": "navigation",
+          "when": "mxscript.scriptSettings.showOpenInMaximo && (resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy)"
+        },
+        {
           "command": "mxscript.execute",
           "group": "navigation",
           "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt"
@@ -438,9 +455,14 @@
       ],
       "editor/context": [
         {
-          "command": "mxscript.execute",
-          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt",
+          "command": "mxscript.openInMaximo",
+          "when": "mxscript.scriptSettings.showOpenInMaximo && (resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy)",
           "group": "maximo@1"
+        },
+        {
+          "command": "mxscript.execute",
+          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy",
+          "group": "maximo@2"
         }
       ]
     }
@@ -459,11 +481,12 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@maximomize/maximo-api-client": "^0.8.0",
+    "@maximomize/maximo-api-client": "file:../../api/maximo-api-client",
     "@types/node-fetch": "^2.5.5",
     "@vscode-elements/elements": "^2.3.0",
     "@vscode-elements/react-elements": "^2.3.1",
     "@vscode/codicons": "^0.0.40",
+    "detect-browsers": "^6.1.0",
     "node-fetch": "^2.6.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -411,4 +411,50 @@ export class ConditionService implements SimpleOSService {
         let source: string = editor.document.getText();
         return source;
     }
+
+    async openInMaximo(): Promise<void> {
+        try {
+            const conditionName = getFilename();
+            if (!conditionName) {
+                showWarning("No condition name could be determined from the current file");
+                return;
+            }
+
+            const { getActiveMaximoEnvironment } = await import('../../utils/utils');
+            const env = getActiveMaximoEnvironment(this.context);
+
+            if (!env) {
+                showWarning("Could not resolve active environment.");
+                return;
+            }
+
+            const client = this.getMaximoClient();
+            vscode.window.showInformationMessage(`Opening condition ${conditionName} in Maximo...`);
+
+            const query = new QueryBuilder<ConditionExpression>(client.getConditionExpressionService().getObjectStructure())
+                .where(`conditionnum="${conditionName}"`)
+                .select(['conditionid']);
+
+            const searchResult = await client.getConditionExpressionService().executeQuery(query);
+
+            if (!searchResult || searchResult.items.length === 0) {
+                vscode.window.showWarningMessage(`Could not find Condition: ${conditionName} in ${env.name}`);
+                return;
+            }
+
+            const conditionId = (searchResult.items[0] as any).conditionid;
+            if (!conditionId) {
+                vscode.window.showErrorMessage(`ID missing for condition ${conditionName}.`);
+                return;
+            }
+
+            const url = client.getWebUrl({ value: "CONDEXPMGR", uniqueid: Number(conditionId) });
+
+            const { openBrowserWithChoice } = await import('../../utils/browserUtils');
+            await openBrowserWithChoice(url, env, this.context);
+
+        } catch (error) {
+            showError(`Failed to open in Maximo: ${(error as Error).message}`);
+        }
+    }
 }

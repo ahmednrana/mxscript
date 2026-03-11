@@ -20,6 +20,7 @@ export interface MaximoEnvironment {
     appxml_objectStructure: string;
     condition_objectStructure: string;
     toolsHostname?: string;
+    preferredBrowser?: string;
 }
 
 export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProvider {
@@ -469,6 +470,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="preferredBrowser">Preferred Browser (leave blank or 'prompt' to ask)</label>
+                        <input type="text" id="preferredBrowser" placeholder="prompt, System Default, Mozilla Firefox, Google Chrome, etc.">
+                    </div>
+
                     <div class="checkbox-group">
                         <input type="checkbox" id="createPythonFile">
                         <label for="createPythonFile">Create Python file for Jython scripts</label>
@@ -650,6 +656,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('createPythonFile').checked = true;
                         document.getElementById('ignoreSsl').checked = false;
                         document.getElementById('formatXmlOnDownload').checked = true;
+                        document.getElementById('preferredBrowser').value = '';
                         
                         toggleAuthFields();
                     }
@@ -686,6 +693,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                             createPythonFileForJythonScripts: document.getElementById('createPythonFile').checked,
                             ignoreSslErrors: document.getElementById('ignoreSsl').checked,
                             formatXmlOnDownloadAndCompare: document.getElementById('formatXmlOnDownload').checked,
+                            preferredBrowser: document.getElementById('preferredBrowser').value,
                             scope: document.getElementById('scopeGlobal').checked ? 'global' : 'workspace'
                         };
                         
@@ -742,6 +750,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('createPythonFile').checked = env.createPythonFileForJythonScripts;
                         document.getElementById('ignoreSsl').checked = env.ignoreSslErrors;
                         document.getElementById('formatXmlOnDownload').checked = env.formatXmlOnDownloadAndCompare !== false;
+                        document.getElementById('preferredBrowser').value = env.preferredBrowser || '';
                         
                         document.querySelector(\`input[name="scope"][value="\${env.scope}"]\`).checked = true;
                         
