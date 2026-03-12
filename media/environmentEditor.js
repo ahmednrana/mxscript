@@ -18621,6 +18621,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     onSelect,
     updateValue,
     focusControl,
+    onFocus,
     setReveal
   }) => {
     var _a6;
@@ -18632,6 +18633,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const common = {
       placeholder: meta.placeholder || "",
       value: state == null ? void 0 : state.value,
+      onFocus: () => onFocus == null ? void 0 : onFocus(meta.id),
       onInput: (e12) => updateValue(meta.id, e12.target.value)
     };
     const selectElRef = (0, import_react76.useRef)(null);
@@ -18639,14 +18641,17 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const el = selectElRef.current;
       if (el) {
         const handleChange = (e12) => updateValue(meta.id, e12.target.value);
+        const handleFocus = () => onFocus == null ? void 0 : onFocus(meta.id);
         el.addEventListener("change", handleChange);
         el.addEventListener("vsc-change", handleChange);
+        el.addEventListener("focus", handleFocus);
         return () => {
           el.removeEventListener("change", handleChange);
           el.removeEventListener("vsc-change", handleChange);
+          el.removeEventListener("focus", handleFocus);
         };
       }
-    }, [meta.id, updateValue]);
+    }, [meta.id, updateValue, onFocus]);
     const selectElement = (() => {
       const currentValue = state == null ? void 0 : state.value;
       const options = meta.options || [];
@@ -18879,6 +18884,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     onSelect,
     updateValue,
     focusControl,
+    onFocus,
     setReveal
   }) => {
     if (settings.length === 0) {
@@ -18918,6 +18924,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           onSelect,
           updateValue,
           focusControl,
+          onFocus,
           setReveal
         },
         meta.id
@@ -18971,6 +18978,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     { id: "logLevel", label: "Log Level", group: "behavior", type: "select", defaultValue: "INFO", options: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"], description: "Controls the verbosity of logs produced by operations." },
     { id: "createPythonFile", label: "Create Python File for Jython Scripts", group: "behavior", type: "boolean", defaultValue: true, description: "When enabled, a Python file will be created for Jython scripts if necessary." },
     { id: "formatXmlOnDownload", label: "Format XML on Download/Compare", group: "behavior", type: "boolean", defaultValue: true, description: "Automatically format XML when downloading or comparing." },
+    { id: "preferredBrowser", label: "Preferred Browser", group: "behavior", type: "select", defaultValue: "prompt", allowCustom: true, options: ["prompt", "System Default"], description: "Preferred browser for Open in Maximo. Leave as prompt to be asked." },
     // Advanced
     { id: "ignoreSsl", label: "Ignore SSL Errors", group: "advanced", type: "boolean", defaultValue: true, description: "When enabled, SSL certificate errors will be ignored. Not recommended for production." },
     { id: "sslcertificate", label: "SSL Certificate (PEM)", group: "advanced", type: "multiline", placeholder: "Paste PEM certificate here", description: "Optional custom CA certificate in PEM format." }
@@ -19004,6 +19012,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const [saveStatus, setSaveStatus] = (0, import_react77.useState)("idle");
     const [lastError, setLastError] = (0, import_react77.useState)();
     const [verifying, setVerifying] = (0, import_react77.useState)(false);
+    const [browserOptionsLoaded, setBrowserOptionsLoaded] = (0, import_react77.useState)(false);
     const [verifyResult, setVerifyResult] = (0, import_react77.useState)(null);
     const [reveal, setReveal] = (0, import_react77.useState)({});
     const validateFieldWithState = (0, import_react77.useCallback)((meta, value, snapshot) => {
@@ -19059,6 +19068,27 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
       return map;
     }, [filteredSettings]);
+    import_react77.default.useEffect(() => {
+      const handleMessage = (event) => {
+        const message = event.data;
+        if (message.type === "browserListResponse") {
+          const browserMeta = SETTINGS.find((s8) => s8.id === "preferredBrowser");
+          if (browserMeta) {
+            const additional = message.browserOptions.map((b3) => b3.label);
+            const current = new Set(browserMeta.options || []);
+            for (const a3 of additional) {
+              if (!current.has(a3)) {
+                if (!browserMeta.options) browserMeta.options = [];
+                browserMeta.options.push(a3);
+              }
+            }
+            setBrowserOptionsLoaded(true);
+          }
+        }
+      };
+      window.addEventListener("message", handleMessage);
+      return () => window.removeEventListener("message", handleMessage);
+    }, []);
     const groupsOrdered = (0, import_react77.useMemo)(() => sortByOrder(GROUPS), []);
     const updateValue = (id, value) => {
       console.log(`[updateValue] id: ${id}, value:`, value);
@@ -19234,7 +19264,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         formatXmlOnDownloadAndCompare: !!v3.formatXmlOnDownload,
         scope: v3.scope,
         sslcertificate: v3.sslcertificate,
-        toolsHostname: v3.toolsHostname
+        toolsHostname: v3.toolsHostname,
+        preferredBrowser: v3.preferredBrowser
       };
     };
     const [vscodeApi, setVscodeApi] = (0, import_react77.useState)(null);
@@ -19311,6 +19342,11 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           onSelect: setSelectedId,
           updateValue,
           focusControl,
+          onFocus: (id) => {
+            if (id === "preferredBrowser" && !browserOptionsLoaded) {
+              vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "getBrowserList" });
+            }
+          },
           setReveal
         },
         group.id

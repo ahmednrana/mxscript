@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { getBrowserList } from '../utils/browserUtils';
 
 export interface MaximoEnvironment {
     sslcertificate: string;
@@ -81,6 +82,14 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     break;
                 case 'getEnvironments':
                     this._sendEnvironmentsToWebview();
+                    break;
+                case 'getBrowserList':
+                    getBrowserList().then(list => {
+                        webviewView.webview.postMessage({
+                            type: 'browserListResponse',
+                            browserOptions: list
+                        });
+                    });
                     break;
             }
         });
@@ -471,8 +480,11 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     </div>
                     
                     <div class="form-group">
-                        <label for="preferredBrowser">Preferred Browser (leave blank or 'prompt' to ask)</label>
-                        <input type="text" id="preferredBrowser" placeholder="prompt, System Default, Mozilla Firefox, Google Chrome, etc.">
+                        <label for="preferredBrowser">Preferred Browser</label>
+                        <select id="preferredBrowser">
+                            <option value="prompt">prompt (Always Ask)</option>
+                            <option value="System Default">System Default</option>
+                        </select>
                     </div>
 
                     <div class="checkbox-group">
@@ -544,6 +556,10 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                     
                     authType.addEventListener('change', toggleAuthFields);
                     
+                    document.getElementById('preferredBrowser').addEventListener('focus', () => {
+                        vscode.postMessage({ type: 'getBrowserList' });
+                    }, { once: true });
+                    
                     passwordToggle.addEventListener('click', () => {
                         if (passwordField.type === 'password') {
                             passwordField.type = 'text';
@@ -562,6 +578,25 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                                 environments = message.environments;
                                 activeEnvironmentId = message.activeEnvironmentId;
                                 renderEnvironmentList();
+                                break;
+                            case 'browserListResponse':
+                                const select = document.getElementById('preferredBrowser');
+                                const currentValue = select.value;
+                                
+                                // Clear dynamic options except first two
+                                while (select.options.length > 2) {
+                                    select.remove(2);
+                                }
+                                
+                                message.browserOptions.forEach(b => {
+                                    if (b.label !== 'System Default') {
+                                        const option = document.createElement('option');
+                                        option.value = b.label;
+                                        option.textContent = b.label;
+                                        select.appendChild(option);
+                                    }
+                                });
+                                select.value = currentValue;
                                 break;
                         }
                     });
@@ -656,7 +691,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('createPythonFile').checked = true;
                         document.getElementById('ignoreSsl').checked = false;
                         document.getElementById('formatXmlOnDownload').checked = true;
-                        document.getElementById('preferredBrowser').value = '';
+                        document.getElementById('preferredBrowser').value = 'prompt';
                         
                         toggleAuthFields();
                     }
@@ -750,7 +785,7 @@ export class EnvironmentManagerWebviewProvider implements vscode.WebviewViewProv
                         document.getElementById('createPythonFile').checked = env.createPythonFileForJythonScripts;
                         document.getElementById('ignoreSsl').checked = env.ignoreSslErrors;
                         document.getElementById('formatXmlOnDownload').checked = env.formatXmlOnDownloadAndCompare !== false;
-                        document.getElementById('preferredBrowser').value = env.preferredBrowser || '';
+                        document.getElementById('preferredBrowser').value = env.preferredBrowser || 'prompt';
                         
                         document.querySelector(\`input[name="scope"][value="\${env.scope}"]\`).checked = true;
                         

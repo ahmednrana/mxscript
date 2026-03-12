@@ -14,6 +14,7 @@ export interface SettingsGroupProps {
   onSelect: (id: string) => void;
   updateValue: (id: string, value: any) => void;
   focusControl: (id: string) => void;
+  onFocus?: (id: string) => void;
   setReveal: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
@@ -32,6 +33,7 @@ export const SettingsGroup: React.FC<SettingsGroupProps> = ({
   onSelect,
   updateValue,
   focusControl,
+  onFocus,
   setReveal,
 }) => {
   // Don't render the group if there are no settings to show (e.g., due to filtering)
@@ -77,6 +79,7 @@ export const SettingsGroup: React.FC<SettingsGroupProps> = ({
             onSelect={onSelect}
             updateValue={updateValue}
             focusControl={focusControl}
+            onFocus={onFocus}
             setReveal={setReveal}
           />
         ))}

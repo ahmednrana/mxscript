@@ -3,6 +3,7 @@ import { MaximoClientProvider } from './client/client';
 import { AppXmlService } from "./service/AutoScript/AppXmlService";
 import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
 import { ConditionService } from "./service/AutoScript/ConditionService";
+import { ExecutionResultContentProvider } from "./webview/ExecutionResultContentProvider";
 import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoLoggingService } from "./service/AutoScript/LogService";
 import { ConfigService } from './service/Config/ConfigService';
@@ -79,6 +80,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   const logHighlighter = new EnvironmentLogHighlighter(logContentProvider);
   context.subscriptions.push(logHighlighter);
+
+  const executionResultProvider = new ExecutionResultContentProvider();
+  context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mxscript-execute', executionResultProvider));
+  context.subscriptions.push(executionResultProvider);
 
 
   // Status bar item for the active environment
@@ -535,9 +540,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       if (as.execute) {
-        as.execute();
+        as.execute(executionResultProvider);
       } else {
-        showError("Upload and Execute is not implemented for this service.");
+        showError("Execute is not implemented for this service.");
       }
     }
   });
@@ -913,15 +918,16 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compare);
   context.subscriptions.push(update);
   context.subscriptions.push(downloadFromMaximo);
+  context.subscriptions.push(refreshCache);
+  context.subscriptions.push(manageEnvironments);
+  context.subscriptions.push(deleteItem);
+  context.subscriptions.push(execute);
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
-  context.subscriptions.push(refreshCache);
-  context.subscriptions.push(execute);
   context.subscriptions.push(fetchLogs);
   context.subscriptions.push(toolsMenu);
   context.subscriptions.push(openInMaximo);
-  context.subscriptions.push(manageEnvironments);
-  context.subscriptions.push(deleteItem);
+  context.subscriptions.push(compareWithEnvironment);
 
   // Expose an API for other extensions to get a MaximoApiClient instance the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));

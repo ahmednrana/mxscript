@@ -2,7 +2,39 @@ import * as vscode from 'vscode';
 import * as os from 'os';
 import { exec } from 'child_process';
 import { MaximoEnvironment } from '../webview/EnvironmentManager';
-import detectBrowsers from 'detect-browsers';
+import * as detectBrowsers from 'detect-browsers';
+
+export async function getBrowserList(): Promise<{ label: string, description?: string }[]> {
+    const browserChoices: vscode.QuickPickItem[] = [
+        { label: 'System Default', description: 'Use your OS default browser' }
+    ];
+
+    try {
+        const installedBrowsers = await detectBrowsers.getAvailableBrowsers();
+
+        for (const b of installedBrowsers) {
+            const name = typeof b === 'string' ? b : (b.browser || '');
+            if (name) {
+                // Filter out Internet Explorer
+                const lowerName = name.toLowerCase();
+                if (lowerName.includes('internet explorer') || lowerName === 'ie') {
+                    continue;
+                }
+
+                const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
+                browserChoices.push({ label: formattedName, description: `Open in ${formattedName}` });
+            }
+        }
+    } catch (err) {
+        console.warn("Failed to detect browsers, falling back to static list", err);
+        browserChoices.push(
+            { label: 'Google Chrome', description: 'Open in Chrome' },
+            { label: 'Microsoft Edge', description: 'Open in Edge' },
+            { label: 'Mozilla Firefox', description: 'Open in Firefox' }
+        );
+    }
+    return browserChoices;
+}
 
 export async function openBrowserWithChoice(url: string, env: MaximoEnvironment, context: vscode.ExtensionContext): Promise<void> {
     if (!env) {
@@ -12,28 +44,7 @@ export async function openBrowserWithChoice(url: string, env: MaximoEnvironment,
     let browserToLaunch = env.preferredBrowser;
 
     if (!browserToLaunch || browserToLaunch === 'prompt' || browserToLaunch === '') {
-        const browserChoices: vscode.QuickPickItem[] = [
-            { label: 'System Default', description: 'Use your OS default browser' }
-        ];
-
-        try {
-            const installedBrowsers = await detectBrowsers.getAvailableBrowsers();
-
-            for (const b of installedBrowsers) {
-                const name = typeof b === 'string' ? b : (b.browser || '');
-                if (name) {
-                    const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
-                    browserChoices.push({ label: formattedName, description: `Open in ${formattedName}` });
-                }
-            }
-        } catch (err) {
-            console.warn("Failed to detect browsers, falling back to static list", err);
-            browserChoices.push(
-                { label: 'Google Chrome', description: 'Open in Chrome' },
-                { label: 'Microsoft Edge', description: 'Open in Edge' },
-                { label: 'Mozilla Firefox', description: 'Open in Firefox' }
-            );
-        }
+        const browserChoices = await getBrowserList();
 
         const selected = await vscode.window.showQuickPick(browserChoices, {
             placeHolder: 'Select a browser to open Maximo Web UI',

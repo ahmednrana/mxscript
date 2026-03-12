@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { MaximoEnvironment } from '../webview/EnvironmentManager';
 import { verifyEnvironment } from '../service/Verification/verifyEnvironment';
+import { getBrowserList } from '../utils/browserUtils';
 
 /**
  * React-based WebView panel for adding/editing environments in the main editor area
@@ -89,7 +90,8 @@ export class ReactEnvironmentEditorPanel {
                                 formatXmlOnDownloadAndCompare: !!(incoming.formatXmlOnDownloadAndCompare ?? this._environment?.formatXmlOnDownloadAndCompare ?? true),
                                 scope: incoming.scope || this._environment?.scope || 'global',
                                 sslcertificate: incoming.sslcertificate ?? this._environment?.sslcertificate ?? '',
-                                toolsHostname: incoming.toolsHostname ?? this._environment?.toolsHostname ?? ''
+                                toolsHostname: incoming.toolsHostname ?? this._environment?.toolsHostname ?? '',
+                                preferredBrowser: incoming.preferredBrowser ?? this._environment?.preferredBrowser ?? ''
                             };
                             this._onSave(normalized);
                         }
@@ -125,6 +127,14 @@ export class ReactEnvironmentEditorPanel {
                         if (message.command) {
                             vscode.commands.executeCommand(message.command);
                         }
+                        break;
+                    case 'getBrowserList':
+                        getBrowserList().then(list => {
+                            this._panel.webview.postMessage({
+                                type: 'browserListResponse',
+                                browserOptions: list
+                            });
+                        });
                         break;
                 }
             },
@@ -192,7 +202,8 @@ export class ReactEnvironmentEditorPanel {
             formatXmlOnDownload: this._environment.formatXmlOnDownloadAndCompare,
             scope: this._environment.scope,
             sslcertificate: this._environment.sslcertificate,
-            toolsHostname: this._environment.toolsHostname
+            toolsHostname: this._environment.toolsHostname,
+            preferredBrowser: this._environment.preferredBrowser
         } : null;
 
         const bootstrap = {

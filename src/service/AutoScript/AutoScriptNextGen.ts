@@ -420,7 +420,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async execute(): Promise<void> {
+    async execute(provider?: any): Promise<void> {
         try {
             const fileName = vscode.window.activeTextEditor?.document.fileName;
             if (!fileName || !/\.(jy|py|js)$/i.test(fileName)) {
@@ -473,21 +473,33 @@ export class AutoScriptNextGen implements SimpleOSService {
                 return;
             }
 
-            let formattedOutput = '';
-
-            if (typeof data === 'object') {
-                formattedOutput += JSON.stringify(data, null, 2);
-            } else {
-                formattedOutput += data.toString();
-            }
-
-            const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+            await this.showExecutionResult(scriptName, data, provider);
 
         } catch (error) {
             showError(`Failed to execute script: ${(error as Error).message}`);
             // Attempt to clean up even if execution fails
             await this.delete(true);
+        }
+    }
+
+    private async showExecutionResult(scriptName: string, data: any, provider?: any): Promise<void> {
+        let formattedOutput = '';
+
+        if (typeof data === 'object') {
+            formattedOutput += JSON.stringify(data, null, 2);
+        } else {
+            formattedOutput += data.toString();
+        }
+
+        if (provider && typeof provider.updateContent === 'function') {
+            const id = `exec-${Date.now()}`;
+            const title = `${scriptName} Result`;
+            const uri = provider.updateContent(id, title, formattedOutput);
+            const doc = await vscode.workspace.openTextDocument(uri);
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+        } else {
+            const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
         }
     }
 
