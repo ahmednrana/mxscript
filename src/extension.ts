@@ -27,6 +27,8 @@ let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
 let toolsLogsStatusBarItem: vscode.StatusBarItem;
 let executeStatusBarItem: vscode.StatusBarItem;
+let executionResultChannel: vscode.OutputChannel;
+let executionResultProvider: ExecutionResultContentProvider;
 
 
 
@@ -81,7 +83,10 @@ export function activate(context: vscode.ExtensionContext) {
   const logHighlighter = new EnvironmentLogHighlighter(logContentProvider);
   context.subscriptions.push(logHighlighter);
 
-  const executionResultProvider = new ExecutionResultContentProvider();
+  executionResultChannel = vscode.window.createOutputChannel("MxScript Result");
+  context.subscriptions.push(executionResultChannel);
+
+  executionResultProvider = new ExecutionResultContentProvider();
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mxscript-execute', executionResultProvider));
   context.subscriptions.push(executionResultProvider);
 
@@ -540,7 +545,7 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       if (as.execute) {
-        as.execute(executionResultProvider);
+        as.execute({ channel: executionResultChannel, provider: executionResultProvider });
       } else {
         showError("Execute is not implemented for this service.");
       }

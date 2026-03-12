@@ -482,7 +482,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    private async showExecutionResult(scriptName: string, data: any, provider?: any): Promise<void> {
+    private async showExecutionResult(scriptName: string, data: any, providers?: { channel: vscode.OutputChannel, provider: any }): Promise<void> {
         let formattedOutput = '';
 
         if (typeof data === 'object') {
@@ -491,13 +491,25 @@ export class AutoScriptNextGen implements SimpleOSService {
             formattedOutput += data.toString();
         }
 
-        if (provider && typeof provider.updateContent === 'function') {
+        const config = vscode.workspace.getConfiguration('mxscript.execution');
+        const displayLocation = config.get<string>('displayLocation', 'bottomPanel');
+
+        if (displayLocation === 'sideView' && providers?.provider && typeof providers.provider.updateContent === 'function') {
+            const provider = providers.provider;
             const id = `exec-${Date.now()}`;
             const title = `${scriptName} Result`;
             const uri = provider.updateContent(id, title, formattedOutput);
             const doc = await vscode.workspace.openTextDocument(uri);
             await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+        } else if (providers?.channel && typeof providers.channel.appendLine === 'function') {
+            const channel = providers.channel;
+            channel.clear();
+            channel.appendLine(`--- Execution Result for ${scriptName} ---`);
+            channel.appendLine(formattedOutput);
+            channel.appendLine('-------------------------------------------');
+            channel.show(true);
         } else {
+            // Fallback for cases where output method is not provided or mismatched
             const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
             await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
         }

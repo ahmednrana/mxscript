@@ -6,6 +6,5 @@ export interface SimpleOSService {
     compareWithServer: () => any;
     delete: (silent?: boolean) => any;
     execute?: (provider?: any) => any;
-    uploadAndExecute?: (provider?: any) => any;
     openInMaximo?: (arg?: any) => Promise<void>;
 }

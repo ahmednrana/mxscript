@@ -372,6 +372,19 @@
           "type": "boolean",
           "default": true,
           "description": "Show the Manage Environments icon in the status bar"
+        },
+        "mxscript.execution.displayLocation": {
+          "type": "string",
+          "enum": [
+            "sideView",
+            "bottomPanel"
+          ],
+          "enumDescriptions": [
+            "Show execution results in a read-only editor tab beside the current editor",
+            "Show execution results in the Output Channel in the bottom panel"
+          ],
+          "default": "sideView",
+          "description": "Where to display the execution results"
         }
       }
     },
