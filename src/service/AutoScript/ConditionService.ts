@@ -412,7 +412,7 @@ export class ConditionService implements SimpleOSService {
         return source;
     }
 
-    async openInMaximo(): Promise<void> {
+    async openInMaximo(arg?: any): Promise<void> {
         try {
             const conditionName = getFilename();
             if (!conditionName) {
@@ -420,8 +420,11 @@ export class ConditionService implements SimpleOSService {
                 return;
             }
 
-            const { getActiveMaximoEnvironment } = await import('../../utils/utils');
-            const env = getActiveMaximoEnvironment(this.context);
+            const { extractEnvironmentFromItem, getActiveMaximoEnvironment } = await import('../../utils/utils');
+            let env = extractEnvironmentFromItem(arg);
+            if (!env) {
+                env = getActiveMaximoEnvironment(this.context);
+            }
 
             if (!env) {
                 showWarning("Could not resolve active environment.");

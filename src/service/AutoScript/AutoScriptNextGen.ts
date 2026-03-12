@@ -515,7 +515,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async openInMaximo(): Promise<void> {
+    async openInMaximo(arg?: any): Promise<void> {
         try {
             const scriptName = getFilename();
             if (!scriptName) {
@@ -523,8 +523,11 @@ export class AutoScriptNextGen implements SimpleOSService {
                 return;
             }
 
-            const { getActiveMaximoEnvironment } = await import('../../utils/utils');
-            const env = getActiveMaximoEnvironment(this.context);
+            const { extractEnvironmentFromItem, getActiveMaximoEnvironment } = await import('../../utils/utils');
+            let env = extractEnvironmentFromItem(arg);
+            if (!env) {
+                env = getActiveMaximoEnvironment(this.context);
+            }
 
             if (!env) {
                 showWarning("Could not resolve active environment.");

@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.6.2",
+  "version": "1.6.4",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -74,7 +74,7 @@
         "command": "mxscript.openInMaximo",
         "title": "Open in Maximo",
         "category": "Maximo [mxscript]",
-        "icon": "$(globe)"
+        "icon": "$(link-external)"
       },
       {
         "command": "mxscript.execute",
@@ -317,11 +317,6 @@
           "default": "",
           "description": "The friendly name of the currently active Maximo environment profile"
         },
-        "mxscript.scriptSettings.showOpenInMaximo": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show the 'Open in Maximo' action in editor title and context menus"
-        },
         "mxscript.appxml.formatOnDownloadAndCompare": {
           "type": "boolean",
           "scope": "window",
@@ -372,6 +367,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show the Manage Environments icon in the status bar"
+        },
+        "mxscript.statusBar.showOpenInMaximo": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the Open in Maximo icon in the status bar"
         },
         "mxscript.execution.displayLocation": {
           "type": "string",
@@ -450,26 +450,14 @@
           "command": "maximoEnvironments.compareWithEnvironment",
           "when": "view == maximoEnvironments",
           "group": "inline@2"
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "mxscript.openInMaximo",
-          "group": "navigation",
-          "when": "mxscript.scriptSettings.showOpenInMaximo && (resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy)"
         },
         {
-          "command": "mxscript.execute",
-          "group": "navigation",
-          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt"
+          "command": "mxscript.openInMaximo",
+          "when": "view == maximoEnvironments && (viewItem == environment || viewItem == activeEnvironment)",
+          "group": "inline@3"
         }
       ],
       "editor/context": [
-        {
-          "command": "mxscript.openInMaximo",
-          "when": "mxscript.scriptSettings.showOpenInMaximo && (resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy)",
-          "group": "maximo@1"
-        },
         {
           "command": "mxscript.execute",
           "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy",

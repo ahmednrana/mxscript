@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigService } from "../service/Config/ConfigService";
 import { Logger } from "../service/Logger/Logger";
+import { MaximoEnvironmentTreeItem } from "../treeview/MaximoEnvironmentTreeProvider";
+import { MaximoEnvironment } from "../webview/EnvironmentManager";
 /**
  * Gets the file extension of the currently open editor tab.
  */
@@ -116,4 +118,22 @@ export function getActiveMaximoEnvironment(context: vscode.ExtensionContext) {
     const environments = [...globalEnvs, ...workspaceEnvs];
 
     return environments.find(e => e.id === activeEnvId);
+}
+
+export function extractEnvironmentFromItem(item?: MaximoEnvironmentTreeItem | MaximoEnvironment): MaximoEnvironment | undefined {
+    if (!item) {
+        return undefined;
+    }
+
+    const possibleTreeItem = item as MaximoEnvironmentTreeItem;
+    if (possibleTreeItem && typeof possibleTreeItem === 'object' && 'environment' in possibleTreeItem) {
+        return possibleTreeItem.environment;
+    }
+
+    const maybeEnvironment = item as MaximoEnvironment;
+    if (maybeEnvironment && typeof maybeEnvironment === 'object' && 'id' in maybeEnvironment && 'hostname' in maybeEnvironment) {
+        return maybeEnvironment;
+    }
+
+    return undefined;
 }
