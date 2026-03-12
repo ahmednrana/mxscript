@@ -118,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
     title: "Open in Maximo",
     arguments: [{ source: 'statusbar' }]
   } as any;
-  openInMaximoStatusBarItem.tooltip = "Open current record or environment in Maximo Web UI";
+  openInMaximoStatusBarItem.tooltip = "Open current record in Maximo Web UI";
   context.subscriptions.push(openInMaximoStatusBarItem);
 
   // Status bar icon for Download from Maximo quick-pick
@@ -1031,9 +1031,9 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
 
   if (openInMaximoStatusBarItem) {
     if (activeEnv) {
-      openInMaximoStatusBarItem.tooltip = `Open ${activeEnv.name} in Maximo${mismatchNotice}`;
+      openInMaximoStatusBarItem.tooltip = `Open in ${activeEnv.name}${mismatchNotice}`;
     } else {
-      openInMaximoStatusBarItem.tooltip = "Open active environment in Maximo";
+      openInMaximoStatusBarItem.tooltip = "Open in Maximo";
     }
     if (hasActiveEnvironment && shouldShowItem('showOpenInMaximo', false)) {
       openInMaximoStatusBarItem.show();

@@ -1,6 +1,6 @@
 # MxScript
 
-A script manager for IBM Maximo / Maximo Application Suite. This allows management (upload / download / comparison) of automation scripts, application XML and condition expressions from within VS Code
+Accelerate your Maximo workflow with integrated tools for automation scripts, application design, environment management, and MAS administrative utilities.
 
 ## Features
 
@@ -15,6 +15,7 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 - MAS Supported
 - Can refresh / reload Maximo caches
 - MAS Tools API (maxinst) Supported
+- Open in Maximo: Directly open scripts, applications, or conditions in the Maximo Web UI from VS Code (supports browser selection and persistence)
 
 ## Supported Actions
 
@@ -32,6 +33,7 @@ A script manager for IBM Maximo / Maximo Application Suite. This allows manageme
 12. [Manage Environments (Add / Edit / Delete / Set Active / Import / Export)](#managing-environments-in-ui)
 13. [Cache Refresh / reload](#cache-refresh)
 14. [MAS Tools](#mas-tools)
+15. [Open in Maximo](#open-in-maximo)
 
 ---
 [Requirements](#requirements)
@@ -240,7 +242,20 @@ Fetches Manage logs via the Maximo stream log end point. When complete, a dedica
 ![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/fetch_logs.gif)
 
 [Back to Top](#mxscript)
-
+ 
+### Open in Maximo
+ 
+#### Activate
+ 
+Use the command palette, click the "link-external" icon status bar button (you can enable it in settings), or click the "link-external" icon button in the Maximo Environments tree view.
+ 
+#### Functionality
+ 
+This feature allows you to quickly open the record you are currently working on directly in the Maximo Web UI. 
+ 
+- **Context-Aware**: If you have an automation script, application XML, or condition expression file open, it will attempt to navigate directly to that specific record.
+- **Browser Selection**: The first time you use this for an environment, you will be prompted to select a browser (Chrome, Edge, Firefox, or System Default). You can choose to remember this preference for each environment.
+ 
 ### Managing Environments in UI
 
 You can add multiple environments and switch between them.
@@ -296,6 +311,7 @@ When an active environment is set the status bar shows quick-action icons:
 - **Download**— Updates the currently open file from current environment
 - **Compare**— Compares the currently open file with version at current environment
 - **Upload and Execute** — Uploads, executes and deletes the currently open file at the current environment
+- **Open in Maximo** — Opens the currently open record (script/app/condition) in the Maximo Web UI via your preferred browser
 - **Deletes** — Deletes the currently open file at the current environment
 - **MAS Tools Menu** — Opens the MAS Tools (MAS only) - Access Logs, Database tools, Pod Manager, Customizations etc. See [API for administrative utilities](https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=reference-apis-administrative-utilities)
 
@@ -360,6 +376,7 @@ The buttons call the following commands:
 - **Edit**→ Edits the environment
 - **Delete**→ Deletes that environment
 - **Compare**→ Compares the currently opened file with this environment
+- **Open in Maximo**→ Opens the currently record or environment in Maximo Web UI
 - **Fetch Logs**→ Fetches the log from this environment
 
 You can add / refresh an environment or use the tree toolbar:
@@ -491,6 +508,7 @@ This extension contributes the following settings:
 | `mxscript.statusBar.showUploadAndExecute`                  | boolean | true     | Show the Upload and Execute icon in the status bar                                                |
 | `mxscript.statusBar.showDelete`                            | boolean | false    | Show the Delete icon in the status bar                                                            |
 | `mxscript.statusBar.showToolsMenu`                         | boolean | false    | Show the Tools Menu icon in the status bar                                                        |
+| `mxscript.statusBar.showOpenInMaximo`                      | boolean | false    | Show the Open in Maximo icon in the status bar                                                    |
 | `mxscript.statusBar.showManageEnvironments`                | boolean | true     | Show the Manage Environments icon in the status bar                                               |
 
 ## 
@@ -516,6 +534,13 @@ This extension contributes the following settings:
 [Back to Top](#mxscript)
 
 ## Release Notes
+### 1.6.4
+ 
+- Added **Open in Maximo** functionality with status bar and tree view shortcuts
+- Added dynamic browser detection and per-environment browser preference
+- Improved script execution result handling and display
+- Updated dependencies and minor fixes
+ 
 ### 1.6.0
 
 - Added execute script functionality
