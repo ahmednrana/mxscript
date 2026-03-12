@@ -47,6 +47,7 @@ const SETTINGS: SettingMeta[] = [
   { id: 'logLevel', label: 'Log Level', group: 'behavior', type: 'select', defaultValue: 'INFO', options: ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'], description: 'Controls the verbosity of logs produced by operations.' },
   { id: 'createPythonFile', label: 'Create Python File for Jython Scripts', group: 'behavior', type: 'boolean', defaultValue: true, description: 'When enabled, a Python file will be created for Jython scripts if necessary.' },
   { id: 'formatXmlOnDownload', label: 'Format XML on Download/Compare', group: 'behavior', type: 'boolean', defaultValue: true, description: 'Automatically format XML when downloading or comparing.' },
+  { id: 'preferredBrowser', label: 'Preferred Browser', group: 'behavior', type: 'select', defaultValue: 'prompt', allowCustom: true, options: ['prompt', 'System Default'], description: 'Preferred browser for Open in Maximo. Leave as prompt to be asked.' },
   // Advanced
   { id: 'ignoreSsl', label: 'Ignore SSL Errors', group: 'advanced', type: 'boolean', defaultValue: true, description: 'When enabled, SSL certificate errors will be ignored. Not recommended for production.' },
   { id: 'sslcertificate', label: 'SSL Certificate (PEM)', group: 'advanced', type: 'multiline', placeholder: 'Paste PEM certificate here', description: 'Optional custom CA certificate in PEM format.' },
@@ -69,6 +70,8 @@ const buildInitialState = (): FormState => {
   }
   return state;
 };
+
+// Removed populateDynamicOptions from module level as it's now on-demand
 
 export interface EnvironmentEditorProps {
   mode?: 'add' | 'edit';
@@ -95,6 +98,7 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lastError, setLastError] = useState<string | undefined>();
   const [verifying, setVerifying] = useState(false);
+  const [browserOptionsLoaded, setBrowserOptionsLoaded] = useState(false);
   const [verifyResult, setVerifyResult] = useState<{ success: boolean | null; message: string } | null>(null);
   // Track reveal state per secret field (apiKey, password, etc.)
   const [reveal, setReveal] = useState<Record<string, boolean>>({});
@@ -156,6 +160,29 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
     }
     return map;
   }, [filteredSettings]);
+
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const message = event.data;
+      if (message.type === 'browserListResponse') {
+        const browserMeta = SETTINGS.find(s => s.id === 'preferredBrowser');
+        if (browserMeta) {
+          const additional = message.browserOptions.map((b: any) => b.label);
+          const current = new Set(browserMeta.options || []);
+          for (const a of additional) {
+            if (!current.has(a)) {
+              if (!browserMeta.options) browserMeta.options = [];
+              browserMeta.options.push(a);
+            }
+          }
+          setBrowserOptionsLoaded(true);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const groupsOrdered = useMemo(() => sortByOrder(GROUPS), []);
 
@@ -357,7 +384,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
       formatXmlOnDownloadAndCompare: !!v.formatXmlOnDownload,
       scope: v.scope,
       sslcertificate: v.sslcertificate,
-      toolsHostname: v.toolsHostname
+      toolsHostname: v.toolsHostname,
+      preferredBrowser: v.preferredBrowser
     };
   };
 
@@ -455,6 +483,11 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
             onSelect={setSelectedId}
             updateValue={updateValue}
             focusControl={focusControl}
+            onFocus={(id) => {
+              if (id === 'preferredBrowser' && !browserOptionsLoaded) {
+                vscodeApi?.postMessage({ type: 'getBrowserList' });
+              }
+            }}
             setReveal={setReveal}
           />
         ))}

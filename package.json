@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.6.2",
+  "version": "1.6.4",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -60,7 +60,8 @@
     "onCommand:maximoEnvironments.exportEnvironments",
     "onCommand:maximoEnvironments.importEnvironments",
     "onCommand:mxscript.execute",
-    "onCommand:mxscript.testApiConsumer"
+    "onCommand:mxscript.testApiConsumer",
+    "onCommand:mxscript.openInMaximo"
   ],
   "contributes": {
     "commands": [
@@ -68,6 +69,12 @@
         "command": "mxscript.testApiConsumer",
         "title": "Test Extension API Consumer Consent Flow",
         "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.openInMaximo",
+        "title": "Open in Maximo",
+        "category": "Maximo [mxscript]",
+        "icon": "$(link-external)"
       },
       {
         "command": "mxscript.execute",
@@ -360,6 +367,24 @@
           "type": "boolean",
           "default": true,
           "description": "Show the Manage Environments icon in the status bar"
+        },
+        "mxscript.statusBar.showOpenInMaximo": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the Open in Maximo icon in the status bar"
+        },
+        "mxscript.execution.displayLocation": {
+          "type": "string",
+          "enum": [
+            "sideView",
+            "bottomPanel"
+          ],
+          "enumDescriptions": [
+            "Show execution results in a read-only editor tab beside the current editor",
+            "Show execution results in the Output Channel in the bottom panel"
+          ],
+          "default": "sideView",
+          "description": "Where to display the execution results"
         }
       }
     },
@@ -425,20 +450,18 @@
           "command": "maximoEnvironments.compareWithEnvironment",
           "when": "view == maximoEnvironments",
           "group": "inline@2"
-        }
-      ],
-      "editor/title": [
+        },
         {
-          "command": "mxscript.execute",
-          "group": "navigation",
-          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt"
+          "command": "mxscript.openInMaximo",
+          "when": "view == maximoEnvironments && (viewItem == environment || viewItem == activeEnvironment)",
+          "group": "inline@3"
         }
       ],
       "editor/context": [
         {
           "command": "mxscript.execute",
-          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .txt",
-          "group": "maximo@1"
+          "when": "resourceExtname == .py || resourceExtname == .js || resourceExtname == .groovy || resourceExtname == .jy",
+          "group": "maximo@2"
         }
       ]
     }
@@ -462,6 +485,7 @@
     "@vscode-elements/elements": "^2.3.0",
     "@vscode-elements/react-elements": "^2.3.1",
     "@vscode/codicons": "^0.0.40",
+    "detect-browsers": "^6.1.0",
     "node-fetch": "^2.6.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

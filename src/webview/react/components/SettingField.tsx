@@ -11,6 +11,7 @@ export interface SettingFieldProps {
   onSelect: (id: string) => void;
   updateValue: (id: string, value: any) => void;
   focusControl: (id: string) => void;
+  onFocus?: (id: string) => void;
   setReveal: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
@@ -29,6 +30,7 @@ export const SettingField: React.FC<SettingFieldProps> = ({
   onSelect,
   updateValue,
   focusControl,
+  onFocus,
   setReveal
 }) => {
   const state = form[meta.id];
@@ -41,6 +43,7 @@ export const SettingField: React.FC<SettingFieldProps> = ({
   const common = {
     placeholder: meta.placeholder || '',
     value: state?.value,
+    onFocus: () => onFocus?.(meta.id),
     onInput: (e: any) => updateValue(meta.id, e.target.value)
   };
 
@@ -53,14 +56,17 @@ export const SettingField: React.FC<SettingFieldProps> = ({
     const el = selectElRef.current;
     if (el) {
       const handleChange = (e: any) => updateValue(meta.id, e.target.value);
+      const handleFocus = () => onFocus?.(meta.id);
       el.addEventListener('change', handleChange);
       el.addEventListener('vsc-change', handleChange);
+      el.addEventListener('focus', handleFocus);
       return () => {
         el.removeEventListener('change', handleChange);
         el.removeEventListener('vsc-change', handleChange);
+        el.removeEventListener('focus', handleFocus);
       };
     }
-  }, [meta.id, updateValue]);
+  }, [meta.id, updateValue, onFocus]);
 
   const selectElement = (() => {
     const currentValue = state?.value;

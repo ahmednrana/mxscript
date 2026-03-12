@@ -420,7 +420,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async execute(): Promise<void> {
+    async execute(provider?: any): Promise<void> {
         try {
             const fileName = vscode.window.activeTextEditor?.document.fileName;
             if (!fileName || !/\.(jy|py|js)$/i.test(fileName)) {
@@ -473,21 +473,94 @@ export class AutoScriptNextGen implements SimpleOSService {
                 return;
             }
 
-            let formattedOutput = '';
-
-            if (typeof data === 'object') {
-                formattedOutput += JSON.stringify(data, null, 2);
-            } else {
-                formattedOutput += data.toString();
-            }
-
-            const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+            await this.showExecutionResult(scriptName, data, provider);
 
         } catch (error) {
             showError(`Failed to execute script: ${(error as Error).message}`);
             // Attempt to clean up even if execution fails
             await this.delete(true);
+        }
+    }
+
+    private async showExecutionResult(scriptName: string, data: any, providers?: { channel: vscode.OutputChannel, provider: any }): Promise<void> {
+        let formattedOutput = '';
+
+        if (typeof data === 'object') {
+            formattedOutput += JSON.stringify(data, null, 2);
+        } else {
+            formattedOutput += data.toString();
+        }
+
+        const config = vscode.workspace.getConfiguration('mxscript.execution');
+        const displayLocation = config.get<string>('displayLocation', 'bottomPanel');
+
+        if (displayLocation === 'sideView' && providers?.provider && typeof providers.provider.updateContent === 'function') {
+            const provider = providers.provider;
+            const id = `exec-${Date.now()}`;
+            const title = `${scriptName} Result`;
+            const uri = provider.updateContent(id, title, formattedOutput);
+            const doc = await vscode.workspace.openTextDocument(uri);
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+        } else if (providers?.channel && typeof providers.channel.appendLine === 'function') {
+            const channel = providers.channel;
+            channel.clear();
+            channel.appendLine(`--- Execution Result for ${scriptName} ---`);
+            channel.appendLine(formattedOutput);
+            channel.appendLine('-------------------------------------------');
+            channel.show(true);
+        } else {
+            // Fallback for cases where output method is not provided or mismatched
+            const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+        }
+    }
+
+    async openInMaximo(arg?: any): Promise<void> {
+        try {
+            const scriptName = getFilename();
+            if (!scriptName) {
+                showWarning("No valid file is open or filename could not be determined.");
+                return;
+            }
+
+            const { extractEnvironmentFromItem, getActiveMaximoEnvironment } = await import('../../utils/utils');
+            let env = extractEnvironmentFromItem(arg);
+            if (!env) {
+                env = getActiveMaximoEnvironment(this.context);
+            }
+
+            if (!env) {
+                showWarning("Could not resolve active environment.");
+                return;
+            }
+
+            const client = this.getMaximoClient();
+            vscode.window.showInformationMessage(`Opening ${scriptName} in Maximo...`);
+
+            const query = new QueryBuilder<AutoScript>(client.autoScript.getObjectStructure())
+                .where(`autoscript="${scriptName}"`)
+                .select(['autoscriptid']);
+
+            const searchResult = await client.autoScript.executeQuery(query);
+
+            if (!searchResult || searchResult.items.length === 0) {
+                vscode.window.showWarningMessage(`Could not find Autoscript: ${scriptName} in ${env.name}`);
+                return;
+            }
+
+            const scriptId = searchResult.items[0].autoscriptid;
+            if (!scriptId) {
+                vscode.window.showErrorMessage(`ID missing for autoscript ${scriptName}.`);
+                return;
+            }
+
+            const url = client.getWebUrl({ value: "autoscript", uniqueid: Number(scriptId) });
+
+            const { openBrowserWithChoice } = await import('../../utils/browserUtils');
+            await openBrowserWithChoice(url, env, this.context);
+
+        } catch (error) {
+            showError(`Failed to open in Maximo: ${(error as Error).message}`);
         }
     }
 

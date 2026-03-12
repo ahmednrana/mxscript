@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { ConfigService } from "../service/Config/ConfigService";
 import { Logger } from "../service/Logger/Logger";
+import { MaximoEnvironmentTreeItem } from "../treeview/MaximoEnvironmentTreeProvider";
+import { MaximoEnvironment } from "../webview/EnvironmentManager";
 /**
  * Gets the file extension of the currently open editor tab.
  */
@@ -101,5 +103,37 @@ export function showError(message: string): void {
     const logger = Logger.getInstance();
     vscode.window.showErrorMessage(message);
     logger.error(`${message} [Environment: ${configService.getActiveEnvironmentName()} [${configService.getUrl()}]]`);
+}
 
+/**
+ * Retrieves the fully populated active MaximoEnvironment object
+ * from VS Code global/workspace state.
+ */
+export function getActiveMaximoEnvironment(context: vscode.ExtensionContext) {
+    const activeEnvId = context.globalState.get<string>('mxscript.activeEnvironment');
+    if (!activeEnvId) return undefined;
+
+    const globalEnvs = context.globalState.get<any[]>('mxscript.environments', []);
+    const workspaceEnvs = context.workspaceState.get<any[]>('mxscript.environments', []);
+    const environments = [...globalEnvs, ...workspaceEnvs];
+
+    return environments.find(e => e.id === activeEnvId);
+}
+
+export function extractEnvironmentFromItem(item?: MaximoEnvironmentTreeItem | MaximoEnvironment): MaximoEnvironment | undefined {
+    if (!item) {
+        return undefined;
+    }
+
+    const possibleTreeItem = item as MaximoEnvironmentTreeItem;
+    if (possibleTreeItem && typeof possibleTreeItem === 'object' && 'environment' in possibleTreeItem) {
+        return possibleTreeItem.environment;
+    }
+
+    const maybeEnvironment = item as MaximoEnvironment;
+    if (maybeEnvironment && typeof maybeEnvironment === 'object' && 'id' in maybeEnvironment && 'hostname' in maybeEnvironment) {
+        return maybeEnvironment;
+    }
+
+    return undefined;
 }

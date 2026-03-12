@@ -3,6 +3,7 @@ import { MaximoClientProvider } from './client/client';
 import { AppXmlService } from "./service/AutoScript/AppXmlService";
 import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
 import { ConditionService } from "./service/AutoScript/ConditionService";
+import { ExecutionResultContentProvider } from "./webview/ExecutionResultContentProvider";
 import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoLoggingService } from "./service/AutoScript/LogService";
 import { ConfigService } from './service/Config/ConfigService';
@@ -10,7 +11,7 @@ import { Logger } from './service/Logger/Logger';
 import { EnvironmentLogHighlighter } from "./service/Logger/LogHighlighter";
 import { MaximoEnvironmentTreeItem, MaximoEnvironmentTreeProvider } from './treeview/MaximoEnvironmentTreeProvider';
 import { ReactEnvironmentEditorPanel } from './treeview/ReactEnvironmentEditorPanel';
-import { getFileExtension, getFilename, showError, showWarning } from "./utils/utils";
+import { extractEnvironmentFromItem, getFileExtension, getFilename, showError, showWarning } from "./utils/utils";
 import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
 import { MaximoEnvironment } from './webview/EnvironmentManager';
 import { CacheRefreshService } from "./service/Cache/CacheRefreshService";
@@ -26,6 +27,9 @@ let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
 let toolsLogsStatusBarItem: vscode.StatusBarItem;
 let executeStatusBarItem: vscode.StatusBarItem;
+let openInMaximoStatusBarItem: vscode.StatusBarItem;
+let executionResultChannel: vscode.OutputChannel;
+let executionResultProvider: ExecutionResultContentProvider;
 
 
 
@@ -80,6 +84,13 @@ export function activate(context: vscode.ExtensionContext) {
   const logHighlighter = new EnvironmentLogHighlighter(logContentProvider);
   context.subscriptions.push(logHighlighter);
 
+  executionResultChannel = vscode.window.createOutputChannel("MxScript Result");
+  context.subscriptions.push(executionResultChannel);
+
+  executionResultProvider = new ExecutionResultContentProvider();
+  context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mxscript-execute', executionResultProvider));
+  context.subscriptions.push(executionResultProvider);
+
 
   // Status bar item for the active environment
   statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -99,6 +110,16 @@ export function activate(context: vscode.ExtensionContext) {
   } as any;
   fetchLogsStatusBarItem.tooltip = "Fetch logs from the active environment (Manage / MAS only; not supported on classic Maximo 7.6)";
   context.subscriptions.push(fetchLogsStatusBarItem);
+
+  openInMaximoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98.8);
+  openInMaximoStatusBarItem.text = "$(link-external)";
+  openInMaximoStatusBarItem.command = {
+    command: "mxscript.openInMaximo",
+    title: "Open in Maximo",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  openInMaximoStatusBarItem.tooltip = "Open current record or environment in Maximo Web UI";
+  context.subscriptions.push(openInMaximoStatusBarItem);
 
   // Status bar icon for Download from Maximo quick-pick
   downloadFromMaximoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 98.5);
@@ -535,10 +556,52 @@ export function activate(context: vscode.ExtensionContext) {
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       if (as.execute) {
-        as.execute();
+        as.execute({ channel: executionResultChannel, provider: executionResultProvider });
       } else {
-        showError("Upload and Execute is not implemented for this service.");
+        showError("Execute is not implemented for this service.");
       }
+    }
+  });
+
+  let openInMaximo = vscode.commands.registerCommand("mxscript.openInMaximo", async (arg?: any) => {
+    // Determine the environment to use
+    let environmentFromItem = extractEnvironmentFromItem(arg);
+    const invokedFromStatusBar = !!(arg && arg.source === 'statusbar');
+
+    if (!environmentFromItem) {
+      if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+      environmentFromItem = getActiveEnvironment(context);
+    }
+
+    if (!environmentFromItem) {
+      showError("No environment resolved.");
+      return;
+    }
+
+    const fileName = getFilename();
+    let config = new ConfigService();
+
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+
+    // Force context-aware opening if a file is open
+    if (fileExtension === 'xml') {
+      let appservice: SimpleOSService = new AppXmlService(context, config);
+      if (appservice.openInMaximo) appservice.openInMaximo(arg);
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      if (ce.openInMaximo) ce.openInMaximo(arg);
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      if (as.openInMaximo) as.openInMaximo(arg);
     }
   });
 
@@ -889,12 +952,15 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(refreshCache);
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteItem);
+  context.subscriptions.push(execute);
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
   context.subscriptions.push(fetchLogs);
   context.subscriptions.push(toolsMenu);
+  context.subscriptions.push(openInMaximo);
+  context.subscriptions.push(compareWithEnvironment);
 
-  // Expose a command so other modules (like the tree provider) can request a status bar refresh
+  // Expose an API for other extensions to get a MaximoApiClient instance the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));
   context.subscriptions.push(updateStatusBarCommand);
 
@@ -960,6 +1026,19 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
       downloadFromMaximoStatusBarItem.show();
     } else {
       downloadFromMaximoStatusBarItem.hide();
+    }
+  }
+
+  if (openInMaximoStatusBarItem) {
+    if (activeEnv) {
+      openInMaximoStatusBarItem.tooltip = `Open ${activeEnv.name} in Maximo${mismatchNotice}`;
+    } else {
+      openInMaximoStatusBarItem.tooltip = "Open active environment in Maximo";
+    }
+    if (hasActiveEnvironment && shouldShowItem('showOpenInMaximo', false)) {
+      openInMaximoStatusBarItem.show();
+    } else {
+      openInMaximoStatusBarItem.hide();
     }
   }
 
@@ -1063,23 +1142,7 @@ function getActiveEnvironment(context: vscode.ExtensionContext): MaximoEnvironme
   return environments.find(env => env.id === activeEnvId);
 }
 
-function extractEnvironmentFromItem(item?: MaximoEnvironmentTreeItem | MaximoEnvironment): MaximoEnvironment | undefined {
-  if (!item) {
-    return undefined;
-  }
 
-  const possibleTreeItem = item as MaximoEnvironmentTreeItem;
-  if (possibleTreeItem && typeof possibleTreeItem === 'object' && 'environment' in possibleTreeItem) {
-    return possibleTreeItem.environment;
-  }
-
-  const maybeEnvironment = item as MaximoEnvironment;
-  if (maybeEnvironment && typeof maybeEnvironment === 'object' && 'id' in maybeEnvironment && 'hostname' in maybeEnvironment) {
-    return maybeEnvironment;
-  }
-
-  return undefined;
-}
 
 /**
  * Ensures the workspace has the necessary Maximo configuration before running a command.
