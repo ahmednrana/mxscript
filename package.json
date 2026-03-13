@@ -4,7 +4,7 @@
   "description": "Development Utilities for IBM Maximo",
   "version": "1.6.6",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.110.0"
   },
   "publisher": "Rana",
   "author": {
