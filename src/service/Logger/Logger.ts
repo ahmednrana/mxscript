@@ -23,7 +23,7 @@ export class Logger implements ILogger {
     };
 
     private constructor(channelName: string) {
-        this.outputChannel = vscode.window.createOutputChannel(channelName);
+        this.outputChannel = vscode.window.createOutputChannel(channelName, { log: true });
         this.logLevel = LogLevel.INFO; // Default log level
     }
 

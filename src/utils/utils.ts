@@ -137,3 +137,16 @@ export function extractEnvironmentFromItem(item?: MaximoEnvironmentTreeItem | Ma
 
     return undefined;
 }
+
+/**
+ * Scrolls the given editor to the end of the document.
+ * @param editor The text editor to scroll.
+ */
+export function scrollToEndOfDocument(editor: vscode.TextEditor): void {
+    const lastLine = editor.document.lineCount - 1;
+    if (lastLine < 0) { return; }
+    const lastChar = editor.document.lineAt(lastLine).text.length;
+    const position = new vscode.Position(lastLine, lastChar);
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+}

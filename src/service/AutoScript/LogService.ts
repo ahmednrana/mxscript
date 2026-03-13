@@ -3,7 +3,7 @@ import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
 import { MaximoClient, MaximoClientConfig } from '@maximomize/maximo-api-client';
-import { showError, showInformation, showWarning, convertAuthType, getLogLevel } from '../../utils/utils';
+import { showError, showInformation, showWarning, convertAuthType, getLogLevel, scrollToEndOfDocument } from '../../utils/utils';
 import { EnvironmentLogContentProvider } from '../../webview/EnvironmentLogContentProvider';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 
@@ -160,7 +160,8 @@ export class MaximoLoggingService {
 
         progress?.report({ increment: 30, message: 'Opening logs...' });
 
-        await vscode.window.showTextDocument(logDocument, { preview: false });
+        const editor = await vscode.window.showTextDocument(logDocument, { preview: false });
+        scrollToEndOfDocument(editor);
 
         progress?.report({ increment: 10, message: `Fetched at ${fetchedAt.toLocaleString()}` });
     }

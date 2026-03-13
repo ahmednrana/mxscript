@@ -132,7 +132,7 @@ In multiple it will show a multi select menu to download **SQL based** condition
 
 #### Activate
 
-Use the command palette and select this option or use the status basr button for it
+Use the command palette and select this option or use the status bar button for it
 
 #### Functionality
 
@@ -148,7 +148,7 @@ You must have a saved file open for this to work. This downloads the updated aut
 
 #### Activate
 
-Use the command palette and select this option or use the status basr button for it
+Use the command palette and select this option or use the status bar button for it
 
 #### Functionality
 
@@ -213,8 +213,16 @@ This deletes the automation script or condition on the server
 Use the command palette, click the "execute" (play) status bar button next to the active environment, or use the command "Execute script using Script Handler".
 
 #### Functionality
+ 
+ Uploads the currently opened automation script (`.py`, `.js`, or `.jy`) to the active environment, immediately executes it, and deletes it from the server to keep your environment clean. 
+ The body returned from the script execution is usually stored in `responseBody` implicit variable in Maximo automation scripts. The response body is then displayed in the selected display location.
 
-Uploads the currently opened automation script (`.py`, `.js`, or `.jy`) to the active environment, immediately executes it, and deletes it from the server to keep your environment clean. The body returned from the script execution is then displayed in a new split VS Code virtual document adjacent to the active file. The body is usually stored in `responseBody` implicit variable in Maximo automation scripts.
+ **Display Options:**
+ By default, the result is displayed in a **new focused tab** (`newTab`). You can change this in settings (`mxscript.execution.displayLocation`) to:
+ - **newTab** (Default): Opens a focused tab in the active editor group.
+ - **sideView**: Opens a read-only tab beside the current editor (with syntax/severity highlighting).
+ - **bottomPanel**: Shows formatted and colorized output in the "MxScript Result" Output Channel.
+ 
 
 ![Execute](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/execute_script.gif)
 
@@ -253,8 +261,8 @@ Use the command palette, click the "link-external" icon status bar button (you c
  
 This feature allows you to quickly open the record you are currently working on directly in the Maximo Web UI. 
  
-- **Context-Aware**: If you have an automation script, application XML, or condition expression file open, it will attempt to navigate directly to that specific record.
-- **Browser Selection**: The first time you use this for an environment, you will be prompted to select a browser (Chrome, Edge, Firefox, or System Default). You can choose to remember this preference for each environment.
+- **Context-Aware**: If you have an automation script, application XML, or condition expression file open, it will attempt to navigate directly to that specific record. If no file is open, it falls back to opening the base Maximo URL.
+- **Browser Selection**: The first time you use this for an environment, you will be prompted to select a browser (Chrome, Edge, Firefox, or System Default). You can choose to remember this preference for each environment. You can also change the browser in the extension settings.
  
 ### Managing Environments in UI
 
@@ -271,7 +279,7 @@ There are two types of environments,
 
 - global (Global are always available in vscode)
 
-- workspace workspace level are only available to the workspace it was created in) 
+- workspace level are only available to the workspace it was created in) 
   
   They have their own icons.
 
@@ -290,7 +298,7 @@ There are two types of environments,
 
 It can also refresh / reload the cache present in IBM Maximo. Sometimes needed after adding certain items in maximo. Maximo wont refresh the changes unless those caches are refreshed. e.g. INTOBJECT, MAXPROP etc
 
-Upong triggering this option. You will be presented with a list of cache (might differ for 7.6 or MAS) to be refreshed. You can selected them all, multiple or single.
+Upon triggering this option, you will be presented with a list of caches (might differ for 7.6 or MAS) to be refreshed. You can select them all, multiple, or a single one.
 
 ![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/cache-refresh.gif)
   
@@ -312,7 +320,7 @@ When an active environment is set the status bar shows quick-action icons:
 - **Compare**— Compares the currently open file with version at current environment
 - **Upload and Execute** — Uploads, executes and deletes the currently open file at the current environment
 - **Open in Maximo** — Opens the currently open record (script/app/condition) in the Maximo Web UI via your preferred browser
-- **Deletes** — Deletes the currently open file at the current environment
+- **Delete** — Deletes the currently open file at the current environment
 - **MAS Tools Menu** — Opens the MAS Tools (MAS only) - Access Logs, Database tools, Pod Manager, Customizations etc. See [API for administrative utilities](https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=reference-apis-administrative-utilities)
 
 [Back to Top](#mxscript)
@@ -396,8 +404,7 @@ You can add / refresh an environment or use the tree toolbar:
 
 - The "active environment" ID is saved in `globalState` under `mxscript.activeEnvironment`.
   
-  ### 
-  
+
   [Back to Top](#mxscript)
 
 ## Requirements
@@ -498,7 +505,7 @@ This extension contributes the following settings:
 | `mxscript.scriptSettings.createPythonFileForJythonScripts` | boolean | true     | Create Jython script in Maximo even if the file in editor is .py                                  |
 | `mxscript.scriptSettings.logLevel`                         | string  |          | The log level to set with scripts when creating / updating them (DEBUG, INFO, WARN, ERROR, FATAL) |
 | `mxscript.scriptSettings.ignoresslerrors`                  | boolean | false    | Ignore SSL errors                                                                                 |
-| `mxscript.scriptSettings.sslcertificate `                  | string  |          | a custom certifcate                                                                               |
+| `mxscript.scriptSettings.sslcertificate`                  | string  |          | A custom certificate                                                                              |
 | `mxscript.appxml.formatOnDownloadAndCompare`               | boolean | true     | Whether to format XML on download and compare                                                     |
 | `mxscript.statusBar.showFetchLogs`                         | boolean | true     | Show the Fetch Logs icon in the status bar                                                        |
 | `mxscript.statusBar.showDownloadFromMaximo`                | boolean | true     | Show the Download from Maximo icon in the status bar                                              |
@@ -510,6 +517,7 @@ This extension contributes the following settings:
 | `mxscript.statusBar.showToolsMenu`                         | boolean | false    | Show the Tools Menu icon in the status bar                                                        |
 | `mxscript.statusBar.showOpenInMaximo`                      | boolean | false    | Show the Open in Maximo icon in the status bar                                                    |
 | `mxscript.statusBar.showManageEnvironments`                | boolean | true     | Show the Manage Environments icon in the status bar                                               |
+| `mxscript.execution.displayLocation`                       | string  | newTab   | Where to display execution results (newTab, sideView, bottomPanel)                                |
 
 ## 
 
@@ -532,8 +540,14 @@ This extension contributes the following settings:
 - If you encounter any bug then please open an issue at github [repository](https://github.com/ahmednrana/mxscript)
 
 [Back to Top](#mxscript)
+ 
+ ## Release Notes
+### 1.6.6
 
-## Release Notes
+- Added **syntax and severity colorization** for execution results in both side view and bottom panel.
+- Added new **Display Location** setting for execution results with three options: `newTab` (default), `sideView`, and `bottomPanel`.
+- Upgraded Output Channel to `LogOutputChannel` for rich color support in the bottom panel.
+ 
 ### 1.6.4
  
 - Added **Open in Maximo** functionality with status bar and tree view shortcuts
@@ -615,7 +629,10 @@ Added support for API key
 
 Initial release added upload, download, download all and compare with server functions.
 
-**Contact**  
-Feel free to reach me at [linkedin](https://www.linkedin.com/in/ranaahmed/) or [Maximomize](https://maximomize.com) or [wordpress](https://maximomize.wordpress.com). I would love to meet fellow maximo consultants
+Feel free to reach me at [linkedin](https://www.linkedin.com/in/ranaahmed/) or [Maximomize](https://maximomize.com) or [wordpress](https://maximomize.wordpress.com). I would love to meet fellow maximo consultants.
 
-> **Note:** This is work of third party and not an IBM official
+## Contributing / Support
+
+If you encounter any bugs, have feature requests, or want to contribute, please open an issue at our GitHub [repository](https://github.com/ahmednrana/mxscript).
+
+> **Note:** This is work of a third party and not an IBM official project.

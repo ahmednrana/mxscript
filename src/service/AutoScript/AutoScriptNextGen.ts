@@ -3,7 +3,7 @@ import { SimpleOSService } from './ISimpleOSService';
 import { MaximoClientProvider } from '../../client/client';
 import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
-import { getFilename, getLanguageFromExtension, showError, showInformation, showWarning } from '../../utils/utils';
+import { getFilename, getLanguageFromExtension, showError, showInformation, showWarning, scrollToEndOfDocument } from '../../utils/utils';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
 
 import { AutoScript, QueryBuilder } from '@maximomize/maximo-api-client';
@@ -482,7 +482,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    private async showExecutionResult(scriptName: string, data: any, providers?: { channel: vscode.OutputChannel, provider: any }): Promise<void> {
+    private async showExecutionResult(scriptName: string, data: any, providers?: { channel: vscode.LogOutputChannel, provider: any }): Promise<void> {
         let formattedOutput = '';
 
         if (typeof data === 'object') {
@@ -492,26 +492,51 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
 
         const config = vscode.workspace.getConfiguration('mxscript.execution');
-        const displayLocation = config.get<string>('displayLocation', 'bottomPanel');
+        const displayLocation = config.get<string>('displayLocation', 'newTab');
 
-        if (displayLocation === 'sideView' && providers?.provider && typeof providers.provider.updateContent === 'function') {
+        if ((displayLocation === 'newTab' || displayLocation === 'sideView') && providers?.provider && typeof providers.provider.updateContent === 'function') {
             const provider = providers.provider;
             const id = `exec-${Date.now()}`;
             const title = `${scriptName} Result`;
             const uri = provider.updateContent(id, title, formattedOutput);
             const doc = await vscode.workspace.openTextDocument(uri);
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
-        } else if (providers?.channel && typeof providers.channel.appendLine === 'function') {
+
+            if (displayLocation === 'sideView') {
+                // Open beside the current editor without stealing focus
+                const editor = await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+                scrollToEndOfDocument(editor);
+            } else {
+                // Open as a new focused tab in the active editor group
+                const editor = await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Active, preview: false });
+                scrollToEndOfDocument(editor);
+            }
+        } else if (providers?.channel && typeof providers.channel.info === 'function') {
             const channel = providers.channel;
             channel.clear();
-            channel.appendLine(`--- Execution Result for ${scriptName} ---`);
-            channel.appendLine(formattedOutput);
-            channel.appendLine('-------------------------------------------');
+            channel.info(`--- Execution Result for ${scriptName} ---`);
+
+            // Route each line based on severity patterns
+            const lines = formattedOutput.split(/\r?\n/);
+            for (const line of lines) {
+                if (/\b(ERROR|FATAL|Exception|Traceback|Error:)\b/.test(line)) {
+                    channel.error(line);
+                } else if (/\bWARN(ING)?\b/.test(line)) {
+                    channel.warn(line);
+                } else if (/\bDEBUG\b/.test(line)) {
+                    channel.debug(line);
+                } else if (/\bTRACE\b/.test(line)) {
+                    channel.trace(line);
+                } else {
+                    channel.info(line);
+                }
+            }
+
+            channel.info('-------------------------------------------');
             channel.show(true);
         } else {
-            // Fallback for cases where output method is not provided or mismatched
+            // Fallback: open as focused new tab
             const doc = await vscode.workspace.openTextDocument({ content: formattedOutput, language: typeof data === 'object' ? 'json' : 'plaintext' });
-            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true });
+            await vscode.window.showTextDocument(doc, { viewColumn: vscode.ViewColumn.Active, preview: false });
         }
     }
 

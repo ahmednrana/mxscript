@@ -4,6 +4,7 @@ import { AppXmlService } from "./service/AutoScript/AppXmlService";
 import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
 import { ConditionService } from "./service/AutoScript/ConditionService";
 import { ExecutionResultContentProvider } from "./webview/ExecutionResultContentProvider";
+import { ExecutionResultHighlighter } from "./service/Logger/ExecutionResultHighlighter";
 import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
 import { MaximoLoggingService } from "./service/AutoScript/LogService";
 import { ConfigService } from './service/Config/ConfigService';
@@ -28,7 +29,7 @@ let deleteStatusBarItem: vscode.StatusBarItem;
 let toolsLogsStatusBarItem: vscode.StatusBarItem;
 let executeStatusBarItem: vscode.StatusBarItem;
 let openInMaximoStatusBarItem: vscode.StatusBarItem;
-let executionResultChannel: vscode.OutputChannel;
+let executionResultChannel: vscode.LogOutputChannel;
 let executionResultProvider: ExecutionResultContentProvider;
 
 
@@ -84,12 +85,15 @@ export function activate(context: vscode.ExtensionContext) {
   const logHighlighter = new EnvironmentLogHighlighter(logContentProvider);
   context.subscriptions.push(logHighlighter);
 
-  executionResultChannel = vscode.window.createOutputChannel("MxScript Result");
+  executionResultChannel = vscode.window.createOutputChannel("MxScript Result", { log: true });
   context.subscriptions.push(executionResultChannel);
 
   executionResultProvider = new ExecutionResultContentProvider();
   context.subscriptions.push(vscode.workspace.registerTextDocumentContentProvider('mxscript-execute', executionResultProvider));
   context.subscriptions.push(executionResultProvider);
+
+  const executionResultHighlighter = new ExecutionResultHighlighter(executionResultProvider);
+  context.subscriptions.push(executionResultHighlighter);
 
 
   // Status bar item for the active environment

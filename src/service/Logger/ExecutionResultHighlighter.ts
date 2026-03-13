@@ -1,19 +1,31 @@
 import * as vscode from 'vscode';
-import { EnvironmentLogContentProvider } from '../../webview/EnvironmentLogContentProvider';
+import { ExecutionResultContentProvider } from '../../webview/ExecutionResultContentProvider';
 
 interface SeverityDecoration {
     test: (line: string) => boolean;
     decoration: vscode.TextEditorDecorationType;
 }
 
-export class EnvironmentLogHighlighter implements vscode.Disposable {
+/**
+ * Applies color decorations to execution result documents (scheme: `mxscript-execute`).
+ *
+ * Decoration rules:
+ * - ERROR / FATAL / Exception / Traceback / Error: → red left border
+ * - WARN / WARNING                                 → orange left border
+ * - INFO / print output (plain lines)              → subtle green left border
+ * - JSON key-value lines  (`"key":`)               → subtle blue left border
+ * - Section headers (lines starting with `---`)    → grey background
+ */
+export class ExecutionResultHighlighter implements vscode.Disposable {
     private readonly disposables: vscode.Disposable[] = [];
     private readonly severityDecorations: SeverityDecoration[];
 
-    constructor(private readonly provider: EnvironmentLogContentProvider) {
+    constructor(private readonly provider: ExecutionResultContentProvider) {
         this.severityDecorations = [
+            // Errors
             {
-                test: (line: string) => /\b(ERROR|FATAL)\b/.test(line),
+                test: (line: string) =>
+                    /\b(ERROR|FATAL|Exception|Traceback|Error:)\b/.test(line),
                 decoration: vscode.window.createTextEditorDecorationType({
                     isWholeLine: true,
                     backgroundColor: 'rgba(255, 99, 71, 0.18)',
@@ -22,16 +34,7 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
                     borderWidth: '0 0 0 3px'
                 })
             },
-            {
-                test: (line: string) => /\b(SystemErr)\b/.test(line),
-                decoration: vscode.window.createTextEditorDecorationType({
-                    // isWholeLine: true,
-                    // backgroundColor: 'rgba(255, 99, 71, 0.18)',
-                    // borderColor: new vscode.ThemeColor('charts.red'),
-                    borderStyle: 'solid',
-                    borderWidth: '0 0 0 3px'
-                })
-            },
+            // Warnings
             {
                 test: (line: string) => /\bWARN(ING)?\b/.test(line),
                 decoration: vscode.window.createTextEditorDecorationType({
@@ -42,26 +45,29 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
                     borderWidth: '0 0 0 3px'
                 })
             },
+            // Info
             {
                 test: (line: string) => /\bINFO\b/.test(line),
                 decoration: vscode.window.createTextEditorDecorationType({
                     isWholeLine: true,
-                    backgroundColor: 'rgba(76, 175, 80, 0.12)',
+                    backgroundColor: 'rgba(76, 175, 80, 0.10)',
                     borderColor: new vscode.ThemeColor('charts.green'),
                     borderStyle: 'solid',
                     borderWidth: '0 0 0 2px'
                 })
             },
+            // Debug
             {
                 test: (line: string) => /\bDEBUG\b/.test(line),
                 decoration: vscode.window.createTextEditorDecorationType({
                     isWholeLine: true,
-                    backgroundColor: 'rgba(96, 125, 139, 0.12)',
+                    backgroundColor: 'rgba(96, 125, 139, 0.10)',
                     borderColor: new vscode.ThemeColor('charts.blue'),
                     borderStyle: 'solid',
                     borderWidth: '0 0 0 2px'
                 })
             },
+            // Trace
             {
                 test: (line: string) => /\bTRACE\b/.test(line),
                 decoration: vscode.window.createTextEditorDecorationType({
@@ -70,6 +76,25 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
                     borderColor: new vscode.ThemeColor('charts.purple'),
                     borderStyle: 'solid',
                     borderWidth: '0 0 0 2px'
+                })
+            },
+            // JSON key-value lines: lines like   "someKey": value
+            {
+                test: (line: string) => /^\s*"[^"]+"\s*:/.test(line),
+                decoration: vscode.window.createTextEditorDecorationType({
+                    isWholeLine: true,
+                    borderColor: new vscode.ThemeColor('charts.blue'),
+                    borderStyle: 'solid',
+                    borderWidth: '0 0 0 2px'
+                })
+            },
+            // Section headers: lines starting with ---
+            {
+                test: (line: string) => /^---/.test(line.trim()),
+                decoration: vscode.window.createTextEditorDecorationType({
+                    isWholeLine: true,
+                    backgroundColor: 'rgba(128, 128, 128, 0.12)',
+                    fontStyle: 'italic'
                 })
             }
         ];
@@ -90,15 +115,14 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
     }
 
     dispose(): void {
-        this.disposables.forEach(disposable => disposable.dispose());
+        this.disposables.forEach(d => d.dispose());
         this.severityDecorations.forEach(({ decoration }) => decoration.dispose());
     }
 
     private updateDocument(document: vscode.TextDocument): void {
-        if (document.uri.scheme !== 'mxscript-log') {
+        if (document.uri.scheme !== 'mxscript-execute') {
             return;
         }
-
         this.updateEditorsForDocument(document);
     }
 
@@ -115,10 +139,9 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
     }
 
     private updateEditor(editor: vscode.TextEditor | undefined): void {
-        if (!editor || editor.document.uri.scheme !== 'mxscript-log') {
+        if (!editor || editor.document.uri.scheme !== 'mxscript-execute') {
             return;
         }
-
         this.applyDecorations(editor);
     }
 
@@ -137,7 +160,6 @@ export class EnvironmentLogHighlighter implements vscode.Disposable {
                 if (!test(line)) {
                     return;
                 }
-
                 const range = new vscode.Range(index, 0, index, line.length);
                 ranges.push({ range });
             });
