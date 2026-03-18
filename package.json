@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.6.6",
+  "version": "1.6.8",
   "engines": {
     "vscode": "^1.110.0"
   },
@@ -60,7 +60,8 @@
     "onCommand:maximoEnvironments.importEnvironments",
     "onCommand:mxscript.execute",
     "onCommand:mxscript.testApiConsumer",
-    "onCommand:mxscript.openInMaximo"
+    "onCommand:mxscript.openInMaximo",
+    "onCommand:mxscript.reupload"
   ],
   "contributes": {
     "commands": [
@@ -137,6 +138,12 @@
         "title": "MAS Tools",
         "category": "Maximo [mxscript]",
         "icon": "$(tools)"
+      },
+      {
+        "command": "mxscript.reupload",
+        "title": "Delete and Upload to Server",
+        "category": "Maximo [mxscript]",
+        "icon": "$(sync)"
       },
       {
         "command": "mxscript.manageEnvironments",
@@ -356,6 +363,11 @@
           "type": "boolean",
           "default": true,
           "description": "Show the Delete icon in the status bar"
+        },
+        "mxscript.statusBar.showReupload": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the Delete and Upload icon in the status bar"
         },
         "mxscript.statusBar.showToolsMenu": {
           "type": "boolean",

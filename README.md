@@ -34,6 +34,7 @@ Accelerate your Maximo workflow with integrated tools for automation scripts, ap
 13. [Cache Refresh / reload](#cache-refresh)
 14. [MAS Tools](#mas-tools)
 15. [Open in Maximo](#open-in-maximo)
+16. [Delete and Upload to Server](#delete-and-upload-to-server) *(Only scripts)*
 
 ---
 [Requirements](#requirements)
@@ -206,6 +207,18 @@ This deletes the automation script or condition on the server
 
 [Back to Top](#mxscript)
 
+### Delete and Upload to Server
+
+#### Activate
+
+Use the command palette or status bar button (if enabled in settings).
+
+#### Functionality
+
+Uploads the currently opened automation script (`.py`, `.js`, or `.jy`) to the active environment after immediately deleting it first.
+
+[Back to Top](#mxscript)
+
 ### Execute script using Script Handler
 
 #### Activate
@@ -321,6 +334,7 @@ When an active environment is set the status bar shows quick-action icons:
 - **Upload and Execute** — Uploads, executes and deletes the currently open file at the current environment
 - **Open in Maximo** — Opens the currently open record (script/app/condition) in the Maximo Web UI via your preferred browser
 - **Delete** — Deletes the currently open file at the current environment
+- **Delete and Upload** — Deletes and uploads the currently open script at the current environment
 - **MAS Tools Menu** — Opens the MAS Tools (MAS only) - Access Logs, Database tools, Pod Manager, Customizations etc. See [API for administrative utilities](https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=reference-apis-administrative-utilities)
 
 [Back to Top](#mxscript)
@@ -514,6 +528,7 @@ This extension contributes the following settings:
 | `mxscript.statusBar.showCompare`                           | boolean | true     | Show the Compare icon in the status bar                                                           |
 | `mxscript.statusBar.showUploadAndExecute`                  | boolean | true     | Show the Upload and Execute icon in the status bar                                                |
 | `mxscript.statusBar.showDelete`                            | boolean | false    | Show the Delete icon in the status bar                                                            |
+| `mxscript.statusBar.showReupload`                          | boolean | false    | Show the Delete and Upload icon in the status bar                                                 |
 | `mxscript.statusBar.showToolsMenu`                         | boolean | false    | Show the Tools Menu icon in the status bar                                                        |
 | `mxscript.statusBar.showOpenInMaximo`                      | boolean | false    | Show the Open in Maximo icon in the status bar                                                    |
 | `mxscript.statusBar.showManageEnvironments`                | boolean | true     | Show the Manage Environments icon in the status bar                                               |

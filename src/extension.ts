@@ -26,6 +26,7 @@ let downloadStatusBarItem: vscode.StatusBarItem;
 let downloadFromMaximoStatusBarItem: vscode.StatusBarItem;
 let compareStatusBarItem: vscode.StatusBarItem;
 let deleteStatusBarItem: vscode.StatusBarItem;
+let reuploadStatusBarItem: vscode.StatusBarItem;
 let toolsLogsStatusBarItem: vscode.StatusBarItem;
 let executeStatusBarItem: vscode.StatusBarItem;
 let openInMaximoStatusBarItem: vscode.StatusBarItem;
@@ -192,6 +193,18 @@ export function activate(context: vscode.ExtensionContext) {
   deleteStatusBarItem.tooltip = "Delete from active Maximo environment";
   deleteStatusBarItem.hide();
   context.subscriptions.push(deleteStatusBarItem);
+
+  // Status bar icon for delete and upload
+  reuploadStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 94.5);
+  reuploadStatusBarItem.command = {
+    command: "mxscript.reupload",
+    title: "Delete and Upload",
+    arguments: [{ source: 'statusbar' }]
+  } as any;
+  reuploadStatusBarItem.text = "$(sync)";
+  reuploadStatusBarItem.tooltip = "Delete and Upload to active Maximo environment";
+  reuploadStatusBarItem.hide();
+  context.subscriptions.push(reuploadStatusBarItem);
 
   // Status bar icon for Tools Logs (MAS only - shown when toolsHostname is configured)
   toolsLogsStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 94);
@@ -710,6 +723,31 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  let reuploadItem = vscode.commands.registerCommand("mxscript.reupload", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    const fileName = getFilename();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    if (fileExtension === 'xml' || fileExtension === 'sql') {
+      showWarning("Delete and upload is only supported for scripts (.py, .jy, or .js).");
+      return;
+    }
+    
+    let config = new ConfigService();
+    let as: AutoScriptNextGen = new AutoScriptNextGen(context, config);
+    // Delete silently
+    await as.delete(true);
+    // Upload and show feedback
+    await as.upload(false);
+  });
+
   let downloadallappxml = vscode.commands.registerCommand("mxscript.downloadallappxml", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
     let appservice: SimpleOSService = new AppXmlService(context, new ConfigService());
@@ -956,6 +994,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(refreshCache);
   context.subscriptions.push(manageEnvironments);
   context.subscriptions.push(deleteItem);
+  context.subscriptions.push(reuploadItem);
   context.subscriptions.push(execute);
   context.subscriptions.push(downloadallappxml);
   context.subscriptions.push(downloadallcondition);
@@ -1061,6 +1100,11 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
         ? `Delete from ${activeEnv.name}${mismatchNotice}`
         : "Delete from active Maximo environment";
     }
+    if (reuploadStatusBarItem) {
+      reuploadStatusBarItem.tooltip = activeEnv
+        ? `Delete and Upload to ${activeEnv.name}${mismatchNotice}`
+        : "Delete and Upload to active Maximo environment";
+    }
     if (executeStatusBarItem) {
       executeStatusBarItem.tooltip = activeEnv
         ? `Execute script on ${activeEnv.name}${mismatchNotice}`
@@ -1073,6 +1117,9 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     if (deleteStatusBarItem) {
       if (shouldShowItem('showDelete', false)) deleteStatusBarItem.show(); else deleteStatusBarItem.hide();
     }
+    if (reuploadStatusBarItem) {
+      if (shouldShowItem('showReupload', false)) reuploadStatusBarItem.show(); else reuploadStatusBarItem.hide();
+    }
     if (executeStatusBarItem) {
       if (shouldShowItem('showExecute', true)) executeStatusBarItem.show(); else executeStatusBarItem.hide();
     }
@@ -1081,6 +1128,7 @@ export function updateStatusBar(context: vscode.ExtensionContext) {
     downloadStatusBarItem.hide();
     compareStatusBarItem.hide();
     if (deleteStatusBarItem) deleteStatusBarItem.hide();
+    if (reuploadStatusBarItem) reuploadStatusBarItem.hide();
     if (executeStatusBarItem) executeStatusBarItem.hide();
   }
 
