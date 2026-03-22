@@ -559,7 +559,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 return;
             }
 
-            const client = this.getMaximoClient();
+            const client = MaximoClientProvider.createClientFromEnvironment(env, this.logger);
             vscode.window.showInformationMessage(`Opening ${scriptName} in Maximo...`);
 
             const query = new QueryBuilder<AutoScript>(client.autoScript.getObjectStructure())

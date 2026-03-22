@@ -468,7 +468,7 @@ export class AppXmlService implements SimpleOSService {
                 return;
             }
 
-            const client = this.getMaximoClient();
+            const client = MaximoClientProvider.createClientFromEnvironment(env, this.logger);
 
             const choice = await vscode.window.showQuickPick([
                 { label: 'Open Application', description: `Open ${appName} in Maximo` },

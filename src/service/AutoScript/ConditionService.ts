@@ -431,7 +431,7 @@ export class ConditionService implements SimpleOSService {
                 return;
             }
 
-            const client = this.getMaximoClient();
+            const client = MaximoClientProvider.createClientFromEnvironment(env, this.logger);
             vscode.window.showInformationMessage(`Opening condition ${conditionName} in Maximo...`);
 
             const query = new QueryBuilder<ConditionExpression>(client.getConditionExpressionService().getObjectStructure())
