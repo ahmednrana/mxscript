@@ -29,13 +29,18 @@ export class ConditionService implements SimpleOSService {
         return MaximoClientProvider.getInstance().getClient();
     }
 
-    async update(): Promise<void> {
+    async update(targetEnvironment?: MaximoEnvironment): Promise<void> {
         try {
             this.logger.debug('Updating condition...');
             const fileName = getFilename();
-            const sourceFromServer = await this.getMaximoClient().getConditionExpressionService().downloadCondition(fileName);
+
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            const sourceFromServer = await client.getConditionExpressionService().downloadCondition(fileName);
             if (!sourceFromServer) {
-                showWarning(`No condition source found for the condition ${fileName} on ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                showWarning(`No condition source found for the condition ${fileName} on ${envName} [${envUrl}]`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -52,7 +57,7 @@ export class ConditionService implements SimpleOSService {
                 edit.replace(document.uri, fullRange, sourceFromServer);
                 const success = await vscode.workspace.applyEdit(edit);
                 if (success) {
-                    showInformation(`Successfully updated condition ${fileName} from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    showInformation(`Successfully updated condition ${fileName} from ${envName} [${envUrl}]`);
                 } else {
                     showError("Failed to apply changes to the editor");
                 }
@@ -270,7 +275,7 @@ export class ConditionService implements SimpleOSService {
         }
     }
 
-    async upload(): Promise<void> {
+    async upload(silent: boolean = false, targetEnvironment?: MaximoEnvironment): Promise<void> {
         try {
             this.logger.debug('Uploading condition...');
             const source = this.getSource();
@@ -285,22 +290,26 @@ export class ConditionService implements SimpleOSService {
                 expression: source,
                 properties: 'condition,description,source'
             };
-            const addUpdateBuilder = this.getMaximoClient().getConditionExpressionService().bulkOperation().addUpdate(condition);
-            const addUpdateResult = await this.getMaximoClient().getConditionExpressionService().executeBulkOperation(addUpdateBuilder);
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            const addUpdateBuilder = client.getConditionExpressionService().bulkOperation().addUpdate(condition);
+            const addUpdateResult = await client.getConditionExpressionService().executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    showInformation(`Condition ${conditionName} uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    showInformation(`Condition ${conditionName} uploaded successfully to ${envName} [${envUrl}]`);
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    showError(`Failed to upload condition ${conditionName} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload condition ${conditionName} to ${envName} [${envUrl}]: ${addUpdateResult.responses[0].status}`);
                 }
                 else {
-                    showError(`Failed to upload condition ${conditionName} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
+                    showError(`Failed to upload condition ${conditionName} to ${envName} [${envUrl}]: ${addUpdateResult.data}`);
                 }
             } else {
-                showError(`Failed to upload condition ${conditionName} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload condition ${conditionName} to ${envName} [${envUrl}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
             showError(`Failed to upload condition: ${(error as Error).message}`);

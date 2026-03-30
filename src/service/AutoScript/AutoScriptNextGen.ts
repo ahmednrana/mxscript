@@ -29,13 +29,17 @@ export class AutoScriptNextGen implements SimpleOSService {
         return MaximoClientProvider.getInstance().getClient();
     }
 
-    async update(): Promise<void> {
+    async update(targetEnvironment?: MaximoEnvironment): Promise<void> {
         try {
             this.logger.debug('Updating script...');
             const fileName = getFilename();
-            const sourceFromServer = await this.getMaximoClient().autoScript.downloadScriptSource(fileName);
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            const sourceFromServer = await client.autoScript.downloadScriptSource(fileName);
             if (!sourceFromServer) {
-                showWarning(`No script source found for the script ${fileName} on ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                showWarning(`No script source found for the script ${fileName} on ${envName} [${envUrl}]`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -52,7 +56,7 @@ export class AutoScriptNextGen implements SimpleOSService {
                 edit.replace(document.uri, fullRange, sourceFromServer);
                 const success = await vscode.workspace.applyEdit(edit);
                 if (success) {
-                    showInformation(`Script ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    showInformation(`Script ${fileName} updated successfully from ${envName} [${envUrl}]`);
                 } else {
                     showError(`Failed to apply edits to the document.`);
                 }
@@ -253,7 +257,7 @@ export class AutoScriptNextGen implements SimpleOSService {
         }
     }
 
-    async upload(silent: boolean = false): Promise<boolean> {
+    async upload(silent: boolean = false, targetEnvironment?: MaximoEnvironment): Promise<boolean> {
         try {
             let language = getLanguageFromExtension(this.configService);
             if (!silent) this.logger.debug('Uploading script...');
@@ -270,26 +274,30 @@ export class AutoScriptNextGen implements SimpleOSService {
                 // status: 'Active',
                 properties: 'autoscript,description,source,status,scriptlanguage'
             }
-            const addUpdateBuilder = this.getMaximoClient().autoScript.bulkOperation().addUpdate(autoscript);
-            const addUpdateResult = await this.getMaximoClient().autoScript.executeBulkOperation(addUpdateBuilder);
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            const addUpdateBuilder = client.autoScript.bulkOperation().addUpdate(autoscript);
+            const addUpdateResult = await client.autoScript.executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    if (!silent) showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    if (!silent) showInformation(`Script ${autoscript.autoscript} uploaded successfully to ${envName} [${envUrl}]`);
                     return true;
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${envName} [${envUrl}]: ${addUpdateResult.responses[0].status}`);
                     return false;
                 }
                 else {
-                    showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
+                    showError(`Failed to upload script ${autoscript.autoscript} to ${envName} [${envUrl}]: ${addUpdateResult.data}`);
                     return false;
                 }
             }
             else {
-                showError(`Failed to upload script ${autoscript.autoscript} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload script ${autoscript.autoscript} to ${envName} [${envUrl}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
                 return false;
             }
         } catch (error) {

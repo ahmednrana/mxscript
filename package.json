@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.7.0",
+  "version": "1.7.2",
   "engines": {
     "vscode": "^1.110.0"
   },
@@ -17,7 +17,13 @@
     "ibm",
     "automation",
     "script",
-    "xml"
+    "xml",
+    "ibm",
+    "mas",
+    "manage",
+    "jython",
+    "python",
+    "nashorn"
   ],
   "repository": {
     "type": "git",
@@ -58,6 +64,8 @@
     "onCommand:maximoEnvironments.compareWithEnvironment",
     "onCommand:maximoEnvironments.exportEnvironments",
     "onCommand:maximoEnvironments.importEnvironments",
+    "onCommand:mxscript.uploadToEnvironment",
+    "onCommand:mxscript.downloadFromEnvironment",
     "onCommand:mxscript.execute",
     "onCommand:mxscript.testApiConsumer",
     "onCommand:mxscript.openInMaximo",
@@ -179,6 +187,18 @@
         "command": "maximoEnvironments.setActiveEnvironment",
         "title": "Set as Active Environment",
         "icon": "$(check)",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.uploadToEnvironment",
+        "title": "Upload to Environment",
+        "icon": "$(arrow-up)",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.downloadFromEnvironment",
+        "title": "Download from Environment",
+        "icon": "$(arrow-down)",
         "category": "Maximo [mxscript]"
       },
       {
@@ -463,6 +483,16 @@
           "command": "maximoEnvironments.compareWithEnvironment",
           "when": "view == maximoEnvironments",
           "group": "inline@2"
+        },
+        {
+          "command": "mxscript.uploadToEnvironment",
+          "when": "view == maximoEnvironments && (viewItem == environment || viewItem == activeEnvironment)",
+          "group": "inline@4"
+        },
+        {
+          "command": "mxscript.downloadFromEnvironment",
+          "when": "view == maximoEnvironments && (viewItem == environment || viewItem == activeEnvironment)",
+          "group": "inline@5"
         },
         {
           "command": "mxscript.openInMaximo",

@@ -392,21 +392,31 @@ Each environment in the "Maximo Environments" tree has inline buttons
 
 ![Object Structure](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/tree_view.jpg)
 
+### Environment Management Actions
+
 The buttons call the following commands:
 
 - **Activate (set as active)** → Selects the environment as active
-- **Edit**→ Edits the environment
-- **Delete**→ Deletes that environment
-- **Compare**→ Compares the currently opened file with this environment
-- **Open in Maximo**→ Opens the currently record or environment in Maximo Web UI
-- **Fetch Logs**→ Fetches the log from this environment
+- **Edit** → Edits the environment
+- **Delete** → Deletes that environment
 
 You can add / refresh an environment or use the tree toolbar:
 
-- Add → Adds a new environment
-- Refresh → Refreshes an environment
-- Export → Exports all configured environments to a JSON file
-- Import → Imports environments from a previously exported JSON file
+- **Add** → Adds a new environment
+- **Refresh** → Refreshes an environment
+- **Export** → Exports all configured environments to a JSON file
+- **Import** → Imports environments from a previously exported JSON file
+
+### File and Script Operations on Tree Environments
+
+The following actions are available from the Maximo tree environment nodes and allow you to perform file operations directly against a selected environment:
+
+1. **Upload to Environment** (`mxscript.uploadToEnvironment`) - Upload the currently opened file directly to the selected tree environment.
+2. **Download from Environment** (`mxscript.downloadFromEnvironment`) - Download/update the currently opened file directly from the selected tree environment.
+3. **Open in Maximo** → Opens the currently record or environment in Maximo Web UI
+4. **Compare** → Compares the currently opened file with this environment
+5. **Fetch Logs** → Fetches the log from this environment
+
 
 [Back to Top](#mxscript)
 

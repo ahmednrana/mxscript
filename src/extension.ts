@@ -525,6 +525,41 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
+  const uploadToEnvironmentCommandHandler = async (item?: any) => {
+    let environmentFromItem = extractEnvironmentFromItem(item);
+    if (!environmentFromItem) return;
+    
+    let activeEnv = getActiveEnvironment(context);
+    if (!activeEnv || activeEnv.id !== environmentFromItem.id) {
+       const proceed = await vscode.window.showWarningMessage(`You are trying to upload to ${environmentFromItem.name} while active env is ${activeEnv ? activeEnv.name : 'none'}. Proceed?`, "Yes", "No");
+       if (proceed !== "Yes") return;
+    }
+
+    const fileName = getFilename();
+    let config = new ConfigService();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    if (fileExtension === 'xml') {
+      let appservice: SimpleOSService = new AppXmlService(context, config);
+      appservice.upload(false, environmentFromItem);
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      ce.upload(false, environmentFromItem);
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      as.upload(false, environmentFromItem);
+    }
+  };
+
+  context.subscriptions.push(vscode.commands.registerCommand('mxscript.uploadToEnvironment', uploadToEnvironmentCommandHandler));
+
   // accept an optional argument to detect invocation source
   let compare = vscode.commands.registerCommand("mxscript.compare", async (arg?: { source?: string }) => {
     const invokedFromStatusBar = !!(arg && arg.source === 'statusbar');
@@ -691,6 +726,41 @@ export function activate(context: vscode.ExtensionContext) {
       as.update();
     }
   });
+
+  const downloadFromEnvironmentCommandHandler = async (item?: any) => {
+    let environmentFromItem = extractEnvironmentFromItem(item);
+    if (!environmentFromItem) return;
+    
+    let activeEnv = getActiveEnvironment(context);
+    if (!activeEnv || activeEnv.id !== environmentFromItem.id) {
+       const proceed = await vscode.window.showWarningMessage(`You are trying to download from ${environmentFromItem.name} while active env is ${activeEnv ? activeEnv.name : 'none'}. Proceed?`, "Yes", "No");
+       if (proceed !== "Yes") return;
+    }
+
+    const fileName = getFilename();
+    let config = new ConfigService();
+    if (!fileName) {
+      showError("No valid file is open");
+      return;
+    }
+    const fileExtension = getFileExtension();
+    if (!fileExtension) {
+      showError("Could not determine file extension");
+      return;
+    }
+    if (fileExtension === 'xml') {
+      let appservice: SimpleOSService = new AppXmlService(context, config);
+      appservice.update(environmentFromItem);
+    } else if (fileExtension === 'sql') {
+      let ce: SimpleOSService = new ConditionService(context, config);
+      ce.update(environmentFromItem);
+    } else {
+      let as: SimpleOSService = new AutoScriptNextGen(context, config);
+      as.update(environmentFromItem);
+    }
+  };
+
+  context.subscriptions.push(vscode.commands.registerCommand('mxscript.downloadFromEnvironment', downloadFromEnvironmentCommandHandler));
 
   let downloadall = vscode.commands.registerCommand("mxscript.downloadall", async () => {
     if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;

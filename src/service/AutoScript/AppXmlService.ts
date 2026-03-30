@@ -30,14 +30,18 @@ export class AppXmlService implements SimpleOSService {
         return MaximoClientProvider.getInstance().getClient();
     }
 
-    async update(): Promise<void> {
+    async update(targetEnvironment?: MaximoEnvironment): Promise<void> {
         try {
             this.logger.debug('Updating xml...');
             const fileName = getFilename();
 
-            let xmlFromServer = await this.getMaximoClient().getMaxAppService().getAppPresentation(fileName);
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            let xmlFromServer = await client.getMaxAppService().getAppPresentation(fileName);
             if (!xmlFromServer) {
-                showWarning(`No application xml found for the ${fileName} on ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                showWarning(`No application xml found for the ${fileName} on ${envName} [${envUrl}]`);
                 return;
             }
             const { activeTextEditor } = vscode.window;
@@ -57,7 +61,7 @@ export class AppXmlService implements SimpleOSService {
                 edit.replace(document.uri, fullRange, xmlFromServer);
                 const success = await vscode.workspace.applyEdit(edit);
                 if (success) {
-                    showInformation(`Xml ${fileName} updated successfully from ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    showInformation(`Xml ${fileName} updated successfully from ${envName} [${envUrl}]`);
                 } else {
                     showError(`Failed to apply edits to the document.`);
                 }
@@ -255,7 +259,7 @@ export class AppXmlService implements SimpleOSService {
         }
     }
 
-    async upload(): Promise<void> {
+    async upload(silent: boolean = false, targetEnvironment?: MaximoEnvironment): Promise<void> {
         try {
             this.logger.debug('Uploading application xml...');
             const source = this.getSource();
@@ -268,23 +272,27 @@ export class AppXmlService implements SimpleOSService {
                 maxpresentation: [{ presentation: source }],
                 properties: 'app'
             }
-            const addUpdateBuilder = this.getMaximoClient().appXml.bulkOperation().addUpdate(appxml);
-            const addUpdateResult = await this.getMaximoClient().appXml.executeBulkOperation(addUpdateBuilder);
+            const client = targetEnvironment ? MaximoClientProvider.createClientFromEnvironment(targetEnvironment, this.logger) : this.getMaximoClient();
+            const envName = targetEnvironment ? targetEnvironment.name : this.configService.getActiveEnvironmentName();
+            const envUrl = targetEnvironment ? `${targetEnvironment.httpProtocol}://${targetEnvironment.hostname}:${targetEnvironment.port}` : this.configService.getUrl();
+
+            const addUpdateBuilder = client.appXml.bulkOperation().addUpdate(appxml);
+            const addUpdateResult = await client.appXml.executeBulkOperation(addUpdateBuilder);
             if (addUpdateResult.success) {
                 // there could be errors in the responses
                 if (addUpdateResult.responses.length > 0 &&
                     addUpdateResult.responses[0].status >= 200 && addUpdateResult.responses[0].status < 300) {
-                    showInformation(`${appxml.app}.xml uploaded successfully to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]`);
+                    showInformation(`${appxml.app}.xml uploaded successfully to ${envName} [${envUrl}]`);
                 }
                 else if (addUpdateResult.responses.length > 0) {
-                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses[0].status}`);
+                    showError(`Failed to upload application xml ${appxml.app} to ${envName} [${envUrl}]: ${addUpdateResult.responses[0].status}`);
                 }
                 else {
-                    showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.data}`);
+                    showError(`Failed to upload application xml ${appxml.app} to ${envName} [${envUrl}]: ${addUpdateResult.data}`);
                 }
             }
             else {
-                showError(`Failed to upload application xml ${appxml.app} to ${this.configService.getActiveEnvironmentName()} [${this.configService.getUrl()}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
+                showError(`Failed to upload application xml ${appxml.app} to ${envName} [${envUrl}]: ${addUpdateResult.responses?.[0]?.error?.message || addUpdateResult.data}`);
             }
         } catch (error) {
             showError(`Failed to upload application xml: ${(error as Error).message}`);
