@@ -2,7 +2,7 @@
   "name": "mxscript",
   "displayName": "MxScript",
   "description": "Development Utilities for IBM Maximo",
-  "version": "1.7.2",
+  "version": "1.9.0",
   "engines": {
     "vscode": "^1.110.0"
   },
@@ -69,7 +69,8 @@
     "onCommand:mxscript.execute",
     "onCommand:mxscript.testApiConsumer",
     "onCommand:mxscript.openInMaximo",
-    "onCommand:mxscript.reupload"
+    "onCommand:mxscript.reupload",
+    "onCommand:mxscript.downloadallproperties"
   ],
   "contributes": {
     "commands": [
@@ -118,6 +119,11 @@
       {
         "command": "mxscript.downloadallcondition",
         "title": "Download Condition(s) from Server",
+        "category": "Maximo [mxscript]"
+      },
+      {
+        "command": "mxscript.downloadallproperties",
+        "title": "Download System Properties from Server",
         "category": "Maximo [mxscript]"
       },
       {

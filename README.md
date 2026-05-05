@@ -4,11 +4,15 @@ Accelerate your Maximo workflow with integrated tools for automation scripts, ap
 
 ## Features
 
-- Can upload / download / compare / delete scripts , application xmls and condition expressions with the currently selected environment
+- Can upload / download / compare / delete scripts, application xmls, condition expressions, and system properties with the currently selected environment
 - Multiple Environment Support
   - Add / edit / delete environments using UI
   - Can switch between environment using UI
   - Provides a treeview for environments
+- System Properties Management
+  - High-performance batch fetching
+  - Context-aware comparison (Matching keys vs All server properties)
+  - Interactive save dialog for downloads
 - Ability to fetch logs from currently selected or any other Maximo Manage environment
 - Can compare with currently selected or any other Maximo environment
 - Adds buttons in status bar for quick switch, upload, download, compare and fetching logs
@@ -23,18 +27,19 @@ Accelerate your Maximo workflow with integrated tools for automation scripts, ap
 2. [Download Script(s) from Server](#download-scripts-from-server)
 3. [Download Application(s) xml from Server](#download-application-xmls-from-server)
 4. [Download Conditions(s) from Server](#download-conditions-from-server)
-5. [Download (Update) from Server](#download-update-from-server)
-6. [Upload to Server](#upload-to-server) *(Not for application xml)*
-7. [Compare with Server](#compare-with-environment-script--xml--condition)
-8. [Execute Script using Script Handler](#execute-script-using-script-handler) *(Only scripts)*
-9. [Delete from Server](#delete-this-file-from-server) *(Not for application xml)*
-10. [Compare with Another Environment](#compare-with-other-environment)
-11. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
-12. [Manage Environments (Add / Edit / Delete / Set Active / Import / Export)](#managing-environments-in-ui)
-13. [Cache Refresh / reload](#cache-refresh)
-14. [MAS Tools](#mas-tools)
-15. [Open in Maximo](#open-in-maximo)
-16. [Delete and Upload to Server](#delete-and-upload-to-server) *(Only scripts)*
+5. [Download System Properties from Server](#download-system-properties-from-server)
+6. [Download (Update) from Server](#download-update-from-server)
+7. [Upload to Server](#upload-to-server) *(Not for application xml)*
+8. [Compare with Server](#compare-with-environment-script--xml--condition)
+9. [Execute Script using Script Handler](#execute-script-using-script-handler) *(Only scripts)*
+10. [Delete from Server](#delete-this-file-from-server) *(Not for application xml)*
+11. [Compare with Another Environment](#compare-with-other-environment)
+12. [Fetch Logs from Server](#fetch-logs-from-server) *(only for Manage)*
+13. [Manage Environments (Add / Edit / Delete / Set Active / Import / Export)](#managing-environments-in-ui)
+14. [Cache Refresh / reload](#cache-refresh)
+15. [MAS Tools](#mas-tools)
+16. [Open in Maximo](#open-in-maximo)
+17. [Delete and Upload to Server](#delete-and-upload-to-server) *(Only scripts)*
 
 ---
 [Requirements](#requirements)
@@ -179,17 +184,20 @@ You must have a saved file open for this to work.
 
 ##### Compare with current Environment
 
-Compares the opened automation script, application XML or condition with the current environment
+Compares the opened automation script, application XML, condition, or system properties with the current environment.
+
+**For System Properties:**
+When comparing a `.properties` file, you can choose:
+- **Matching keys only**: Only compares values for keys present in your local file.
+- **All server properties**: Compares your local file against every property on the server (highlights added/missing properties).
 
 ![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/compare_with_current_env.gif)
 
 #### Compare with other Environment
 
-Compares the opened automation script, application XML or condition with the selected environment
+Compares the opened record with the selected environment. Supports the same context-aware modes for system properties.
 
 ![Update](https://raw.githubusercontent.com/ahmednrana/mxscript/refs/heads/master/images/compare_with_other_env.gif)
-
-
 
 [Back to Top](#mxscript)
 
@@ -567,6 +575,16 @@ This extension contributes the following settings:
 [Back to Top](#mxscript)
  
  ## Release Notes
+### 1.9.0 (Pre-release)
+
+- **System Properties Management**:
+  - New service for downloading, updating, and comparing Maximo system properties.
+  - **Batch Fetching**: High-performance retrieval of multiple property values in a single API call.
+  - **Context-Aware Comparison**: Choose between comparing "Matching keys only" or "All server properties".
+  - **Improved Download Flow**: Use native save dialogs to choose location and rename files before saving.
+  - **Update Confirmation**: Integrated update (push-to-server) with non-modal confirmation notifications.
+- **Improved Diff Engine**: Strips comments and sorts keys for property comparisons to eliminate noise.
+
 ### 1.6.6
 
 - Added **syntax and severity colorization** for execution results in both side view and bottom panel.

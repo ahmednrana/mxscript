@@ -3,6 +3,7 @@ import { MaximoClientProvider } from './client/client';
 import { AppXmlService } from "./service/AutoScript/AppXmlService";
 import { AutoScriptNextGen } from "./service/AutoScript/AutoScriptNextGen";
 import { ConditionService } from "./service/AutoScript/ConditionService";
+import { SystemPropertyService } from "./service/AutoScript/SystemPropertyService";
 import { ExecutionResultContentProvider } from "./webview/ExecutionResultContentProvider";
 import { ExecutionResultHighlighter } from "./service/Logger/ExecutionResultHighlighter";
 import { SimpleOSService } from './service/AutoScript/ISimpleOSService';
@@ -442,6 +443,9 @@ export function activate(context: vscode.ExtensionContext) {
       } else if (fileExtension === 'sql') {
         let ce = new ConditionService(context, config);
         ce.compareWithEnvironment(item.environment);
+      } else if (fileExtension === 'properties') {
+        let ps = new SystemPropertyService(context, config);
+        ps.compareWithEnvironment(item.environment);
       } else {
         let as = new AutoScriptNextGen(context, config);
         as.compareWithEnvironment(item.environment);
@@ -484,6 +488,9 @@ export function activate(context: vscode.ExtensionContext) {
           } else if (fileExtension === 'sql') {
             let ce = new ConditionService(context, config);
             ce.compareWithEnvironment(selectedItem.environment);
+          } else if (fileExtension === 'properties') {
+            let ps = new SystemPropertyService(context, config);
+            ps.compareWithEnvironment(selectedItem.environment);
           } else {
             let as = new AutoScriptNextGen(context, config);
             as.compareWithEnvironment(selectedItem.environment);
@@ -519,6 +526,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension === 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       ce.upload();
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.upload();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.upload();
@@ -552,6 +562,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension === 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       ce.upload(false, environmentFromItem);
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.upload(false, environmentFromItem);
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.upload(false, environmentFromItem);
@@ -582,6 +595,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension === 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       ce.compareWithServer();
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.compareWithServer();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.compareWithServer();
@@ -605,6 +621,8 @@ export function activate(context: vscode.ExtensionContext) {
       showWarning("Execution of App XML files is not supported.");
     } else if (fileExtension === 'sql') {
       showWarning("Execution of Condition files is not supported.");
+    } else if (fileExtension === 'properties') {
+      showWarning("Execution of System Properties files is not supported.");
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       if (as.execute) {
@@ -651,6 +669,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension === 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       if (ce.openInMaximo) ce.openInMaximo(arg);
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      if (ps.openInMaximo) ps.openInMaximo(arg);
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       if (as.openInMaximo) as.openInMaximo(arg);
@@ -691,6 +712,9 @@ export function activate(context: vscode.ExtensionContext) {
         if (fileExtension === 'xml') {
           let appservice = new AppXmlService(context, config);
           appservice.compareWithEnvironment(selectedItem.environment);
+        } else if (fileExtension === 'properties') {
+          let ps = new SystemPropertyService(context, config);
+          ps.compareWithEnvironment(selectedItem.environment);
         } else {
           let as = new AutoScriptNextGen(context, config);
           as.compareWithEnvironment(selectedItem.environment);
@@ -721,6 +745,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension == 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       ce.update();
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.update();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.update();
@@ -754,6 +781,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension === 'sql') {
       let ce: SimpleOSService = new ConditionService(context, config);
       ce.update(environmentFromItem);
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.update(environmentFromItem);
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.update(environmentFromItem);
@@ -787,6 +817,9 @@ export function activate(context: vscode.ExtensionContext) {
     } else if (fileExtension == 'sql') {
       let cs: SimpleOSService = new ConditionService(context, config);
       cs.delete();
+    } else if (fileExtension === 'properties') {
+      let ps = new SystemPropertyService(context, config);
+      ps.delete();
     } else {
       let as: SimpleOSService = new AutoScriptNextGen(context, config);
       as.delete();
@@ -805,7 +838,7 @@ export function activate(context: vscode.ExtensionContext) {
       showError("Could not determine file extension");
       return;
     }
-    if (fileExtension === 'xml' || fileExtension === 'sql') {
+    if (fileExtension === 'xml' || fileExtension === 'sql' || fileExtension === 'properties') {
       showWarning("Delete and upload is only supported for scripts (.py, .jy, or .js).");
       return;
     }
@@ -830,12 +863,19 @@ export function activate(context: vscode.ExtensionContext) {
     conditionService.downloadAll();
   });
 
+  let downloadallproperties = vscode.commands.registerCommand("mxscript.downloadallproperties", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    let ps = new SystemPropertyService(context, new ConfigService());
+    ps.downloadAll();
+  });
+
   // Quick pick wrapper: Download from Maximo (lets user choose which type to download)
   let downloadFromMaximo = vscode.commands.registerCommand("mxscript.downloadFromMaximo", async () => {
     const picks: Array<vscode.QuickPickItem & { command: string }> = [
       { label: "Download Script(s) from Server", description: "", command: "mxscript.downloadall" },
       { label: "Download Application xml(s) from Server", description: "", command: "mxscript.downloadallappxml" },
-      { label: "Download Condition(s) from Server", description: "", command: "mxscript.downloadallcondition" }
+      { label: "Download Condition(s) from Server", description: "", command: "mxscript.downloadallcondition" },
+      { label: "Download System Properties from Server", description: "", command: "mxscript.downloadallproperties" }
     ];
 
     const qp = vscode.window.createQuickPick<vscode.QuickPickItem & { command: string }>();
