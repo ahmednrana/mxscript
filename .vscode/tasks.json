@@ -27,6 +27,12 @@
           "endsPattern": "^\\[watch\\] build finished, watching for changes...$"
         }
       }
+    },
+    {
+      "label": "Publish Pre-release",
+      "type": "npm",
+      "script": "publish:pre",
+      "problemMatcher": []
     }
   ]
 }

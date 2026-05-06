@@ -46,7 +46,8 @@
     "clean:webviews": "npx rimraf ./media",
     "build:webviews": "npm run clean:webviews && node ./scripts/build-webview.js",
     "package": "vsce package",
-    "publish": "vsce publish"
+    "publish": "vsce publish",
+    "publish:pre": "vsce publish --pre-release"
   },
   "activationEvents": [
     "onCommand:mxscript.upload",
@@ -529,7 +530,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "@maximomize/maximo-api-client": "latest",
+    "@maximomize/maximo-api-client": "^0.9.0",
     "@types/node-fetch": "^2.5.5",
     "@vscode-elements/elements": "^2.3.0",
     "@vscode-elements/react-elements": "^2.3.1",
