@@ -8453,6 +8453,30 @@
     }, [controlId, currentValue, onChange]);
   }
 
+  // src/webview/react/boot/vscode.ts
+  var vscodeApi = null;
+  function getVsCodeApi() {
+    if (vscodeApi) {
+      return vscodeApi;
+    }
+    try {
+      if (typeof window !== "undefined" && window.acquireVsCodeApi) {
+        vscodeApi = window.acquireVsCodeApi();
+      } else {
+        vscodeApi = {
+          postMessage: (msg) => console.log("[DEV][vscode stub] postMessage ->", msg),
+          setState: (_2) => {
+          },
+          getState: () => void 0
+        };
+        console.warn("[vscode.ts] VS Code webview API not available \u2013 using dev stub.");
+      }
+    } catch (e12) {
+      console.warn("[vscode.ts] Failed to acquire VS Code API (it might have been already acquired):", e12);
+    }
+    return vscodeApi;
+  }
+
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeBadge.js
   var import_react2 = __toESM(require_react(), 1);
 
@@ -20169,7 +20193,6 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const validateFieldWithState = (0, import_react77.useCallback)((meta, value, snapshot) => {
       var _a7;
       const authType = ((_a7 = snapshot["authType"]) == null ? void 0 : _a7.value) || "internal";
-      debugger;
       const isVisible = (id) => {
         if (id === "apikey") return authType === "apikey";
         if (id === "username" || id === "password") return authType !== "apikey";
@@ -20354,10 +20377,10 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         return;
       }
-      if (vscodeApi) {
+      if (vscodeApi2) {
         try {
           const payload = mapToEnvironmentPayload();
-          vscodeApi.postMessage({
+          vscodeApi2.postMessage({
             type: "save",
             environment: payload
           });
@@ -20419,36 +20442,16 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         preferredBrowser: v3.preferredBrowser
       };
     };
-    const [vscodeApi, setVscodeApi] = (0, import_react77.useState)(null);
-    (0, import_react77.useEffect)(() => {
-      if (vscodeApi) return;
-      try {
-        const api = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
-        if (api) {
-          setVscodeApi(api);
-        } else {
-          const devStub = {
-            postMessage: (msg) => console.log("[DEV][webview stub] postMessage ->", msg),
-            setState: (_2) => {
-            },
-            getState: () => void 0
-          };
-          setVscodeApi(devStub);
-          console.warn("[EnvironmentEditor] VS Code webview API not available \u2013 using dev stub. Running outside real VS Code webview?");
-        }
-      } catch (e12) {
-        console.warn("[EnvironmentEditor] Failed to acquire VS Code API", e12);
-      }
-    }, [vscodeApi]);
+    const vscodeApi2 = getVsCodeApi();
     const cancel = () => {
-      vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "cancel" });
+      vscodeApi2 == null ? void 0 : vscodeApi2.postMessage({ type: "cancel" });
     };
     const verify = () => {
       if (verifying) return;
       setVerifying(true);
       setVerifyResult({ success: null, message: "Verifying settings..." });
-      vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "verifySettings", environment: mapToEnvironmentPayload() });
-      if (vscodeApi && !("acquireVsCodeApi" in window) && !window.acquireVsCodeApi) {
+      vscodeApi2 == null ? void 0 : vscodeApi2.postMessage({ type: "verifySettings", environment: mapToEnvironmentPayload() });
+      if (vscodeApi2 && !("acquireVsCodeApi" in window) && !window.acquireVsCodeApi) {
         setTimeout(() => {
           setVerifying(false);
           setVerifyResult({ success: false, message: "Dev preview: verification requires running inside VS Code webview." });
@@ -20456,7 +20459,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       }
     };
     (0, import_react77.useEffect)(() => {
-      if (!vscodeApi) return;
+      if (!vscodeApi2) return;
       const handler = (event) => {
         const msg = event.data;
         if ((msg == null ? void 0 : msg.type) === "verificationResult") {
@@ -20466,7 +20469,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       };
       window.addEventListener("message", handler);
       return () => window.removeEventListener("message", handler);
-    }, [vscodeApi]);
+    }, [vscodeApi2]);
     useSyncSelectValue("authType", (_a6 = form["authType"]) == null ? void 0 : _a6.value, (val) => updateValue("authType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "env-editor-root", children: [
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "page-heading", children: heading || (mode === "edit" ? "Edit Environment" : "Add New Environment") }),
@@ -20495,7 +20498,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
           focusControl,
           onFocus: (id) => {
             if (id === "preferredBrowser" && !browserOptionsLoaded) {
-              vscodeApi == null ? void 0 : vscodeApi.postMessage({ type: "getBrowserList" });
+              vscodeApi2 == null ? void 0 : vscodeApi2.postMessage({ type: "getBrowserList" });
             }
           },
           setReveal
@@ -20602,7 +20605,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
   // src/webview/react/pages/SystemPropertyViewer.tsx
   var import_react78 = __toESM(require_react());
   var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-  var vscode = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
+  var vscode = getVsCodeApi();
   var SystemPropertyViewer = () => {
     const [originalProperties, setOriginalProperties] = (0, import_react78.useState)({});
     const [properties, setProperties] = (0, import_react78.useState)([]);
@@ -20968,7 +20971,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     apikey: env.apikey,
     objectStructure: env.objectStructure,
     appxmlObjectStructure: env.appxml_objectStructure,
-    conditionExpressionObjectStructure: env.condition_objectStructure,
+    conditionObjectStructure: env.condition_objectStructure,
     logLevel: env.logLevel,
     createPythonFile: env.createPythonFileForJythonScripts,
     ignoreSsl: env.ignoreSslErrors,

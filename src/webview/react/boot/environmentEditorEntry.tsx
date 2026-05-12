@@ -27,7 +27,7 @@ const mapInitialValues = (env: any) => env ? {
     apikey: env.apikey,
     objectStructure: env.objectStructure,
     appxmlObjectStructure: env.appxml_objectStructure,
-    conditionExpressionObjectStructure: env.condition_objectStructure,
+    conditionObjectStructure: env.condition_objectStructure,
     logLevel: env.logLevel,
     createPythonFile: env.createPythonFileForJythonScripts,
     ignoreSsl: env.ignoreSslErrors,

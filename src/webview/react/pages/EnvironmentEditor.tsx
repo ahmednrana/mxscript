@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useSyncSelectValue } from '../hooks/useSyncSelectValue';
+import { getVsCodeApi } from '../boot/vscode';
 import {
   VscodeButton,
   VscodeBadge,
@@ -107,7 +108,6 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
   // pulling from a changing closure. Useful during rehydration.
   const validateFieldWithState = useCallback((meta: SettingMeta, value: any, snapshot: FormState): string | undefined => {
     const authType = snapshot['authType']?.value || 'internal';
-    debugger;
     const isVisible = (id: string) => {
       if (id === 'apikey') return authType === 'apikey';
       if (id === 'username' || id === 'password') return authType !== 'apikey';
@@ -389,31 +389,8 @@ export const EnvironmentEditor: React.FC<EnvironmentEditorProps> = ({
     };
   };
 
-  // VS Code messaging helper (lazy acquisition + dev fallback)
-  const [vscodeApi, setVscodeApi] = useState<any | null>(null);
-
-  useEffect(() => {
-    if (vscodeApi) return; // already set
-    try {
-      const api = (typeof window !== 'undefined' && (window as any).acquireVsCodeApi)
-        ? (window as any).acquireVsCodeApi()
-        : null;
-      if (api) {
-        setVscodeApi(api);
-      } else {
-        // Provide a lightweight dev stub so local preview doesn't crash
-        const devStub = {
-          postMessage: (msg: any) => console.log('[DEV][webview stub] postMessage ->', msg),
-          setState: (_: any) => { /* noop */ },
-          getState: () => undefined
-        };
-        setVscodeApi(devStub);
-        console.warn('[EnvironmentEditor] VS Code webview API not available – using dev stub. Running outside real VS Code webview?');
-      }
-    } catch (e) {
-      console.warn('[EnvironmentEditor] Failed to acquire VS Code API', e);
-    }
-  }, [vscodeApi]);
+  // VS Code messaging helper
+  const vscodeApi = getVsCodeApi();
 
   const cancel = () => {
     vscodeApi?.postMessage({ type: 'cancel' });

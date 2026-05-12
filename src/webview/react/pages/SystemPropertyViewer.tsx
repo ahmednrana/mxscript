@@ -12,15 +12,14 @@ import {
     VscodeLabel,
     VscodeCheckbox
 } from '@vscode-elements/react-elements';
+import { getVsCodeApi } from '../boot/vscode';
 
 interface SystemProperty {
     key: string;
     value: string | null;
 }
 
-const vscode = (typeof window !== 'undefined' && (window as any).acquireVsCodeApi) 
-    ? (window as any).acquireVsCodeApi() 
-    : null;
+const vscode = getVsCodeApi();
 
 export const SystemPropertyViewer: React.FC = () => {
     const [originalProperties, setOriginalProperties] = useState<Record<string, string | null>>({});

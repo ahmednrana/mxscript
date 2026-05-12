@@ -5,9 +5,6 @@ import { EnvironmentEditor } from './pages/EnvironmentEditor';
 import { SystemPropertyViewer } from './pages/SystemPropertyViewer';
 
 // Acquire VS Code API
-declare global { function acquireVsCodeApi(): any; }
-const vscode = acquireVsCodeApi?.();
-
 declare global { interface Window { __BOOTSTRAP_DATA__?: any; } }
 const bootstrap = window.__BOOTSTRAP_DATA__ || null;
 
@@ -22,7 +19,7 @@ const mapInitialValues = (env:any) => env ? {
   apikey: env.apikey,
   objectStructure: env.objectStructure,
   appxmlObjectStructure: env.appxml_objectStructure,
-	conditionExpressionObjectStructure: env.condition_objectStructure,
+  conditionObjectStructure: env.condition_objectStructure,
   logLevel: env.logLevel,
   createPythonFile: env.createPythonFileForJythonScripts,
   ignoreSsl: env.ignoreSslErrors,
