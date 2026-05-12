@@ -2,13 +2,14 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { EnvironmentEditor } from './pages/EnvironmentEditor';
+import { SystemPropertyViewer } from './pages/SystemPropertyViewer';
 
 // Acquire VS Code API
 declare global { function acquireVsCodeApi(): any; }
 const vscode = acquireVsCodeApi?.();
 
-declare global { interface Window { __ENV_EDITOR_BOOTSTRAP__?: any; } }
-const bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || null;
+declare global { interface Window { __BOOTSTRAP_DATA__?: any; } }
+const bootstrap = window.__BOOTSTRAP_DATA__ || null;
 
 const mapInitialValues = (env:any) => env ? {
   envName: env.name,
@@ -31,19 +32,23 @@ const mapInitialValues = (env:any) => env ? {
 } : undefined;
 
 const App: React.FC = () => {
-  // If extension injected bootstrap, render editor directly (fast path)
+  // If extension injected bootstrap, decide what to render
   if (bootstrap) {
-    const initialValues = mapInitialValues(bootstrap.environment);
-    return <EnvironmentEditor mode={bootstrap.mode} initialValues={initialValues} />;
+    if (bootstrap.page === 'environment-editor') {
+        const initialValues = mapInitialValues(bootstrap.environment);
+        return <EnvironmentEditor mode={bootstrap.mode} initialValues={initialValues} />;
+    }
+    if (bootstrap.page === 'system-properties') {
+        return <SystemPropertyViewer />;
+    }
   }
 
-  // Normal SPA with hash routes (new pages will work here)
+  // Normal SPA with hash routes
   return (
     <HashRouter>
       <Routes>
-        {/* <Route path="/" element={<OtherPage />} /> */}
         <Route path="/environment-editor" element={<EnvironmentEditor />} />
-        {/* <Route path="/other" element={<OtherPage />} /> */}
+        <Route path="/system-properties" element={<SystemPropertyViewer />} />
       </Routes>
     </HashRouter>
   );

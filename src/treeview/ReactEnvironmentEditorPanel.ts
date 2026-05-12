@@ -239,9 +239,11 @@ export class ReactEnvironmentEditorPanel {
     <div id="root"></div>
     <script nonce="${nonce}">
         // Make bootstrap data available to React component
-        window.__ENV_EDITOR_BOOTSTRAP__ = ${bootstrapStr};
-        window.initialValues = ${JSON.stringify(initialValues)};
-        window.mode = '${this._environment ? 'edit' : 'add'}';
+        window.__BOOTSTRAP_DATA__ = {
+            page: 'environment-editor',
+            mode: '${this._environment ? 'edit' : 'add'}',
+            environment: ${JSON.stringify(this._environment || null)}
+        };
     </script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
 </body>

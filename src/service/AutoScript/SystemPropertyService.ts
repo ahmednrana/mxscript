@@ -4,6 +4,7 @@ import { ConfigService } from '../Config/ConfigService';
 import { Logger } from '../Logger/Logger';
 import { MaximoClientProvider } from '../../client/client';
 import { MaximoEnvironment } from '../../webview/EnvironmentManager';
+import { SystemPropertyWebview } from '../../webview/SystemPropertyWebview';
 import { showError, showWarning, showInformation } from '../../utils/utils';
 
 // ─────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ function serializeProperties(
     }
     return lines.join('\n');
 }
+
 
 /**
  * Parse a .properties text into a key→value record.
@@ -322,11 +324,17 @@ export class SystemPropertyService {
             const mode = await vscode.window.showQuickPick(
                 [
                     { label: 'All', description: 'Download all system properties from the server into one file' },
-                    { label: 'Multiple', description: 'Pick one or more properties to download into one file' }
+                    { label: 'Multiple', description: 'Pick one or more properties to download into one file' },
+                    { label: 'View / Edit', description: 'Interactive viewer to search, edit, compare and export all system properties' }
                 ],
                 { placeHolder: 'Which properties do you want to download?' }
             );
             if (!mode) { return; }
+
+            if (mode.label === 'View / Edit') {
+                await this.viewProperties();
+                return;
+            }
 
             // ── Step 2: fetch the full property-name list (needed for Single/Multiple) ──
             let allNames: string[] | undefined;
@@ -376,11 +384,11 @@ export class SystemPropertyService {
                 // Compute filename before showing the folder picker so the user sees it
                 let fileName: string;
                 if (selectedAll) {
-                    fileName = `sysprops-all.properties`;
+                    fileName = `sysprops-${envName}-all.properties`;
                 } else if (selectedNames.length === 1) {
-                    fileName = `sysprops-${sanitizeForFilename(selectedNames[0])}.properties`;
+                    fileName = `sysprops-${envName}-${sanitizeForFilename(selectedNames[0])}.properties`;
                 } else {
-                    fileName = `sysprops-multiple.properties`;
+                    fileName = `sysprops-${envName}-multiple.properties`;
                 }
 
                 // ── Step 3: save dialog (user can edit filename, OS warns on overwrite) ──
@@ -418,7 +426,7 @@ export class SystemPropertyService {
             }
 
             // ── Mode: All ──────────────────────────────────────────
-            const allFileName = `sysprops-all.properties`;
+            const allFileName = `sysprops-${envName}-all.properties`;
             const allFileUri = await vscode.window.showSaveDialog({
                 defaultUri: vscode.Uri.joinPath(rootFolder.uri, allFileName),
                 filters: { 'Properties files': ['properties'], 'All files': ['*'] },
@@ -604,5 +612,191 @@ export class SystemPropertyService {
         } catch (error) {
             showError(`Failed to open in Maximo: ${(error as Error).message}`);
         }
+    }
+    /**
+     * VIEW PROPERTIES — Fetches all properties and their values, then presents a searchable QuickPick.
+     */
+    async viewProperties(): Promise<void> {
+        try {
+            const client = this.getMaximoClient();
+            const systemService = client.getSystemService();
+            const envName = this.configService.getActiveEnvironmentName() || 'Maximo';
+
+            await vscode.window.withProgress(
+                {
+                    location: vscode.ProgressLocation.Notification,
+                    title: `Fetching properties from ${envName}`,
+                    cancellable: false
+                },
+                async (progress) => {
+                    progress.report({ increment: 10, message: 'Fetching property names…' });
+                    const names = await systemService.getAllPropertyNames();
+                    if (!names || names.length === 0) {
+                        showWarning('No properties found on the server.');
+                        return;
+                    }
+
+                    progress.report({ increment: 20, message: `Fetching values for ${names.length} properties…` });
+                    const valuesMap = await systemService.getProperties(names);
+                    
+                    progress.report({ increment: 60, message: 'Opening interactive viewer…' });
+                    SystemPropertyWebview.show(
+                        this.context, 
+                        valuesMap as Record<string, string>, 
+                        envName,
+                        async (changes) => {
+                            // This runs when the user clicks "Push" in the webview
+                            await this._handleWebviewPush(changes, envName);
+                            
+                            // Refresh the webview data after a successful push
+                            const refreshed = await systemService.getProperties(Object.keys(valuesMap));
+                            SystemPropertyWebview.show(this.context, refreshed as Record<string, string>, envName);
+                        },
+                        async (key) => {
+                            // This runs when the user clicks "Live Refresh" icon in the webview
+                            try {
+                                await vscode.window.withProgress(
+                                    { location: vscode.ProgressLocation.Notification, title: `Refreshing ${key}...` },
+                                    async () => {
+                                        await systemService.liveRefreshProperty(key);
+                                        // Also fetch the value again in case it changed
+                                        const newVal = await systemService.getPropertyValue(key);
+                                        const currentProps = { ...valuesMap, [key]: newVal };
+                                        SystemPropertyWebview.show(this.context, currentProps as Record<string, string>, envName);
+                                    }
+                                );
+                                showInformation(`Successfully refreshed property: ${key}`);
+                            } catch (error) {
+                                showError(`Failed to refresh property ${key}: ${(error as Error).message}`);
+                            }
+                        },
+                        async () => {
+                            // This runs when the user clicks "Compare" in the webview
+                            const globalEnvs = this.context.globalState.get<any[]>('mxscript.environments', []);
+                            const workspaceEnvs = this.context.workspaceState.get<any[]>('mxscript.environments', []);
+                            const allEnvs = [...globalEnvs, ...workspaceEnvs];
+                            
+                            // Filter out current env if possible (envName comparison)
+                            const otherEnvs = allEnvs.filter(e => e.name !== envName);
+                            
+                            if (otherEnvs.length === 0) {
+                                showWarning("No other environments found to compare with.");
+                                return;
+                            }
+
+                            const selected = await vscode.window.showQuickPick(
+                                otherEnvs.map(e => ({ label: e.name, description: `${e.hostname}`, env: e })),
+                                { placeHolder: "Select environment to compare with" }
+                            );
+
+                            if (selected) {
+                                try {
+                                    await vscode.window.withProgress(
+                                        { location: vscode.ProgressLocation.Notification, title: `Comparing with ${selected.label}...` },
+                                        async () => {
+                                            const otherClient = MaximoClientProvider.createClientFromEnvironment(selected.env, Logger.getInstance());
+                                            const otherSystemService = otherClient.getSystemService();
+                                            
+                                            // Fetch ALL properties from the other system
+                                            const otherNames = await otherSystemService.getAllPropertyNames();
+                                            const otherProps = await otherSystemService.getProperties(otherNames);
+                                            const otherValuesMap = otherProps as Record<string, string>;
+                                            
+                                            // Get union of keys
+                                            const allKeys = new Set([...Object.keys(valuesMap), ...Object.keys(otherValuesMap)]);
+                                            
+                                            // Update the webview's base property list to include keys missing in A
+                                            const unionValuesMap: Record<string, string | null> = {};
+                                            allKeys.forEach(key => {
+                                                unionValuesMap[key] = valuesMap[key] ?? null;
+                                            });
+
+                                            // Re-send current properties (union) so they show up in the table
+                                            SystemPropertyWebview.show(this.context, unionValuesMap as any, envName);
+                                            
+                                            // Send comparison data
+                                            SystemPropertyWebview.sendComparison(otherValuesMap, selected.label);
+                                        }
+                                    );
+                                } catch (error) {
+                                    showError(`Failed to fetch comparison data: ${(error as Error).message}`);
+                                }
+                            }
+                        },
+                        async (exportProps) => {
+                            // This runs when the user clicks "Export Properties" in the webview
+                            const rootFolder = vscode.workspace.workspaceFolders?.[0];
+                            const defaultUri = rootFolder 
+                                ? vscode.Uri.joinPath(rootFolder.uri, `sysprops-${sanitizeForFilename(envName)}-all.properties`)
+                                : undefined;
+
+                            const fileUri = await vscode.window.showSaveDialog({
+                                defaultUri,
+                                filters: { 'Properties files': ['properties', 'props'], 'All files': ['*'] },
+                                title: `Export system properties from ${envName}`
+                            });
+
+                            if (fileUri) {
+                                const header = `# Exported from: ${envName} [${this.configService.getUrl()}]\n# Date: ${new Date().toISOString()}`;
+                                const content = serializeProperties(exportProps, header);
+                                await vscode.workspace.fs.writeFile(fileUri, Buffer.from(content, 'utf8'));
+                                showInformation(`Successfully exported properties to ${fileUri.fsPath}`);
+                                await vscode.window.showTextDocument(fileUri);
+                            }
+                        }
+                    );
+                    progress.report({ increment: 10, message: 'Done.' });
+                }
+            );
+        } catch (error) {
+            showError(`Failed to open properties viewer: ${(error as Error).message}`);
+        }
+    }
+
+    /**
+     * Internal helper to push changes from webview to server with progress.
+     */
+    private async _handleWebviewPush(changes: Record<string, string>, envName: string): Promise<void> {
+        const keys = Object.keys(changes);
+        const systemService = this.getMaximoClient().getSystemService();
+
+        await vscode.window.withProgress(
+            {
+                location: vscode.ProgressLocation.Notification,
+                title: `Updating ${keys.length} properties on ${envName}`,
+                cancellable: false
+            },
+            async (progress) => {
+                let successCount = 0;
+                let failCount = 0;
+                const errors: string[] = [];
+                const step = 100 / keys.length;
+
+                for (let i = 0; i < keys.length; i++) {
+                    const key = keys[i];
+                    const value = changes[key];
+                    progress.report({
+                        increment: step,
+                        message: `Updating ${key} (${i + 1}/${keys.length})`
+                    });
+
+                    try {
+                        await systemService.setPropertyValue(key, value);
+                        successCount++;
+                    } catch (err) {
+                        failCount++;
+                        errors.push(`${key}: ${(err as Error).message}`);
+                    }
+                }
+
+                if (failCount === 0) {
+                    showInformation(`Successfully updated ${successCount} properties on ${envName}.`);
+                } else {
+                    const detail = errors.slice(0, 5).join('\n') + (errors.length > 5 ? `\n…and ${errors.length - 5} more` : '');
+                    showError(`Updated ${successCount} properties, but ${failCount} failed.\n${detail}`);
+                    throw new Error('Some updates failed');
+                }
+            }
+        );
     }
 }

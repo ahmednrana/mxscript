@@ -869,13 +869,19 @@ export function activate(context: vscode.ExtensionContext) {
     ps.downloadAll();
   });
 
+  let viewProperties = vscode.commands.registerCommand("mxscript.viewProperties", async () => {
+    if (!(await ensureWorkspaceConfigured(context, maximoEnvironmentTreeProvider))) return;
+    let ps = new SystemPropertyService(context, new ConfigService());
+    ps.viewProperties();
+  });
+
   // Quick pick wrapper: Download from Maximo (lets user choose which type to download)
   let downloadFromMaximo = vscode.commands.registerCommand("mxscript.downloadFromMaximo", async () => {
     const picks: Array<vscode.QuickPickItem & { command: string }> = [
       { label: "Download Script(s) from Server", description: "", command: "mxscript.downloadall" },
       { label: "Download Application xml(s) from Server", description: "", command: "mxscript.downloadallappxml" },
       { label: "Download Condition(s) from Server", description: "", command: "mxscript.downloadallcondition" },
-      { label: "Download System Properties from Server", description: "", command: "mxscript.downloadallproperties" }
+      { label: "Manage System Properties (View / Edit / Download)", description: "", command: "mxscript.downloadallproperties" }
     ];
 
     const qp = vscode.window.createQuickPick<vscode.QuickPickItem & { command: string }>();
@@ -1112,6 +1118,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(toolsMenu);
   context.subscriptions.push(openInMaximo);
   context.subscriptions.push(compareWithEnvironment);
+  context.subscriptions.push(downloadallproperties);
+  context.subscriptions.push(viewProperties);
 
   // Expose an API for other extensions to get a MaximoApiClient instance the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));

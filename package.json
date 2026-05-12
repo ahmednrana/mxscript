@@ -128,6 +128,11 @@
         "category": "Maximo [mxscript]"
       },
       {
+        "command": "mxscript.viewProperties",
+        "title": "Manage System Properties (View / Edit / Download)",
+        "category": "Maximo [mxscript]"
+      },
+      {
         "command": "mxscript.downloadFromMaximo",
         "title": "Download from Server",
         "category": "Maximo [mxscript]"

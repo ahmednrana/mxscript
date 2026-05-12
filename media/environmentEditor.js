@@ -7283,6 +7283,1150 @@
   // src/webview/react/boot/environmentEditorEntry.tsx
   var import_client = __toESM(require_client());
 
+  // node_modules/react-router-dom/dist/index.js
+  var React2 = __toESM(require_react());
+  var ReactDOM = __toESM(require_react_dom());
+
+  // node_modules/react-router/dist/index.js
+  var React = __toESM(require_react());
+
+  // node_modules/@remix-run/router/dist/router.js
+  function _extends() {
+    _extends = Object.assign ? Object.assign.bind() : function(target) {
+      for (var i7 = 1; i7 < arguments.length; i7++) {
+        var source = arguments[i7];
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+      return target;
+    };
+    return _extends.apply(this, arguments);
+  }
+  var Action;
+  (function(Action2) {
+    Action2["Pop"] = "POP";
+    Action2["Push"] = "PUSH";
+    Action2["Replace"] = "REPLACE";
+  })(Action || (Action = {}));
+  var PopStateEventType = "popstate";
+  function createHashHistory(options) {
+    if (options === void 0) {
+      options = {};
+    }
+    function createHashLocation(window2, globalHistory) {
+      let {
+        pathname = "/",
+        search = "",
+        hash = ""
+      } = parsePath(window2.location.hash.substr(1));
+      if (!pathname.startsWith("/") && !pathname.startsWith(".")) {
+        pathname = "/" + pathname;
+      }
+      return createLocation(
+        "",
+        {
+          pathname,
+          search,
+          hash
+        },
+        // state defaults to `null` because `window.history.state` does
+        globalHistory.state && globalHistory.state.usr || null,
+        globalHistory.state && globalHistory.state.key || "default"
+      );
+    }
+    function createHashHref(window2, to) {
+      let base = window2.document.querySelector("base");
+      let href = "";
+      if (base && base.getAttribute("href")) {
+        let url = window2.location.href;
+        let hashIndex = url.indexOf("#");
+        href = hashIndex === -1 ? url : url.slice(0, hashIndex);
+      }
+      return href + "#" + (typeof to === "string" ? to : createPath(to));
+    }
+    function validateHashLocation(location, to) {
+      warning(location.pathname.charAt(0) === "/", "relative pathnames are not supported in hash history.push(" + JSON.stringify(to) + ")");
+    }
+    return getUrlBasedHistory(createHashLocation, createHashHref, validateHashLocation, options);
+  }
+  function invariant(value, message) {
+    if (value === false || value === null || typeof value === "undefined") {
+      throw new Error(message);
+    }
+  }
+  function warning(cond, message) {
+    if (!cond) {
+      if (typeof console !== "undefined") console.warn(message);
+      try {
+        throw new Error(message);
+      } catch (e12) {
+      }
+    }
+  }
+  function createKey() {
+    return Math.random().toString(36).substr(2, 8);
+  }
+  function getHistoryState(location, index) {
+    return {
+      usr: location.state,
+      key: location.key,
+      idx: index
+    };
+  }
+  function createLocation(current, to, state, key) {
+    if (state === void 0) {
+      state = null;
+    }
+    let location = _extends({
+      pathname: typeof current === "string" ? current : current.pathname,
+      search: "",
+      hash: ""
+    }, typeof to === "string" ? parsePath(to) : to, {
+      state,
+      // TODO: This could be cleaned up.  push/replace should probably just take
+      // full Locations now and avoid the need to run through this flow at all
+      // But that's a pretty big refactor to the current test suite so going to
+      // keep as is for the time being and just let any incoming keys take precedence
+      key: to && to.key || key || createKey()
+    });
+    return location;
+  }
+  function createPath(_ref) {
+    let {
+      pathname = "/",
+      search = "",
+      hash = ""
+    } = _ref;
+    if (search && search !== "?") pathname += search.charAt(0) === "?" ? search : "?" + search;
+    if (hash && hash !== "#") pathname += hash.charAt(0) === "#" ? hash : "#" + hash;
+    return pathname;
+  }
+  function parsePath(path) {
+    let parsedPath = {};
+    if (path) {
+      let hashIndex = path.indexOf("#");
+      if (hashIndex >= 0) {
+        parsedPath.hash = path.substr(hashIndex);
+        path = path.substr(0, hashIndex);
+      }
+      let searchIndex = path.indexOf("?");
+      if (searchIndex >= 0) {
+        parsedPath.search = path.substr(searchIndex);
+        path = path.substr(0, searchIndex);
+      }
+      if (path) {
+        parsedPath.pathname = path;
+      }
+    }
+    return parsedPath;
+  }
+  function getUrlBasedHistory(getLocation, createHref, validateLocation, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    let {
+      window: window2 = document.defaultView,
+      v5Compat = false
+    } = options;
+    let globalHistory = window2.history;
+    let action = Action.Pop;
+    let listener = null;
+    let index = getIndex();
+    if (index == null) {
+      index = 0;
+      globalHistory.replaceState(_extends({}, globalHistory.state, {
+        idx: index
+      }), "");
+    }
+    function getIndex() {
+      let state = globalHistory.state || {
+        idx: null
+      };
+      return state.idx;
+    }
+    function handlePop() {
+      action = Action.Pop;
+      let nextIndex = getIndex();
+      let delta = nextIndex == null ? null : nextIndex - index;
+      index = nextIndex;
+      if (listener) {
+        listener({
+          action,
+          location: history.location,
+          delta
+        });
+      }
+    }
+    function push(to, state) {
+      action = Action.Push;
+      let location = createLocation(history.location, to, state);
+      if (validateLocation) validateLocation(location, to);
+      index = getIndex() + 1;
+      let historyState = getHistoryState(location, index);
+      let url = history.createHref(location);
+      try {
+        globalHistory.pushState(historyState, "", url);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "DataCloneError") {
+          throw error;
+        }
+        window2.location.assign(url);
+      }
+      if (v5Compat && listener) {
+        listener({
+          action,
+          location: history.location,
+          delta: 1
+        });
+      }
+    }
+    function replace2(to, state) {
+      action = Action.Replace;
+      let location = createLocation(history.location, to, state);
+      if (validateLocation) validateLocation(location, to);
+      index = getIndex();
+      let historyState = getHistoryState(location, index);
+      let url = history.createHref(location);
+      globalHistory.replaceState(historyState, "", url);
+      if (v5Compat && listener) {
+        listener({
+          action,
+          location: history.location,
+          delta: 0
+        });
+      }
+    }
+    function createURL(to) {
+      let base = window2.location.origin !== "null" ? window2.location.origin : window2.location.href;
+      let href = typeof to === "string" ? to : createPath(to);
+      href = href.replace(/ $/, "%20");
+      invariant(base, "No window.location.(origin|href) available to create URL for href: " + href);
+      return new URL(href, base);
+    }
+    let history = {
+      get action() {
+        return action;
+      },
+      get location() {
+        return getLocation(window2, globalHistory);
+      },
+      listen(fn) {
+        if (listener) {
+          throw new Error("A history only accepts one active listener");
+        }
+        window2.addEventListener(PopStateEventType, handlePop);
+        listener = fn;
+        return () => {
+          window2.removeEventListener(PopStateEventType, handlePop);
+          listener = null;
+        };
+      },
+      createHref(to) {
+        return createHref(window2, to);
+      },
+      createURL,
+      encodeLocation(to) {
+        let url = createURL(to);
+        return {
+          pathname: url.pathname,
+          search: url.search,
+          hash: url.hash
+        };
+      },
+      push,
+      replace: replace2,
+      go(n9) {
+        return globalHistory.go(n9);
+      }
+    };
+    return history;
+  }
+  var ResultType;
+  (function(ResultType2) {
+    ResultType2["data"] = "data";
+    ResultType2["deferred"] = "deferred";
+    ResultType2["redirect"] = "redirect";
+    ResultType2["error"] = "error";
+  })(ResultType || (ResultType = {}));
+  function matchRoutes(routes, locationArg, basename) {
+    if (basename === void 0) {
+      basename = "/";
+    }
+    return matchRoutesImpl(routes, locationArg, basename, false);
+  }
+  function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
+    let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
+    let pathname = stripBasename(location.pathname || "/", basename);
+    if (pathname == null) {
+      return null;
+    }
+    let branches = flattenRoutes(routes);
+    rankRouteBranches(branches);
+    let matches = null;
+    for (let i7 = 0; matches == null && i7 < branches.length; ++i7) {
+      let decoded = decodePath(pathname);
+      matches = matchRouteBranch(branches[i7], decoded, allowPartial);
+    }
+    return matches;
+  }
+  function flattenRoutes(routes, branches, parentsMeta, parentPath) {
+    if (branches === void 0) {
+      branches = [];
+    }
+    if (parentsMeta === void 0) {
+      parentsMeta = [];
+    }
+    if (parentPath === void 0) {
+      parentPath = "";
+    }
+    let flattenRoute = (route, index, relativePath) => {
+      let meta = {
+        relativePath: relativePath === void 0 ? route.path || "" : relativePath,
+        caseSensitive: route.caseSensitive === true,
+        childrenIndex: index,
+        route
+      };
+      if (meta.relativePath.startsWith("/")) {
+        invariant(meta.relativePath.startsWith(parentPath), 'Absolute route path "' + meta.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes.");
+        meta.relativePath = meta.relativePath.slice(parentPath.length);
+      }
+      let path = joinPaths([parentPath, meta.relativePath]);
+      let routesMeta = parentsMeta.concat(meta);
+      if (route.children && route.children.length > 0) {
+        invariant(
+          // Our types know better, but runtime JS may not!
+          // @ts-expect-error
+          route.index !== true,
+          "Index routes must not have child routes. Please remove " + ('all child routes from route path "' + path + '".')
+        );
+        flattenRoutes(route.children, branches, routesMeta, path);
+      }
+      if (route.path == null && !route.index) {
+        return;
+      }
+      branches.push({
+        path,
+        score: computeScore(path, route.index),
+        routesMeta
+      });
+    };
+    routes.forEach((route, index) => {
+      var _route$path;
+      if (route.path === "" || !((_route$path = route.path) != null && _route$path.includes("?"))) {
+        flattenRoute(route, index);
+      } else {
+        for (let exploded of explodeOptionalSegments(route.path)) {
+          flattenRoute(route, index, exploded);
+        }
+      }
+    });
+    return branches;
+  }
+  function explodeOptionalSegments(path) {
+    let segments = path.split("/");
+    if (segments.length === 0) return [];
+    let [first, ...rest] = segments;
+    let isOptional = first.endsWith("?");
+    let required = first.replace(/\?$/, "");
+    if (rest.length === 0) {
+      return isOptional ? [required, ""] : [required];
+    }
+    let restExploded = explodeOptionalSegments(rest.join("/"));
+    let result = [];
+    result.push(...restExploded.map((subpath) => subpath === "" ? required : [required, subpath].join("/")));
+    if (isOptional) {
+      result.push(...restExploded);
+    }
+    return result.map((exploded) => path.startsWith("/") && exploded === "" ? "/" : exploded);
+  }
+  function rankRouteBranches(branches) {
+    branches.sort((a3, b3) => a3.score !== b3.score ? b3.score - a3.score : compareIndexes(a3.routesMeta.map((meta) => meta.childrenIndex), b3.routesMeta.map((meta) => meta.childrenIndex)));
+  }
+  var paramRe = /^:[\w-]+$/;
+  var dynamicSegmentValue = 3;
+  var indexRouteValue = 2;
+  var emptySegmentValue = 1;
+  var staticSegmentValue = 10;
+  var splatPenalty = -2;
+  var isSplat = (s8) => s8 === "*";
+  function computeScore(path, index) {
+    let segments = path.split("/");
+    let initialScore = segments.length;
+    if (segments.some(isSplat)) {
+      initialScore += splatPenalty;
+    }
+    if (index) {
+      initialScore += indexRouteValue;
+    }
+    return segments.filter((s8) => !isSplat(s8)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
+  }
+  function compareIndexes(a3, b3) {
+    let siblings = a3.length === b3.length && a3.slice(0, -1).every((n9, i7) => n9 === b3[i7]);
+    return siblings ? (
+      // If two routes are siblings, we should try to match the earlier sibling
+      // first. This allows people to have fine-grained control over the matching
+      // behavior by simply putting routes with identical paths in the order they
+      // want them tried.
+      a3[a3.length - 1] - b3[b3.length - 1]
+    ) : (
+      // Otherwise, it doesn't really make sense to rank non-siblings by index,
+      // so they sort equally.
+      0
+    );
+  }
+  function matchRouteBranch(branch, pathname, allowPartial) {
+    if (allowPartial === void 0) {
+      allowPartial = false;
+    }
+    let {
+      routesMeta
+    } = branch;
+    let matchedParams = {};
+    let matchedPathname = "/";
+    let matches = [];
+    for (let i7 = 0; i7 < routesMeta.length; ++i7) {
+      let meta = routesMeta[i7];
+      let end = i7 === routesMeta.length - 1;
+      let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
+      let match = matchPath({
+        path: meta.relativePath,
+        caseSensitive: meta.caseSensitive,
+        end
+      }, remainingPathname);
+      let route = meta.route;
+      if (!match && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
+        match = matchPath({
+          path: meta.relativePath,
+          caseSensitive: meta.caseSensitive,
+          end: false
+        }, remainingPathname);
+      }
+      if (!match) {
+        return null;
+      }
+      Object.assign(matchedParams, match.params);
+      matches.push({
+        // TODO: Can this as be avoided?
+        params: matchedParams,
+        pathname: joinPaths([matchedPathname, match.pathname]),
+        pathnameBase: normalizePathname(joinPaths([matchedPathname, match.pathnameBase])),
+        route
+      });
+      if (match.pathnameBase !== "/") {
+        matchedPathname = joinPaths([matchedPathname, match.pathnameBase]);
+      }
+    }
+    return matches;
+  }
+  function matchPath(pattern, pathname) {
+    if (typeof pattern === "string") {
+      pattern = {
+        path: pattern,
+        caseSensitive: false,
+        end: true
+      };
+    }
+    let [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
+    let match = pathname.match(matcher);
+    if (!match) return null;
+    let matchedPathname = match[0];
+    let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
+    let captureGroups = match.slice(1);
+    let params = compiledParams.reduce((memo2, _ref, index) => {
+      let {
+        paramName,
+        isOptional
+      } = _ref;
+      if (paramName === "*") {
+        let splatValue = captureGroups[index] || "";
+        pathnameBase = matchedPathname.slice(0, matchedPathname.length - splatValue.length).replace(/(.)\/+$/, "$1");
+      }
+      const value = captureGroups[index];
+      if (isOptional && !value) {
+        memo2[paramName] = void 0;
+      } else {
+        memo2[paramName] = (value || "").replace(/%2F/g, "/");
+      }
+      return memo2;
+    }, {});
+    return {
+      params,
+      pathname: matchedPathname,
+      pathnameBase,
+      pattern
+    };
+  }
+  function compilePath(path, caseSensitive, end) {
+    if (caseSensitive === void 0) {
+      caseSensitive = false;
+    }
+    if (end === void 0) {
+      end = true;
+    }
+    warning(path === "*" || !path.endsWith("*") || path.endsWith("/*"), 'Route path "' + path + '" will be treated as if it were ' + ('"' + path.replace(/\*$/, "/*") + '" because the `*` character must ') + "always follow a `/` in the pattern. To get rid of this warning, " + ('please change the route path to "' + path.replace(/\*$/, "/*") + '".'));
+    let params = [];
+    let regexpSource = "^" + path.replace(/\/*\*?$/, "").replace(/^\/*/, "/").replace(/[\\.*+^${}|()[\]]/g, "\\$&").replace(/\/:([\w-]+)(\?)?/g, (_2, paramName, isOptional) => {
+      params.push({
+        paramName,
+        isOptional: isOptional != null
+      });
+      return isOptional ? "/?([^\\/]+)?" : "/([^\\/]+)";
+    });
+    if (path.endsWith("*")) {
+      params.push({
+        paramName: "*"
+      });
+      regexpSource += path === "*" || path === "/*" ? "(.*)$" : "(?:\\/(.+)|\\/*)$";
+    } else if (end) {
+      regexpSource += "\\/*$";
+    } else if (path !== "" && path !== "/") {
+      regexpSource += "(?:(?=\\/|$))";
+    } else ;
+    let matcher = new RegExp(regexpSource, caseSensitive ? void 0 : "i");
+    return [matcher, params];
+  }
+  function decodePath(value) {
+    try {
+      return value.split("/").map((v3) => decodeURIComponent(v3).replace(/\//g, "%2F")).join("/");
+    } catch (error) {
+      warning(false, 'The URL path "' + value + '" could not be decoded because it is is a malformed URL segment. This is probably due to a bad percent ' + ("encoding (" + error + ")."));
+      return value;
+    }
+  }
+  function stripBasename(pathname, basename) {
+    if (basename === "/") return pathname;
+    if (!pathname.toLowerCase().startsWith(basename.toLowerCase())) {
+      return null;
+    }
+    let startIndex = basename.endsWith("/") ? basename.length - 1 : basename.length;
+    let nextChar = pathname.charAt(startIndex);
+    if (nextChar && nextChar !== "/") {
+      return null;
+    }
+    return pathname.slice(startIndex) || "/";
+  }
+  var joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
+  var normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
+  function isRouteErrorResponse(error) {
+    return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
+  }
+  var validMutationMethodsArr = ["post", "put", "patch", "delete"];
+  var validMutationMethods = new Set(validMutationMethodsArr);
+  var validRequestMethodsArr = ["get", ...validMutationMethodsArr];
+  var validRequestMethods = new Set(validRequestMethodsArr);
+  var UNSAFE_DEFERRED_SYMBOL = Symbol("deferred");
+
+  // node_modules/react-router/dist/index.js
+  function _extends2() {
+    _extends2 = Object.assign ? Object.assign.bind() : function(target) {
+      for (var i7 = 1; i7 < arguments.length; i7++) {
+        var source = arguments[i7];
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+      return target;
+    };
+    return _extends2.apply(this, arguments);
+  }
+  var DataRouterContext = /* @__PURE__ */ React.createContext(null);
+  if (false) {
+    DataRouterContext.displayName = "DataRouter";
+  }
+  var DataRouterStateContext = /* @__PURE__ */ React.createContext(null);
+  if (false) {
+    DataRouterStateContext.displayName = "DataRouterState";
+  }
+  if (false) {
+    AwaitContext.displayName = "Await";
+  }
+  var NavigationContext = /* @__PURE__ */ React.createContext(null);
+  if (false) {
+    NavigationContext.displayName = "Navigation";
+  }
+  var LocationContext = /* @__PURE__ */ React.createContext(null);
+  if (false) {
+    LocationContext.displayName = "Location";
+  }
+  var RouteContext = /* @__PURE__ */ React.createContext({
+    outlet: null,
+    matches: [],
+    isDataRoute: false
+  });
+  if (false) {
+    RouteContext.displayName = "Route";
+  }
+  var RouteErrorContext = /* @__PURE__ */ React.createContext(null);
+  if (false) {
+    RouteErrorContext.displayName = "RouteError";
+  }
+  function useInRouterContext() {
+    return React.useContext(LocationContext) != null;
+  }
+  function useLocation() {
+    !useInRouterContext() ? false ? invariant(
+      false,
+      // TODO: This error is probably because they somehow have 2 versions of the
+      // router loaded. We can help them understand how to avoid that.
+      "useLocation() may be used only in the context of a <Router> component."
+    ) : invariant(false) : void 0;
+    return React.useContext(LocationContext).location;
+  }
+  function useRoutes(routes, locationArg) {
+    return useRoutesImpl(routes, locationArg);
+  }
+  function useRoutesImpl(routes, locationArg, dataRouterState, future) {
+    !useInRouterContext() ? false ? invariant(
+      false,
+      // TODO: This error is probably because they somehow have 2 versions of the
+      // router loaded. We can help them understand how to avoid that.
+      "useRoutes() may be used only in the context of a <Router> component."
+    ) : invariant(false) : void 0;
+    let {
+      navigator: navigator2
+    } = React.useContext(NavigationContext);
+    let {
+      matches: parentMatches
+    } = React.useContext(RouteContext);
+    let routeMatch = parentMatches[parentMatches.length - 1];
+    let parentParams = routeMatch ? routeMatch.params : {};
+    let parentPathname = routeMatch ? routeMatch.pathname : "/";
+    let parentPathnameBase = routeMatch ? routeMatch.pathnameBase : "/";
+    let parentRoute = routeMatch && routeMatch.route;
+    if (false) {
+      let parentPath = parentRoute && parentRoute.path || "";
+      warningOnce(parentPathname, !parentRoute || parentPath.endsWith("*"), "You rendered descendant <Routes> (or called `useRoutes()`) at " + ('"' + parentPathname + '" (under <Route path="' + parentPath + '">) but the ') + `parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+` + ('Please change the parent <Route path="' + parentPath + '"> to <Route ') + ('path="' + (parentPath === "/" ? "*" : parentPath + "/*") + '">.'));
+    }
+    let locationFromContext = useLocation();
+    let location;
+    if (locationArg) {
+      var _parsedLocationArg$pa;
+      let parsedLocationArg = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
+      !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ? false ? invariant(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, the location pathname must begin with the portion of the URL pathname that was " + ('matched by all parent routes. The current pathname base is "' + parentPathnameBase + '" ') + ('but pathname "' + parsedLocationArg.pathname + '" was given in the `location` prop.')) : invariant(false) : void 0;
+      location = parsedLocationArg;
+    } else {
+      location = locationFromContext;
+    }
+    let pathname = location.pathname || "/";
+    let remainingPathname = pathname;
+    if (parentPathnameBase !== "/") {
+      let parentSegments = parentPathnameBase.replace(/^\//, "").split("/");
+      let segments = pathname.replace(/^\//, "").split("/");
+      remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
+    }
+    let matches = matchRoutes(routes, {
+      pathname: remainingPathname
+    });
+    if (false) {
+      false ? warning(parentRoute || matches != null, 'No routes matched location "' + location.pathname + location.search + location.hash + '" ') : void 0;
+      false ? warning(matches == null || matches[matches.length - 1].route.element !== void 0 || matches[matches.length - 1].route.Component !== void 0 || matches[matches.length - 1].route.lazy !== void 0, 'Matched leaf route at location "' + location.pathname + location.search + location.hash + '" does not have an element or Component. This means it will render an <Outlet /> with a null value by default resulting in an "empty" page.') : void 0;
+    }
+    let renderedMatches = _renderMatches(matches && matches.map((match) => Object.assign({}, match, {
+      params: Object.assign({}, parentParams, match.params),
+      pathname: joinPaths([
+        parentPathnameBase,
+        // Re-encode pathnames that were decoded inside matchRoutes
+        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathname).pathname : match.pathname
+      ]),
+      pathnameBase: match.pathnameBase === "/" ? parentPathnameBase : joinPaths([
+        parentPathnameBase,
+        // Re-encode pathnames that were decoded inside matchRoutes
+        navigator2.encodeLocation ? navigator2.encodeLocation(match.pathnameBase).pathname : match.pathnameBase
+      ])
+    })), parentMatches, dataRouterState, future);
+    if (locationArg && renderedMatches) {
+      return /* @__PURE__ */ React.createElement(LocationContext.Provider, {
+        value: {
+          location: _extends2({
+            pathname: "/",
+            search: "",
+            hash: "",
+            state: null,
+            key: "default"
+          }, location),
+          navigationType: Action.Pop
+        }
+      }, renderedMatches);
+    }
+    return renderedMatches;
+  }
+  function DefaultErrorComponent() {
+    let error = useRouteError();
+    let message = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
+    let stack = error instanceof Error ? error.stack : null;
+    let lightgrey = "rgba(200,200,200, 0.5)";
+    let preStyles = {
+      padding: "0.5rem",
+      backgroundColor: lightgrey
+    };
+    let codeStyles = {
+      padding: "2px 4px",
+      backgroundColor: lightgrey
+    };
+    let devInfo = null;
+    if (false) {
+      console.error("Error handled by React Router default ErrorBoundary:", error);
+      devInfo = /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("p", null, "\u{1F4BF} Hey developer \u{1F44B}"), /* @__PURE__ */ React.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own ", /* @__PURE__ */ React.createElement("code", {
+        style: codeStyles
+      }, "ErrorBoundary"), " or", " ", /* @__PURE__ */ React.createElement("code", {
+        style: codeStyles
+      }, "errorElement"), " prop on your route."));
+    }
+    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React.createElement("h3", {
+      style: {
+        fontStyle: "italic"
+      }
+    }, message), stack ? /* @__PURE__ */ React.createElement("pre", {
+      style: preStyles
+    }, stack) : null, devInfo);
+  }
+  var defaultErrorElement = /* @__PURE__ */ React.createElement(DefaultErrorComponent, null);
+  var RenderErrorBoundary = class extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        location: props.location,
+        revalidation: props.revalidation,
+        error: props.error
+      };
+    }
+    static getDerivedStateFromError(error) {
+      return {
+        error
+      };
+    }
+    static getDerivedStateFromProps(props, state) {
+      if (state.location !== props.location || state.revalidation !== "idle" && props.revalidation === "idle") {
+        return {
+          error: props.error,
+          location: props.location,
+          revalidation: props.revalidation
+        };
+      }
+      return {
+        error: props.error !== void 0 ? props.error : state.error,
+        location: state.location,
+        revalidation: props.revalidation || state.revalidation
+      };
+    }
+    componentDidCatch(error, errorInfo) {
+      console.error("React Router caught the following error during render", error, errorInfo);
+    }
+    render() {
+      return this.state.error !== void 0 ? /* @__PURE__ */ React.createElement(RouteContext.Provider, {
+        value: this.props.routeContext
+      }, /* @__PURE__ */ React.createElement(RouteErrorContext.Provider, {
+        value: this.state.error,
+        children: this.props.component
+      })) : this.props.children;
+    }
+  };
+  function RenderedRoute(_ref) {
+    let {
+      routeContext,
+      match,
+      children
+    } = _ref;
+    let dataRouterContext = React.useContext(DataRouterContext);
+    if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match.route.errorElement || match.route.ErrorBoundary)) {
+      dataRouterContext.staticContext._deepestRenderedBoundaryId = match.route.id;
+    }
+    return /* @__PURE__ */ React.createElement(RouteContext.Provider, {
+      value: routeContext
+    }, children);
+  }
+  function _renderMatches(matches, parentMatches, dataRouterState, future) {
+    var _dataRouterState;
+    if (parentMatches === void 0) {
+      parentMatches = [];
+    }
+    if (dataRouterState === void 0) {
+      dataRouterState = null;
+    }
+    if (future === void 0) {
+      future = null;
+    }
+    if (matches == null) {
+      var _future;
+      if (!dataRouterState) {
+        return null;
+      }
+      if (dataRouterState.errors) {
+        matches = dataRouterState.matches;
+      } else if ((_future = future) != null && _future.v7_partialHydration && parentMatches.length === 0 && !dataRouterState.initialized && dataRouterState.matches.length > 0) {
+        matches = dataRouterState.matches;
+      } else {
+        return null;
+      }
+    }
+    let renderedMatches = matches;
+    let errors = (_dataRouterState = dataRouterState) == null ? void 0 : _dataRouterState.errors;
+    if (errors != null) {
+      let errorIndex = renderedMatches.findIndex((m3) => m3.route.id && (errors == null ? void 0 : errors[m3.route.id]) !== void 0);
+      !(errorIndex >= 0) ? false ? invariant(false, "Could not find a matching route for errors on route IDs: " + Object.keys(errors).join(",")) : invariant(false) : void 0;
+      renderedMatches = renderedMatches.slice(0, Math.min(renderedMatches.length, errorIndex + 1));
+    }
+    let renderFallback = false;
+    let fallbackIndex = -1;
+    if (dataRouterState && future && future.v7_partialHydration) {
+      for (let i7 = 0; i7 < renderedMatches.length; i7++) {
+        let match = renderedMatches[i7];
+        if (match.route.HydrateFallback || match.route.hydrateFallbackElement) {
+          fallbackIndex = i7;
+        }
+        if (match.route.id) {
+          let {
+            loaderData,
+            errors: errors2
+          } = dataRouterState;
+          let needsToRunLoader = match.route.loader && loaderData[match.route.id] === void 0 && (!errors2 || errors2[match.route.id] === void 0);
+          if (match.route.lazy || needsToRunLoader) {
+            renderFallback = true;
+            if (fallbackIndex >= 0) {
+              renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
+            } else {
+              renderedMatches = [renderedMatches[0]];
+            }
+            break;
+          }
+        }
+      }
+    }
+    return renderedMatches.reduceRight((outlet, match, index) => {
+      let error;
+      let shouldRenderHydrateFallback = false;
+      let errorElement = null;
+      let hydrateFallbackElement = null;
+      if (dataRouterState) {
+        error = errors && match.route.id ? errors[match.route.id] : void 0;
+        errorElement = match.route.errorElement || defaultErrorElement;
+        if (renderFallback) {
+          if (fallbackIndex < 0 && index === 0) {
+            warningOnce("route-fallback", false, "No `HydrateFallback` element provided to render during initial hydration");
+            shouldRenderHydrateFallback = true;
+            hydrateFallbackElement = null;
+          } else if (fallbackIndex === index) {
+            shouldRenderHydrateFallback = true;
+            hydrateFallbackElement = match.route.hydrateFallbackElement || null;
+          }
+        }
+      }
+      let matches2 = parentMatches.concat(renderedMatches.slice(0, index + 1));
+      let getChildren = () => {
+        let children;
+        if (error) {
+          children = errorElement;
+        } else if (shouldRenderHydrateFallback) {
+          children = hydrateFallbackElement;
+        } else if (match.route.Component) {
+          children = /* @__PURE__ */ React.createElement(match.route.Component, null);
+        } else if (match.route.element) {
+          children = match.route.element;
+        } else {
+          children = outlet;
+        }
+        return /* @__PURE__ */ React.createElement(RenderedRoute, {
+          match,
+          routeContext: {
+            outlet,
+            matches: matches2,
+            isDataRoute: dataRouterState != null
+          },
+          children
+        });
+      };
+      return dataRouterState && (match.route.ErrorBoundary || match.route.errorElement || index === 0) ? /* @__PURE__ */ React.createElement(RenderErrorBoundary, {
+        location: dataRouterState.location,
+        revalidation: dataRouterState.revalidation,
+        component: errorElement,
+        error,
+        children: getChildren(),
+        routeContext: {
+          outlet: null,
+          matches: matches2,
+          isDataRoute: true
+        }
+      }) : getChildren();
+    }, null);
+  }
+  var DataRouterStateHook = /* @__PURE__ */ (function(DataRouterStateHook3) {
+    DataRouterStateHook3["UseBlocker"] = "useBlocker";
+    DataRouterStateHook3["UseLoaderData"] = "useLoaderData";
+    DataRouterStateHook3["UseActionData"] = "useActionData";
+    DataRouterStateHook3["UseRouteError"] = "useRouteError";
+    DataRouterStateHook3["UseNavigation"] = "useNavigation";
+    DataRouterStateHook3["UseRouteLoaderData"] = "useRouteLoaderData";
+    DataRouterStateHook3["UseMatches"] = "useMatches";
+    DataRouterStateHook3["UseRevalidator"] = "useRevalidator";
+    DataRouterStateHook3["UseNavigateStable"] = "useNavigate";
+    DataRouterStateHook3["UseRouteId"] = "useRouteId";
+    return DataRouterStateHook3;
+  })(DataRouterStateHook || {});
+  function useDataRouterState(hookName) {
+    let state = React.useContext(DataRouterStateContext);
+    !state ? false ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
+    return state;
+  }
+  function useRouteContext(hookName) {
+    let route = React.useContext(RouteContext);
+    !route ? false ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
+    return route;
+  }
+  function useCurrentRouteId(hookName) {
+    let route = useRouteContext(hookName);
+    let thisRoute = route.matches[route.matches.length - 1];
+    !thisRoute.route.id ? false ? invariant(false, hookName + ' can only be used on routes that contain a unique "id"') : invariant(false) : void 0;
+    return thisRoute.route.id;
+  }
+  function useRouteError() {
+    var _state$errors;
+    let error = React.useContext(RouteErrorContext);
+    let state = useDataRouterState(DataRouterStateHook.UseRouteError);
+    let routeId = useCurrentRouteId(DataRouterStateHook.UseRouteError);
+    if (error !== void 0) {
+      return error;
+    }
+    return (_state$errors = state.errors) == null ? void 0 : _state$errors[routeId];
+  }
+  var alreadyWarned$1 = {};
+  function warningOnce(key, cond, message) {
+    if (!cond && !alreadyWarned$1[key]) {
+      alreadyWarned$1[key] = true;
+      false ? warning(false, message) : void 0;
+    }
+  }
+  function warnOnce(key, message) {
+    if (false) {
+      alreadyWarned[message] = true;
+      console.warn(message);
+    }
+  }
+  var logDeprecation = (flag, msg, link) => warnOnce(flag, "\u26A0\uFE0F React Router Future Flag Warning: " + msg + ". " + ("You can use the `" + flag + "` future flag to opt-in early. ") + ("For more information, see " + link + "."));
+  function logV6DeprecationWarnings(renderFuture, routerFuture) {
+    if ((renderFuture == null ? void 0 : renderFuture.v7_startTransition) === void 0) {
+      logDeprecation("v7_startTransition", "React Router will begin wrapping state updates in `React.startTransition` in v7", "https://reactrouter.com/v6/upgrading/future#v7_starttransition");
+    }
+    if ((renderFuture == null ? void 0 : renderFuture.v7_relativeSplatPath) === void 0 && (!routerFuture || routerFuture.v7_relativeSplatPath === void 0)) {
+      logDeprecation("v7_relativeSplatPath", "Relative route resolution within Splat routes is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath");
+    }
+    if (routerFuture) {
+      if (routerFuture.v7_fetcherPersist === void 0) {
+        logDeprecation("v7_fetcherPersist", "The persistence behavior of fetchers is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_fetcherpersist");
+      }
+      if (routerFuture.v7_normalizeFormMethod === void 0) {
+        logDeprecation("v7_normalizeFormMethod", "Casing of `formMethod` fields is being normalized to uppercase in v7", "https://reactrouter.com/v6/upgrading/future#v7_normalizeformmethod");
+      }
+      if (routerFuture.v7_partialHydration === void 0) {
+        logDeprecation("v7_partialHydration", "`RouterProvider` hydration behavior is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_partialhydration");
+      }
+      if (routerFuture.v7_skipActionErrorRevalidation === void 0) {
+        logDeprecation("v7_skipActionErrorRevalidation", "The revalidation behavior after 4xx/5xx `action` responses is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_skipactionerrorrevalidation");
+      }
+    }
+  }
+  var START_TRANSITION = "startTransition";
+  var startTransitionImpl = React[START_TRANSITION];
+  function Route(_props) {
+    false ? invariant(false, "A <Route> is only ever to be used as the child of <Routes> element, never rendered directly. Please wrap your <Route> in a <Routes>.") : invariant(false);
+  }
+  function Router(_ref5) {
+    let {
+      basename: basenameProp = "/",
+      children = null,
+      location: locationProp,
+      navigationType = Action.Pop,
+      navigator: navigator2,
+      static: staticProp = false,
+      future
+    } = _ref5;
+    !!useInRouterContext() ? false ? invariant(false, "You cannot render a <Router> inside another <Router>. You should never have more than one in your app.") : invariant(false) : void 0;
+    let basename = basenameProp.replace(/^\/*/, "/");
+    let navigationContext = React.useMemo(() => ({
+      basename,
+      navigator: navigator2,
+      static: staticProp,
+      future: _extends2({
+        v7_relativeSplatPath: false
+      }, future)
+    }), [basename, future, navigator2, staticProp]);
+    if (typeof locationProp === "string") {
+      locationProp = parsePath(locationProp);
+    }
+    let {
+      pathname = "/",
+      search = "",
+      hash = "",
+      state = null,
+      key = "default"
+    } = locationProp;
+    let locationContext = React.useMemo(() => {
+      let trailingPathname = stripBasename(pathname, basename);
+      if (trailingPathname == null) {
+        return null;
+      }
+      return {
+        location: {
+          pathname: trailingPathname,
+          search,
+          hash,
+          state,
+          key
+        },
+        navigationType
+      };
+    }, [basename, pathname, search, hash, state, key, navigationType]);
+    false ? warning(locationContext != null, '<Router basename="' + basename + '"> is not able to match the URL ' + ('"' + pathname + search + hash + '" because it does not start with the ') + "basename, so the <Router> won't render anything.") : void 0;
+    if (locationContext == null) {
+      return null;
+    }
+    return /* @__PURE__ */ React.createElement(NavigationContext.Provider, {
+      value: navigationContext
+    }, /* @__PURE__ */ React.createElement(LocationContext.Provider, {
+      children,
+      value: locationContext
+    }));
+  }
+  function Routes(_ref6) {
+    let {
+      children,
+      location
+    } = _ref6;
+    return useRoutes(createRoutesFromChildren(children), location);
+  }
+  var neverSettledPromise = new Promise(() => {
+  });
+  function createRoutesFromChildren(children, parentPath) {
+    if (parentPath === void 0) {
+      parentPath = [];
+    }
+    let routes = [];
+    React.Children.forEach(children, (element, index) => {
+      if (!/* @__PURE__ */ React.isValidElement(element)) {
+        return;
+      }
+      let treePath = [...parentPath, index];
+      if (element.type === React.Fragment) {
+        routes.push.apply(routes, createRoutesFromChildren(element.props.children, treePath));
+        return;
+      }
+      !(element.type === Route) ? false ? invariant(false, "[" + (typeof element.type === "string" ? element.type : element.type.name) + "] is not a <Route> component. All component children of <Routes> must be a <Route> or <React.Fragment>") : invariant(false) : void 0;
+      !(!element.props.index || !element.props.children) ? false ? invariant(false, "An index route cannot have child routes.") : invariant(false) : void 0;
+      let route = {
+        id: element.props.id || treePath.join("-"),
+        caseSensitive: element.props.caseSensitive,
+        element: element.props.element,
+        Component: element.props.Component,
+        index: element.props.index,
+        path: element.props.path,
+        loader: element.props.loader,
+        action: element.props.action,
+        errorElement: element.props.errorElement,
+        ErrorBoundary: element.props.ErrorBoundary,
+        hasErrorBoundary: element.props.ErrorBoundary != null || element.props.errorElement != null,
+        shouldRevalidate: element.props.shouldRevalidate,
+        handle: element.props.handle,
+        lazy: element.props.lazy
+      };
+      if (element.props.children) {
+        route.children = createRoutesFromChildren(element.props.children, treePath);
+      }
+      routes.push(route);
+    });
+    return routes;
+  }
+
+  // node_modules/react-router-dom/dist/index.js
+  var REACT_ROUTER_VERSION = "6";
+  try {
+    window.__reactRouterVersion = REACT_ROUTER_VERSION;
+  } catch (e12) {
+  }
+  if (false) {
+    ViewTransitionContext.displayName = "ViewTransition";
+  }
+  if (false) {
+    FetchersContext.displayName = "Fetchers";
+  }
+  var START_TRANSITION2 = "startTransition";
+  var startTransitionImpl2 = React2[START_TRANSITION2];
+  var FLUSH_SYNC = "flushSync";
+  var flushSyncImpl = ReactDOM[FLUSH_SYNC];
+  var USE_ID = "useId";
+  var useIdImpl = React2[USE_ID];
+  function HashRouter(_ref5) {
+    let {
+      basename,
+      children,
+      future,
+      window: window2
+    } = _ref5;
+    let historyRef = React2.useRef();
+    if (historyRef.current == null) {
+      historyRef.current = createHashHistory({
+        window: window2,
+        v5Compat: true
+      });
+    }
+    let history = historyRef.current;
+    let [state, setStateImpl] = React2.useState({
+      action: history.action,
+      location: history.location
+    });
+    let {
+      v7_startTransition
+    } = future || {};
+    let setState = React2.useCallback((newState) => {
+      v7_startTransition && startTransitionImpl2 ? startTransitionImpl2(() => setStateImpl(newState)) : setStateImpl(newState);
+    }, [setStateImpl, v7_startTransition]);
+    React2.useLayoutEffect(() => history.listen(setState), [history, setState]);
+    React2.useEffect(() => logV6DeprecationWarnings(future), [future]);
+    return /* @__PURE__ */ React2.createElement(Router, {
+      basename,
+      children,
+      location: state.location,
+      navigationType: state.action,
+      navigator: history,
+      future
+    });
+  }
+  if (false) {
+    HistoryRouter.displayName = "unstable_HistoryRouter";
+  }
+  var isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
+  if (false) {
+    Link.displayName = "Link";
+  }
+  if (false) {
+    NavLink.displayName = "NavLink";
+  }
+  if (false) {
+    Form.displayName = "Form";
+  }
+  if (false) {
+    ScrollRestoration.displayName = "ScrollRestoration";
+  }
+  var DataRouterHook;
+  (function(DataRouterHook2) {
+    DataRouterHook2["UseScrollRestoration"] = "useScrollRestoration";
+    DataRouterHook2["UseSubmit"] = "useSubmit";
+    DataRouterHook2["UseSubmitFetcher"] = "useSubmitFetcher";
+    DataRouterHook2["UseFetcher"] = "useFetcher";
+    DataRouterHook2["useViewTransitionState"] = "useViewTransitionState";
+  })(DataRouterHook || (DataRouterHook = {}));
+  var DataRouterStateHook2;
+  (function(DataRouterStateHook3) {
+    DataRouterStateHook3["UseFetcher"] = "useFetcher";
+    DataRouterStateHook3["UseFetchers"] = "useFetchers";
+    DataRouterStateHook3["UseScrollRestoration"] = "useScrollRestoration";
+  })(DataRouterStateHook2 || (DataRouterStateHook2 = {}));
+
   // src/webview/react/pages/EnvironmentEditor.tsx
   var import_react77 = __toESM(require_react());
 
@@ -10595,6 +11739,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react26.default,
     displayName: "VscodeLabel"
   });
+  var VscodeLabel_default = VscodeLabel3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeMultiSelect.js
   var import_react28 = __toESM(require_react(), 1);
@@ -15602,6 +16747,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react48.default,
     displayName: "VscodeTable"
   });
+  var VscodeTable_default = VscodeTable3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableBody.js
   var import_react50 = __toESM(require_react(), 1);
@@ -15658,6 +16804,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react50.default,
     displayName: "VscodeTableBody"
   });
+  var VscodeTableBody_default = VscodeTableBody3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableCell.js
   var import_react52 = __toESM(require_react(), 1);
@@ -15762,6 +16909,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react52.default,
     displayName: "VscodeTableCell"
   });
+  var VscodeTableCell_default = VscodeTableCell3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableHeader.js
   var import_react54 = __toESM(require_react(), 1);
@@ -15814,6 +16962,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react54.default,
     displayName: "VscodeTableHeader"
   });
+  var VscodeTableHeader_default = VscodeTableHeader3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableHeaderCell.js
   var import_react56 = __toESM(require_react(), 1);
@@ -15885,6 +17034,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react56.default,
     displayName: "VscodeTableHeaderCell"
   });
+  var VscodeTableHeaderCell_default = VscodeTableHeaderCell3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTableRow.js
   var import_react58 = __toESM(require_react(), 1);
@@ -15938,6 +17088,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     react: import_react58.default,
     displayName: "VscodeTableRow"
   });
+  var VscodeTableRow_default = VscodeTableRow3;
 
   // node_modules/@vscode-elements/react-elements/dist/components/VscodeTabPanel.js
   var import_react60 = __toESM(require_react(), 1);
@@ -18998,8 +20149,8 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     return state;
   };
   var EnvironmentEditor = ({
-    mode: mode2 = "add",
-    initialValues: initialValues2,
+    mode = "add",
+    initialValues,
     onSave: onSaveExternal,
     heading
   }) => {
@@ -19148,7 +20299,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       (_b2 = (_a7 = focusable || container).focus) == null ? void 0 : _b2.call(_a7);
     };
     (0, import_react77.useEffect)(() => {
-      const valuesToUse = initialValues2 || (typeof window !== "undefined" ? window.initialValues : null);
+      const valuesToUse = initialValues || (typeof window !== "undefined" ? window.initialValues : null);
       if (!valuesToUse) return;
       setForm((prev) => {
         const next = { ...prev };
@@ -19165,7 +20316,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
         }
         return next;
       });
-    }, [initialValues2, validateFieldWithState]);
+    }, [initialValues, validateFieldWithState]);
     const collectValues = () => {
       var _a7;
       const result = {};
@@ -19194,7 +20345,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
       const values = collectValues();
       if (onSaveExternal) {
         try {
-          await onSaveExternal(values, mode2);
+          await onSaveExternal(values, mode);
           setSaveStatus("saved");
           setTimeout(() => setSaveStatus("idle"), 1200);
         } catch (e12) {
@@ -19226,7 +20377,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     const reset = () => {
       console.log("[reset] Resetting form...");
       const initialState = buildInitialState();
-      const valuesToUse = initialValues2 || (typeof window !== "undefined" ? window.initialValues : null);
+      const valuesToUse = initialValues || (typeof window !== "undefined" ? window.initialValues : null);
       if (valuesToUse) {
         for (const s8 of SETTINGS) {
           if (valuesToUse[s8.id] !== void 0) {
@@ -19318,7 +20469,7 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     }, [vscodeApi]);
     useSyncSelectValue("authType", (_a6 = form["authType"]) == null ? void 0 : _a6.value, (val) => updateValue("authType", val));
     return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "env-editor-root", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "page-heading", children: heading || (mode2 === "edit" ? "Edit Environment" : "Add New Environment") }),
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("h1", { className: "page-heading", children: heading || (mode === "edit" ? "Edit Environment" : "Add New Environment") }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsx)("div", { className: "toolbar-row", children: /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)("div", { className: "left", children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(VscodeTextfield_default, { placeholder: "Search settings", value: search, onInput: (e12) => setSearch(e12.target.value), children: [
           /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(VscodeIcon_default, { slot: "content-before", name: "search" }),
@@ -19448,11 +20599,365 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     ] });
   };
 
-  // src/webview/react/boot/environmentEditorEntry.tsx
+  // src/webview/react/pages/SystemPropertyViewer.tsx
+  var import_react78 = __toESM(require_react());
   var import_jsx_runtime5 = __toESM(require_jsx_runtime());
-  var bootstrap = window.__ENV_EDITOR_BOOTSTRAP__ || { mode: "add", initialValues: void 0, environment: null };
-  var env = bootstrap.environment;
-  var mappedFromEnv = env ? {
+  var vscode = typeof window !== "undefined" && window.acquireVsCodeApi ? window.acquireVsCodeApi() : null;
+  var SystemPropertyViewer = () => {
+    const [originalProperties, setOriginalProperties] = (0, import_react78.useState)({});
+    const [properties, setProperties] = (0, import_react78.useState)([]);
+    const [editedValues, setEditedValues] = (0, import_react78.useState)({});
+    const [searchTerm, setSearchTerm] = (0, import_react78.useState)("");
+    const [envName, setEnvName] = (0, import_react78.useState)("");
+    const [isReviewing, setIsReviewing] = (0, import_react78.useState)(false);
+    const [isSubmitting, setIsSubmitting] = (0, import_react78.useState)(false);
+    const [showChangesOnly, setShowChangesOnly] = (0, import_react78.useState)(false);
+    const [comparisonData, setComparisonData] = (0, import_react78.useState)(null);
+    const [comparisonEnvName, setComparisonEnvName] = (0, import_react78.useState)("");
+    (0, import_react78.useEffect)(() => {
+      const handleMessage = (event) => {
+        const message = event.data;
+        switch (message.type) {
+          case "setProperties":
+            setOriginalProperties(message.properties);
+            const props = Object.entries(message.properties).map(([key, value]) => ({
+              key,
+              value
+            })).sort((a3, b3) => a3.key.localeCompare(b3.key));
+            setProperties(props);
+            setEnvName(message.envName);
+            setEditedValues({});
+            setIsSubmitting(false);
+            setIsReviewing(false);
+            break;
+          case "setComparison":
+            setComparisonData(message.properties);
+            setComparisonEnvName(message.envName);
+            break;
+          case "pushResult":
+            setIsSubmitting(false);
+            break;
+        }
+      };
+      window.addEventListener("message", handleMessage);
+      vscode == null ? void 0 : vscode.postMessage({ type: "ready" });
+      return () => window.removeEventListener("message", handleMessage);
+    }, []);
+    const filteredProperties = (0, import_react78.useMemo)(() => {
+      const lowerSearch = searchTerm.toLowerCase();
+      return properties.filter((p4) => {
+        var _a6, _b2, _c;
+        const currentVal = (_b2 = (_a6 = editedValues[p4.key]) != null ? _a6 : p4.value) != null ? _b2 : "";
+        const compareVal = (_c = comparisonData == null ? void 0 : comparisonData[p4.key]) != null ? _c : "";
+        const keyMatch = p4.key.toLowerCase().includes(lowerSearch) || currentVal.toLowerCase().includes(lowerSearch) || compareVal.toLowerCase().includes(lowerSearch);
+        if (!keyMatch) return false;
+        if (showChangesOnly && comparisonData) {
+          const otherValue = comparisonData[p4.key];
+          const isMissingInOther = otherValue === void 0;
+          const isMissingLocally = p4.value === null;
+          const isDifferent = !isMissingInOther && !isMissingLocally && otherValue !== p4.value;
+          return isMissingInOther || isMissingLocally || isDifferent;
+        }
+        return true;
+      });
+    }, [properties, searchTerm, editedValues, comparisonData, showChangesOnly]);
+    const pendingCount = Object.keys(editedValues).length;
+    const handleValueChange = (key, newValue) => {
+      const original = originalProperties[key];
+      if (newValue === original) {
+        const newEdits = { ...editedValues };
+        delete newEdits[key];
+        setEditedValues(newEdits);
+      } else {
+        setEditedValues({ ...editedValues, [key]: newValue });
+      }
+    };
+    const handleCopy = (text) => {
+      vscode == null ? void 0 : vscode.postMessage({ type: "copyToClipboard", text });
+    };
+    const handlePush = () => {
+      setIsSubmitting(true);
+      vscode == null ? void 0 : vscode.postMessage({
+        type: "pushChanges",
+        changes: editedValues
+      });
+    };
+    const handleDiscard = () => {
+      setEditedValues({});
+      setIsReviewing(false);
+    };
+    const handleRequestCompare = () => {
+      vscode == null ? void 0 : vscode.postMessage({ type: "requestCompare" });
+    };
+    const handleExportProperties = () => {
+      const exportData = {};
+      properties.forEach((p4) => {
+        var _a6;
+        exportData[p4.key] = (_a6 = editedValues[p4.key]) != null ? _a6 : p4.value;
+      });
+      vscode == null ? void 0 : vscode.postMessage({
+        type: "exportProperties",
+        properties: exportData
+      });
+    };
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", flexDirection: "column", height: "100vh", padding: "10px", boxSizing: "border-box", position: "relative" }, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { marginBottom: "15px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", flexDirection: "column", gap: "2px" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("span", { style: { opacity: 0.7, fontSize: "0.85em", textTransform: "uppercase", letterSpacing: "1px" }, children: "System Properties" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("h2", { style: { margin: 0, whiteSpace: "nowrap" }, children: envName })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { flex: 1, minWidth: "10px" } }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeButton_default, { ...{ secondary: true, onClick: handleRequestCompare }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "compare-changes", slot: "content-before" } }),
+          "Compare"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeButton_default, { ...{ secondary: true, onClick: handleExportProperties }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "file-code", slot: "content-before" } }),
+          "Export Properties"
+        ] }),
+        comparisonData && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          VscodeCheckbox_default,
+          {
+            ...{
+              checked: showChangesOnly,
+              onChange: (e12) => setShowChangesOnly(e12.target.checked),
+              style: { marginRight: "10px" }
+            },
+            children: "Show differences only"
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          VscodeTextfield_default,
+          {
+            ...{
+              placeholder: "Search keys or values...",
+              onInput: (e12) => setSearchTerm(e12.target.value),
+              value: searchTerm,
+              style: { width: "100%", maxWidth: "300px", minWidth: "150px" }
+            },
+            children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "search", slot: "content-before" } })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { fontSize: "0.9em", opacity: 0.8, whiteSpace: "nowrap" }, children: [
+          "Showing ",
+          filteredProperties.length,
+          " of ",
+          properties.length
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { flex: 1, overflow: "hidden", marginBottom: pendingCount > 0 ? "60px" : "0" }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+        VscodeTable_default,
+        {
+          ...{
+            zebra: true,
+            resizable: true,
+            style: { height: "100%" }
+          },
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeTableHeader_default, { slot: "header", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableHeaderCell_default, { style: { width: "25%" }, children: "Property Name" }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableHeaderCell_default, { style: { width: comparisonData ? "30%" : "55%" }, children: "Value (Edit)" }),
+              comparisonData && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(VscodeTableHeaderCell_default, { style: { width: "30%" }, children: [
+                "Compare: ",
+                comparisonEnvName
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableHeaderCell_default, { style: { width: "15%" }, children: "Actions" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableBody_default, { slot: "body", children: filteredProperties.map((prop) => {
+              var _a6, _b2;
+              const isModified = editedValues[prop.key] !== void 0;
+              const isMissingLocally = prop.value === null;
+              const displayValue = (_b2 = (_a6 = editedValues[prop.key]) != null ? _a6 : prop.value) != null ? _b2 : "";
+              const rowCount = Math.max(1, Math.min(10, (displayValue.match(/\n/g) || []).length + 1));
+              const hasComparison = comparisonData !== null;
+              const otherValue = hasComparison ? comparisonData[prop.key] : void 0;
+              const isMissingInOther = hasComparison && otherValue === void 0;
+              const isDifferent = hasComparison && !isMissingInOther && !isMissingLocally && otherValue !== prop.value;
+              return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+                VscodeTableRow_default,
+                {
+                  style: {
+                    backgroundColor: isModified ? "rgba(40, 167, 69, 0.15)" : isMissingLocally ? "rgba(255, 165, 0, 0.15)" : void 0
+                  },
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableCell_default, { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      overflow: "hidden",
+                      padding: "2px 0"
+                    }, children: [
+                      isModified && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "circle-filled", style: { fontSize: "8px", color: "var(--vscode-gitDecoration-modifiedResourceForeground)", flexShrink: 0 } } }),
+                      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                        VscodeLabel_default,
+                        {
+                          title: prop.key,
+                          style: {
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            color: isMissingLocally ? "var(--vscode-errorForeground)" : "inherit"
+                          },
+                          children: prop.key
+                        }
+                      )
+                    ] }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableCell_default, { style: { padding: 0 }, children: isMissingLocally ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { padding: "2px 8px", opacity: 0.6, fontStyle: "italic" }, children: [
+                      "Not found in ",
+                      envName
+                    ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                      "textarea",
+                      {
+                        value: displayValue,
+                        onChange: (e12) => handleValueChange(prop.key, e12.target.value),
+                        rows: rowCount,
+                        style: {
+                          width: "100%",
+                          border: "none",
+                          background: "transparent",
+                          color: isModified ? "var(--vscode-gitDecoration-modifiedResourceForeground)" : "inherit",
+                          padding: "2px 8px",
+                          fontFamily: "inherit",
+                          fontSize: "inherit",
+                          outline: "none",
+                          resize: "none",
+                          display: "block",
+                          wordBreak: "break-all",
+                          lineHeight: "1.2"
+                        },
+                        title: isModified ? `Original: ${prop.value}` : ""
+                      }
+                    ) }),
+                    comparisonData && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableCell_default, { style: {
+                      padding: "2px 8px",
+                      backgroundColor: isMissingInOther ? "rgba(255, 165, 0, 0.15)" : isDifferent ? "rgba(255, 0, 0, 0.1)" : void 0
+                    }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: {
+                      wordBreak: "break-all",
+                      opacity: isMissingInOther ? 0.6 : 0.8,
+                      fontStyle: isMissingInOther ? "italic" : "normal",
+                      color: isDifferent ? "var(--vscode-errorForeground)" : "inherit"
+                    }, children: isMissingInOther ? `Not found in ${comparisonEnvName}` : otherValue }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeTableCell_default, { children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", gap: "2px" }, children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                        VscodeButton_default,
+                        {
+                          ...{
+                            appearance: "icon",
+                            // Still using it as an attribute if it works at runtime
+                            title: "Live Refresh",
+                            onClick: () => {
+                              vscode == null ? void 0 : vscode.postMessage({ type: "liveRefresh", key: prop.key });
+                            }
+                          },
+                          children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "refresh" } })
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                        VscodeButton_default,
+                        {
+                          ...{
+                            appearance: "icon",
+                            title: "Copy Value",
+                            onClick: () => handleCopy(displayValue)
+                          },
+                          children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "copy" } })
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+                        VscodeButton_default,
+                        {
+                          ...{
+                            appearance: "icon",
+                            title: "Copy Key=Value",
+                            onClick: () => handleCopy(`${prop.key}=${displayValue}`)
+                          },
+                          children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeIcon_default, { ...{ name: "symbol-key" } })
+                        }
+                      )
+                    ] }) })
+                  ]
+                },
+                prop.key
+              );
+            }) })
+          ]
+        }
+      ) }),
+      pendingCount > 0 && !isReviewing && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: {
+        position: "absolute",
+        bottom: "20px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "var(--vscode-editorWidget-background)",
+        border: "1px solid var(--vscode-widget-border)",
+        boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+        padding: "10px 20px",
+        borderRadius: "4px",
+        display: "flex",
+        alignItems: "center",
+        gap: "20px",
+        zIndex: 100
+      }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("span", { style: { fontWeight: "bold" }, children: [
+          pendingCount,
+          " properties modified"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", gap: "10px" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: () => setIsReviewing(true), children: "Review & Push" }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { ...{ secondary: true, onClick: handleDiscard }, children: "Discard All" })
+        ] })
+      ] }),
+      isReviewing && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: "rgba(0,0,0,0.7)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1e3,
+        padding: "40px"
+      }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: {
+        background: "var(--vscode-editor-background)",
+        border: "1px solid var(--vscode-panel-border)",
+        borderRadius: "8px",
+        width: "100%",
+        maxWidth: "800px",
+        maxHeight: "800px",
+        display: "flex",
+        flexDirection: "column",
+        padding: "20px"
+      }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("h3", { children: [
+          "Review Changes to ",
+          envName
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("div", { style: { flex: 1, overflowY: "auto", margin: "20px 0" }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("table", { style: { width: "100%", borderCollapse: "collapse" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("thead", { style: { borderBottom: "1px solid var(--vscode-panel-border)", opacity: 0.8 }, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { style: { textAlign: "left" }, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { style: { padding: "8px" }, children: "Property" }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { style: { padding: "8px" }, children: "From" }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("th", { style: { padding: "8px" }, children: "To" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("tbody", { children: Object.entries(editedValues).map(([key, newVal]) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("tr", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { style: { padding: "8px", fontWeight: "bold" }, children: key }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { style: { padding: "8px", opacity: 0.7, textDecoration: "line-through" }, children: originalProperties[key] }),
+            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)("td", { style: { padding: "8px", color: "var(--vscode-gitDecoration-modifiedResourceForeground)" }, children: newVal })
+          ] }, key)) })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)("div", { style: { display: "flex", justifyContent: "flex-end", gap: "10px" }, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { onClick: handlePush, disabled: isSubmitting, children: isSubmitting ? "Pushing..." : `Push ${pendingCount} Changes` }),
+          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(VscodeButton_default, { ...{ secondary: true, onClick: () => setIsReviewing(false), disabled: isSubmitting }, children: "Back to Editor" })
+        ] })
+      ] }) })
+    ] });
+  };
+
+  // src/webview/react/boot/environmentEditorEntry.tsx
+  var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+  var bootstrap = window.__BOOTSTRAP_DATA__ || window.__ENV_EDITOR_BOOTSTRAP__ || null;
+  var mapInitialValues = (env) => env ? {
     envName: env.name,
     hostname: env.hostname,
     port: env.port,
@@ -19471,17 +20976,27 @@ To suppress this warning, set window.${CONFIG_KEY} to true`);
     scope: env.scope,
     sslcertificate: env.sslcertificate
   } : void 0;
-  var initialValues = bootstrap.initialValues || window.initialValues || mappedFromEnv;
-  var mode = bootstrap.mode || window.mode || "add";
-  (0, import_client.createRoot)(document.getElementById("root")).render(
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
-      EnvironmentEditor,
-      {
-        mode,
-        initialValues
+  var App = () => {
+    if (bootstrap) {
+      const page = bootstrap.page || "environment-editor";
+      if (page === "environment-editor") {
+        const initialValues = bootstrap.initialValues || window.initialValues || mapInitialValues(bootstrap.environment);
+        const mode = bootstrap.mode || window.mode || "add";
+        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(EnvironmentEditor, { mode, initialValues });
       }
-    )
-  );
+      if (page === "system-properties") {
+        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(SystemPropertyViewer, {});
+      }
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(HashRouter, { children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Routes, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Route, { path: "/environment-editor", element: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(EnvironmentEditor, {}) }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Route, { path: "/system-properties", element: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(SystemPropertyViewer, {}) })
+    ] }) });
+  };
+  var rootEl = document.getElementById("root");
+  if (rootEl) {
+    (0, import_client.createRoot)(rootEl).render(/* @__PURE__ */ (0, import_jsx_runtime6.jsx)(App, {}));
+  }
 })();
 /*! Bundled license information:
 
@@ -19527,6 +21042,42 @@ react/cjs/react-jsx-runtime.production.min.js:
    *
    * This source code is licensed under the MIT license found in the
    * LICENSE file in the root directory of this source tree.
+   *)
+
+@remix-run/router/dist/router.js:
+  (**
+   * @remix-run/router v1.23.0
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
+   *)
+
+react-router/dist/index.js:
+  (**
+   * React Router v6.30.1
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
+   *)
+
+react-router-dom/dist/index.js:
+  (**
+   * React Router DOM v6.30.1
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
    *)
 
 @lit/react/create-component.js:

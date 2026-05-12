@@ -32,5 +32,6 @@
     "mxscript.scriptSettings.sslcertificate": "",
     "mxscript.appxml.objectStructure": "MXL_APPS",
     "mxscript.condition.objectStructure": "MXL_CONDITION",
+    "workbench.colorTheme": "Atom Dark Low Eye",
     
 }
