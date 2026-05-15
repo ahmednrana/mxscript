@@ -5,3 +5,5 @@ src/test/testwp/
 out/
 out
 *.tgz
+.agents
+skills-lock.json
