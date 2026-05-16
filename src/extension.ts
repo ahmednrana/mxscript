@@ -15,6 +15,7 @@ import { MaximoEnvironmentTreeItem, MaximoEnvironmentTreeProvider } from './tree
 import { ReactEnvironmentEditorPanel } from './treeview/ReactEnvironmentEditorPanel';
 import { extractEnvironmentFromItem, getFileExtension, getFilename, showError, showWarning } from "./utils/utils";
 import { EnvironmentLogContentProvider } from "./webview/EnvironmentLogContentProvider";
+import { ScriptGridWebview } from "./webview/ScriptGridWebview";
 import { MaximoEnvironment } from './webview/EnvironmentManager';
 import { CacheRefreshService } from "./service/Cache/CacheRefreshService";
 import { ToolsService } from "./service/Tools/ToolsService";
@@ -1120,6 +1121,11 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(compareWithEnvironment);
   context.subscriptions.push(downloadallproperties);
   context.subscriptions.push(viewProperties);
+
+  const openScriptGrid = vscode.commands.registerCommand("mxscript.openScriptGrid", () => {
+    ScriptGridWebview.show(context);
+  });
+  context.subscriptions.push(openScriptGrid);
 
   // Expose an API for other extensions to get a MaximoApiClient instance the tree provider) can request a status bar refresh
   const updateStatusBarCommand = vscode.commands.registerCommand('mxscript.updateStatusBar', () => updateStatusBar(context));

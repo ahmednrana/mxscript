@@ -1,0 +1,60 @@
+/*
+ * Headless LyteNyte Grid theme for VS Code webviews.
+ * grid.css supplies structural element styles; design.css supplies spacing/font
+ * tokens. All --ln-* color tokens are remapped onto VS Code theme variables so
+ * the grid recolors automatically with the active color theme.
+ */
+@import "@1771technologies/lytenyte-core/design.css";
+@import "@1771technologies/lytenyte-core/grid.css";
+
+.mx-vscode-theme {
+  /* Backgrounds */
+  --ln-bg: var(--vscode-editor-background);
+  --ln-bg-ui-panel: var(--vscode-sideBar-background, var(--vscode-editorWidget-background));
+  --ln-bg-row-hover: var(--vscode-list-hoverBackground);
+  --ln-bg-row-alternate: var(--vscode-list-inactiveSelectionBackground, rgba(128, 128, 128, 0.08));
+  --ln-bg-floating-panel: var(--vscode-editorWidget-background);
+  --ln-bg-popover: var(--vscode-editorWidget-background);
+  --ln-bg-form-field: var(--vscode-input-background);
+
+  /* Borders */
+  --ln-border: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  --ln-border-row: var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+  --ln-border-strong: var(--vscode-contrastBorder, var(--vscode-focusBorder));
+  --ln-border-xstrong: var(--vscode-contrastBorder, var(--vscode-focusBorder));
+  --ln-border-icon: var(--vscode-foreground);
+  --ln-border-ui-panel: var(--vscode-panel-border);
+
+  /* Text */
+  --ln-text: var(--vscode-foreground);
+  --ln-text-dark: var(--vscode-foreground);
+  --ln-text-light: var(--vscode-descriptionForeground);
+  --ln-text-xlight: var(--vscode-disabledForeground, var(--vscode-descriptionForeground));
+  --ln-text-hyperlink: var(--vscode-textLink-foreground);
+  --ln-text-primary-button: var(--vscode-button-foreground);
+
+  /* Primary accent (focus border drives the accent) */
+  --ln-primary-05: var(--vscode-list-hoverBackground);
+  --ln-primary-10: var(--vscode-list-hoverBackground);
+  --ln-primary-30: var(--vscode-editor-selectionBackground);
+  --ln-primary-50: var(--vscode-focusBorder);
+  --ln-primary-70: var(--vscode-focusBorder);
+  --ln-primary-90: var(--vscode-focusBorder);
+
+  /* Status colors */
+  --ln-red-10: var(--vscode-inputValidation-errorBackground, rgba(255, 0, 0, 0.1));
+  --ln-red-50: var(--vscode-errorForeground);
+  --ln-red-90: var(--vscode-errorForeground);
+  --ln-green-10: rgba(137, 209, 133, 0.15);
+  --ln-green-50: var(--vscode-charts-green, #89d185);
+  --ln-green-90: var(--vscode-charts-green, #89d185);
+  --ln-yellow-10: rgba(204, 167, 0, 0.15);
+  --ln-yellow-50: var(--vscode-charts-yellow, #cca700);
+  --ln-yellow-90: var(--vscode-charts-yellow, #cca700);
+  --ln-info-10: var(--vscode-list-hoverBackground);
+  --ln-info-50: var(--vscode-descriptionForeground);
+  --ln-info-90: var(--vscode-foreground);
+
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+}

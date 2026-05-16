@@ -1,0 +1,344 @@
+/* node_modules/@1771technologies/lytenyte-design/src/design.css */
+:root {
+  --ln-space-02: 2px;
+  --ln-space-05: 4px;
+  --ln-space-10: 6px;
+  --ln-space-20: 8px;
+  --ln-space-25: 10px;
+  --ln-space-30: 12px;
+  --ln-space-40: 16px;
+  --ln-space-50: 20px;
+  --ln-space-60: 24px;
+  --ln-space-70: 32px;
+  --ln-space-80: 48px;
+  --ln-space-90: 64px;
+  --ln-space-100: 128px;
+  --ln-padding-field-sm: 4px;
+  --ln-padding-field-md: 6px;
+  --ln-padding-field-lg: 8px;
+  --ln-padding-field-xl: 12px;
+  --ln-padding-vertical-thead: 4px;
+  --ln-padding-vertical-cell: 8px;
+  --ln-padding-horizontal-cell: 10px;
+  --ln-radius: 6px;
+  --ln-radius-md: 8px;
+  --ln-radius-lg: 12px;
+  --ln-radius-field-lg: 10px;
+  --ln-radius-field-md: 8px;
+  --ln-radius-field-sm: 6px;
+  --ln-font-xs: 10px;
+  --ln-font-sm: 12px;
+  --ln-font-md: 14px;
+  --ln-font-lg: 16px;
+  --ln-shadow-100: 0 1px 2.5px 0 rgba(30, 30, 41, 0.13), 0 0 0 1px rgba(30, 30, 41, 0.02);
+  --ln-shadow-200:
+    0 1px 1px 0 rgba(30, 30, 41, 0.06),
+    0 1px 0 1px rgba(51, 51, 51, 0.05) inset,
+    0 2px 3px 0.625px rgba(30, 30, 41, 0.1);
+  --ln-shadow-300: 0 11px 10px -6px rgba(30, 30, 41, 0.06), 0 1px 7px 0 rgba(30, 30, 41, 0.12);
+  --ln-shadow-400: 0 14px 18px -6px rgba(30, 30, 41, 0.07), 0 3px 13px 0 rgba(30, 30, 41, 0.1);
+  --ln-shadow-500: 0 3px 20px 0 rgba(30, 30, 41, 0.1), 0 19px 24.75px -9px rgba(30, 30, 41, 0.11);
+  --ln-shadow-600: 0 6px 36px 0 rgba(30, 30, 41, 0.12), 0 37px 35.75px -20px rgba(30, 30, 41, 0.07);
+  --ln-shadow-700: 0 16px 22px -10px rgba(30, 30, 41, 0.06), 0 22px 64px 0 rgba(30, 30, 41, 0.16);
+  --ln-typeface:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --ln-transition-fn: cubic-bezier(0.4, 0, 0.2, 1);
+  --ln-transition-duration: 100ms;
+}
+.ln-term {
+  --ln-typeface:
+    "Noto Sans Mono",
+    ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "DejaVu Sans Mono",
+    "Courier New",
+    monospace;
+}
+
+/* node_modules/@1771technologies/lytenyte-core/css/design.css */
+
+/* node_modules/@1771technologies/lytenyte-core/css/grid.css */
+@layer ln-grid {
+  .ln-grid {
+    [data-ln-viewport=true] {
+      border: 1px solid var(--ln-border);
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      font-family: var(--ln-typeface);
+      font-size: var(--ln-font-md);
+      & [data-ln-start-shadow],
+      & [data-ln-end-shadow] {
+        width: 5px;
+        opacity: 0;
+        transition: opacity 200ms ease-in-out;
+        pointer-events: none;
+      }
+      & [data-ln-top-shadow],
+      & [data-ln-bottom-shadow] {
+        height: 8px;
+        opacity: 1;
+        transition: opacity 200ms ease-in-out;
+        pointer-events: none;
+      }
+      & [data-ln-end-shadow] {
+        transform: translateX(-5px);
+      }
+      &[data-ln-y-status=full] [data-ln-top-shadow],
+      &[data-ln-y-status=partial] [data-ln-top-shadow] {
+        opacity: 1;
+        background-image:
+          linear-gradient(
+            to bottom,
+            var(--ln-border),
+            transparent);
+      }
+      &[data-ln-y-status=none] [data-ln-bottom-shadow],
+      &[data-ln-y-status=partial] [data-ln-bottom-shadow] {
+        opacity: 1;
+        background-image:
+          linear-gradient(
+            to top,
+            var(--ln-border),
+            transparent);
+        transform: translateY(-8px);
+      }
+      &[data-ln-x-status=full] [data-ln-start-shadow],
+      &[data-ln-x-status=partial] [data-ln-start-shadow] {
+        opacity: 1;
+        background-image:
+          linear-gradient(
+            to right,
+            var(--ln-border),
+            transparent);
+      }
+      &[data-ln-x-status=none] [data-ln-end-shadow],
+      &[data-ln-x-status=partial] [data-ln-end-shadow] {
+        opacity: 1;
+        background-image:
+          linear-gradient(
+            to left,
+            var(--ln-border-strong) 0,
+            transparent);
+      }
+    }
+    [data-ln-header=true] {
+      box-sizing: border-box;
+    }
+    [data-ln-header-group=true] {
+      display: flex;
+      align-items: center;
+      position: relative;
+      background-color: var(--ln-bg-ui-panel);
+      padding-inline: var(--ln-padding-horizontal-cell);
+      font-weight: 600;
+      color: var(--ln-text-dark);
+      line-height: 20px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--ln-border);
+      &::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 8px;
+        inset-inline-end: 0px;
+        height: calc(100% - 16px);
+        width: 1px;
+        background-color: var(--ln-border);
+      }
+      &[data-ln-colpin=end]::before {
+        inset-inline-end: unset;
+        inset-inline-start: 0px;
+      }
+      &[data-ln-last-start-pin]::before,
+      &[data-ln-first-end-pin]::before {
+        top: 0px;
+        height: 100%;
+      }
+    }
+    [data-ln-header-cell=true] {
+      background-color: var(--ln-bg-ui-panel);
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      color: var(--ln-text);
+      font-weight: 500;
+      line-height: 20px;
+      padding-inline: var(--ln-padding-horizontal-cell);
+      border-bottom: 1px solid var(--ln-border);
+      white-space: nowrap;
+      &[data-ln-type=number] {
+        justify-content: flex-end;
+      }
+      &::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 8px;
+        inset-inline-end: 0px;
+        height: calc(100% - 16px);
+        width: 1px;
+        background-color: var(--ln-border);
+      }
+      &[data-ln-colpin=end]::before {
+        inset-inline-end: unset;
+        inset-inline-start: 0px;
+      }
+      &[data-ln-last-start-pin]::before,
+      &[data-ln-first-end-pin]::before {
+        top: 0px;
+        height: 100%;
+      }
+    }
+    [data-ln-colid=lytenyte-marker-column] {
+      padding: 0px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    [data-ln-header-resizer=true] {
+      background-color: transparent;
+      transition: background-color 200ms ease-in-out;
+      cursor: col-resize;
+      &:hover {
+        background-color: var(--ln-primary-50);
+      }
+    }
+    [data-ln-row=true] {
+      box-sizing: border-box;
+      &:hover::before {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: var(--ln-row-height);
+        background: var(--ln-bg-row-hover);
+        pointer-events: none;
+        z-index: 9;
+      }
+      &[data-ln-selected=true]:hover::before {
+        background: color-mix(in srgb, var(--ln-primary-50) 40%, transparent 60%);
+      }
+      &[data-ln-selected=true]::before {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: var(--ln-row-height);
+        background: color-mix(in srgb, var(--ln-primary-50) 30%, transparent 70%);
+        pointer-events: none;
+        z-index: 9;
+      }
+      &[data-ln-alternate=true] [data-ln-cell=true] {
+        background-color: var(--ln-bg-row-alternate);
+      }
+      [data-ln-cell=true] {
+        display: flex;
+        align-items: center;
+        padding-inline: var(--ln-padding-horizontal-cell);
+        background-color: var(--ln-bg-ui-panel);
+        color: var(--ln-text-dark);
+        font-weight: 400;
+        line-height: 20px;
+        box-sizing: border-box;
+        border-bottom: 1px solid var(--ln-border-row);
+        &[data-ln-last-top-pin=true] {
+          border-bottom: 1px solid var(--ln-border-xstrong);
+        }
+        &[data-ln-first-bottom-pin=true] {
+          border-top: 1px solid var(--ln-border-xstrong);
+        }
+        &[data-ln-last-start-pin=true] {
+          border-inline-end: 1px solid var(--ln-border-strong);
+        }
+        &[data-ln-first-end-pin=true] {
+          border-inline-start: 1px solid var(--ln-border-strong);
+        }
+        &[data-ln-type=number] {
+          justify-content: flex-end;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+    }
+    [data-ln-cell=true]:focus {
+      outline: none;
+      position: relative;
+    }
+    [data-ln-rowtype=full-width] > div:focus,
+    [data-ln-cell=true]:focus,
+    [data-ln-header-cell=true]:focus,
+    [data-ln-header-group=true]:focus {
+      outline: none;
+      &::before {
+        content: "";
+        left: 0px;
+        top: 0px;
+        position: absolute;
+        border: 1px solid var(--ln-primary-50);
+        background-color: transparent;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+  }
+}
+
+/* src/webview/react/scriptgrid/theme.css */
+.mx-vscode-theme {
+  --ln-bg: var(--vscode-editor-background);
+  --ln-bg-ui-panel: var(--vscode-sideBar-background, var(--vscode-editorWidget-background));
+  --ln-bg-row-hover: var(--vscode-list-hoverBackground);
+  --ln-bg-row-alternate: var(--vscode-list-inactiveSelectionBackground, rgba(128, 128, 128, 0.08));
+  --ln-bg-floating-panel: var(--vscode-editorWidget-background);
+  --ln-bg-popover: var(--vscode-editorWidget-background);
+  --ln-bg-form-field: var(--vscode-input-background);
+  --ln-border: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  --ln-border-row: var(--vscode-panel-border, rgba(128, 128, 128, 0.2));
+  --ln-border-strong: var(--vscode-contrastBorder, var(--vscode-focusBorder));
+  --ln-border-xstrong: var(--vscode-contrastBorder, var(--vscode-focusBorder));
+  --ln-border-icon: var(--vscode-foreground);
+  --ln-border-ui-panel: var(--vscode-panel-border);
+  --ln-text: var(--vscode-foreground);
+  --ln-text-dark: var(--vscode-foreground);
+  --ln-text-light: var(--vscode-descriptionForeground);
+  --ln-text-xlight: var(--vscode-disabledForeground, var(--vscode-descriptionForeground));
+  --ln-text-hyperlink: var(--vscode-textLink-foreground);
+  --ln-text-primary-button: var(--vscode-button-foreground);
+  --ln-primary-05: var(--vscode-list-hoverBackground);
+  --ln-primary-10: var(--vscode-list-hoverBackground);
+  --ln-primary-30: var(--vscode-editor-selectionBackground);
+  --ln-primary-50: var(--vscode-focusBorder);
+  --ln-primary-70: var(--vscode-focusBorder);
+  --ln-primary-90: var(--vscode-focusBorder);
+  --ln-red-10: var(--vscode-inputValidation-errorBackground, rgba(255, 0, 0, 0.1));
+  --ln-red-50: var(--vscode-errorForeground);
+  --ln-red-90: var(--vscode-errorForeground);
+  --ln-green-10: rgba(137, 209, 133, 0.15);
+  --ln-green-50: var(--vscode-charts-green, #89d185);
+  --ln-green-90: var(--vscode-charts-green, #89d185);
+  --ln-yellow-10: rgba(204, 167, 0, 0.15);
+  --ln-yellow-50: var(--vscode-charts-yellow, #cca700);
+  --ln-yellow-90: var(--vscode-charts-yellow, #cca700);
+  --ln-info-10: var(--vscode-list-hoverBackground);
+  --ln-info-50: var(--vscode-descriptionForeground);
+  --ln-info-90: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size, 13px);
+}
+/*# sourceMappingURL=scriptGrid.css.map */
